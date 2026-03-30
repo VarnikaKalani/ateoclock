@@ -17,13 +17,22 @@ type Database = {
   }
 }
 
-const publicSupabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const publicSupabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+let browserClient: ReturnType<typeof createClient<Database>> | null = null
 
-export const supabase =
-  publicSupabaseUrl && publicSupabaseAnonKey
-    ? createClient<Database>(publicSupabaseUrl, publicSupabaseAnonKey)
-    : null
+export function getSupabaseBrowserClient() {
+  const publicSupabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim()
+  const publicSupabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim()
+
+  if (!publicSupabaseUrl || !publicSupabaseAnonKey) {
+    return null
+  }
+
+  if (!browserClient) {
+    browserClient = createClient<Database>(publicSupabaseUrl, publicSupabaseAnonKey)
+  }
+
+  return browserClient
+}
 
 function getEnvValue(name: 'NEXT_PUBLIC_SUPABASE_URL' | 'NEXT_PUBLIC_SUPABASE_ANON_KEY' | 'SUPABASE_SERVICE_ROLE_KEY') {
   const value = process.env[name]

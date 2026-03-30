@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
-import { supabase } from '@/lib/supabase'
+import { getSupabaseBrowserClient } from '@/lib/supabase'
 
 const RED   = '#962d49'
 const CREAM = '#f3eac3'
@@ -205,6 +205,7 @@ export default function Home() {
 
   // Fetch initial count + subscribe to live inserts
   useEffect(() => {
+    const supabase = getSupabaseBrowserClient()
     if (!supabase) return
 
     supabase

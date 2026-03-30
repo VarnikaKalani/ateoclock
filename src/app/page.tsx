@@ -205,6 +205,8 @@ export default function Home() {
 
   // Fetch initial count + subscribe to live inserts
   useEffect(() => {
+    if (!supabase) return
+
     supabase
       .from('waitlist')
       .select('*', { count: 'exact', head: true })
@@ -223,7 +225,14 @@ export default function Home() {
   async function join(source: 'hero' | 'footer') {
     const email = source === 'hero' ? heroEmail : footerEmail
     if (!email.includes('@')) return
-    await supabase.from('waitlist').insert({ email })
+    const response = await fetch('/api/waitlist', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    })
+
+    if (!response.ok) return
+
     setJoined(true)
     if (source === 'hero') setHeroEmail('')
     if (source === 'footer') setFooterEmail('')

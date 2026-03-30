@@ -10,10 +10,19 @@ const WHITE = '#ffffff'
 
 type SplitBasket = {
   store: string
-  eta: string
   subtotal: number
-  deliveryFee: number
   items: string[]
+}
+
+type CompareOption = {
+  store: string
+  price: number
+}
+
+type CompareRow = {
+  item: string
+  selectedStore: string
+  options: CompareOption[]
 }
 
 type SplitPlan = {
@@ -22,96 +31,153 @@ type SplitPlan = {
   hint: string
   reason: string
   tag: string
+  rows: CompareRow[]
   baskets: SplitBasket[]
   singleStoreEstimate: number
 }
 
 const SPLIT_CHECKOUT_PLANS: SplitPlan[] = [
   {
-    id: 'balanced',
-    label: 'Balanced',
-    hint: '2 checkouts',
-    reason: 'Most people start here: fewer carts, lower total, and clean handoff between stores.',
-    tag: 'Most popular',
-    baskets: [
+    id: 'single-store',
+    label: 'Single store',
+    hint: '1 checkout',
+    reason: 'Keep every item in one cart when simplicity matters most.',
+    tag: 'Simplest',
+    rows: [
       {
-        store: 'Blinkit',
-        eta: '18 min',
-        subtotal: 214,
-        deliveryFee: 26,
-        items: ['Black lentils', 'Butter', 'Fresh cream'],
+        item: 'Butter',
+        selectedStore: 'Blinkit',
+        options: [
+          { store: 'Blinkit', price: 59 },
+          { store: 'Zepto', price: 61 },
+          { store: 'Instamart', price: 56 },
+        ],
       },
       {
-        store: 'Zepto',
-        eta: '24 min',
-        subtotal: 148,
-        deliveryFee: 20,
-        items: ['Vine tomatoes', 'Onion', 'Garam masala'],
+        item: 'Fresh cream',
+        selectedStore: 'Blinkit',
+        options: [
+          { store: 'Blinkit', price: 44 },
+          { store: 'Zepto', price: 46 },
+          { store: 'Instamart', price: 45 },
+        ],
+      },
+      {
+        item: 'Tomatoes',
+        selectedStore: 'Blinkit',
+        options: [
+          { store: 'Blinkit', price: 38 },
+          { store: 'Zepto', price: 32 },
+          { store: 'Instamart', price: 36 },
+        ],
       },
     ],
-    singleStoreEstimate: 448,
-  },
-  {
-    id: 'fastest',
-    label: 'Fastest tonight',
-    hint: '3 checkouts',
-    reason: 'Pushes produce and dairy to the quickest stores so prep can begin sooner.',
-    tag: 'Lowest ETA',
     baskets: [
       {
         store: 'Blinkit',
-        eta: '14 min',
-        subtotal: 128,
-        deliveryFee: 24,
+        subtotal: 141,
+        items: ['Butter', 'Fresh cream', 'Tomatoes'],
+      },
+    ],
+    singleStoreEstimate: 141,
+  },
+  {
+    id: 'recommended-split',
+    label: 'Recommended split',
+    hint: '2 checkouts',
+    reason: 'Move only the cheaper item into a second cart and keep the rest together.',
+    tag: 'Clear saving',
+    rows: [
+      {
+        item: 'Butter',
+        selectedStore: 'Blinkit',
+        options: [
+          { store: 'Blinkit', price: 59 },
+          { store: 'Zepto', price: 61 },
+          { store: 'Instamart', price: 56 },
+        ],
+      },
+      {
+        item: 'Fresh cream',
+        selectedStore: 'Blinkit',
+        options: [
+          { store: 'Blinkit', price: 44 },
+          { store: 'Zepto', price: 46 },
+          { store: 'Instamart', price: 45 },
+        ],
+      },
+      {
+        item: 'Tomatoes',
+        selectedStore: 'Zepto',
+        options: [
+          { store: 'Blinkit', price: 38 },
+          { store: 'Zepto', price: 32 },
+          { store: 'Instamart', price: 36 },
+        ],
+      },
+    ],
+    baskets: [
+      {
+        store: 'Blinkit',
+        subtotal: 103,
         items: ['Butter', 'Fresh cream'],
       },
       {
-        store: 'Instamart',
-        eta: '16 min',
-        subtotal: 151,
-        deliveryFee: 18,
-        items: ['Black lentils', 'Onion'],
-      },
-      {
         store: 'Zepto',
-        eta: '19 min',
-        subtotal: 109,
-        deliveryFee: 16,
-        items: ['Vine tomatoes', 'Green chili', 'Coriander'],
+        subtotal: 32,
+        items: ['Tomatoes'],
       },
     ],
-    singleStoreEstimate: 471,
+    singleStoreEstimate: 141,
   },
   {
     id: 'lowest-total',
     label: 'Lowest bill',
-    hint: '3 checkouts',
-    reason: 'Splits across three stores to reduce total amount for cost-sensitive orders.',
+    hint: '2 checkouts',
+    reason: 'Pick the cheapest store for each item to lower the total in this preview.',
     tag: 'Best value',
+    rows: [
+      {
+        item: 'Butter',
+        selectedStore: 'Instamart',
+        options: [
+          { store: 'Blinkit', price: 59 },
+          { store: 'Zepto', price: 61 },
+          { store: 'Instamart', price: 56 },
+        ],
+      },
+      {
+        item: 'Fresh cream',
+        selectedStore: 'Instamart',
+        options: [
+          { store: 'Blinkit', price: 44 },
+          { store: 'Zepto', price: 46 },
+          { store: 'Instamart', price: 45 },
+        ],
+      },
+      {
+        item: 'Tomatoes',
+        selectedStore: 'Zepto',
+        options: [
+          { store: 'Blinkit', price: 38 },
+          { store: 'Zepto', price: 32 },
+          { store: 'Instamart', price: 36 },
+        ],
+      },
+    ],
     baskets: [
       {
         store: 'Zepto',
-        eta: '22 min',
-        subtotal: 166,
-        deliveryFee: 18,
-        items: ['Black lentils', 'Vine tomatoes', 'Coriander'],
+        subtotal: 32,
+        items: ['Tomatoes'],
       },
       {
-        store: 'Blinkit',
-        eta: '20 min',
-        subtotal: 94,
-        deliveryFee: 22,
+        store: 'Instamart',
+        subtotal: 101,
         items: ['Butter', 'Fresh cream'],
       },
-      {
-        store: 'BigBasket',
-        eta: '40 min',
-        subtotal: 101,
-        deliveryFee: 8,
-        items: ['Onion', 'Garam masala'],
-      },
     ],
-    singleStoreEstimate: 462,
+    singleStoreEstimate: 141,
   },
 ]
 
@@ -149,20 +215,103 @@ function useVisible(ref: React.RefObject<HTMLElement | null>) {
 function Logo({ size = 20 }: { size?: number }) {
   return (
     <span style={{ fontSize: size, fontWeight: 800, letterSpacing: '-1px', lineHeight: 1 }}>
-      <span style={{ color: RED }}>Cook</span><span style={{ color: RED2 }}>d</span>
+      <span style={{ color: RED }}>Coook</span><span style={{ color: RED2 }}>d</span>
     </span>
   )
 }
 
 const STORES = [
-  { name: 'Blinkit',          logo: '/logos/blinkit.svg' },
-  { name: 'Amazon',           logo: '/logos/amazon.svg' },
-  { name: 'Zepto',            logo: '/logos/zepto.png' },
-  { name: 'Flipkart',         logo: '/logos/flipkart.svg' },
-  { name: 'BigBasket',        logo: '/logos/bigbasket.png' },
-  { name: 'JioMart',          logo: '/logos/jiomart.png' },
-  { name: 'Swiggy Instamart', logo: '/logos/swiggy.svg' },
-  { name: 'eBay',             logo: '/logos/ebay.svg' },
+  { name: 'Blinkit', mark: 'B' },
+  { name: 'Amazon Fresh', mark: 'AF' },
+  { name: 'Zepto', mark: 'Z' },
+  { name: 'Flipkart Minutes', mark: 'FM' },
+  { name: 'BigBasket', mark: 'BB' },
+  { name: 'JioMart', mark: 'JM' },
+  { name: 'Instamart', mark: 'I' },
+]
+
+type RecipeIngredient = {
+  id: string
+  name: string
+  qty: string
+  defaultSelected: boolean
+}
+
+type RecipeCardData = {
+  id: string
+  name: string
+  by: string
+  time: string
+  tag: string
+  checkoutStores: string[]
+  ingredients: RecipeIngredient[]
+}
+
+const RECIPE_LIBRARY: RecipeCardData[] = [
+  {
+    id: 'dal-makhani',
+    name: 'Dal Makhani',
+    by: '@priyacooks',
+    time: '45 min',
+    tag: 'Vegetarian',
+    checkoutStores: ['Blinkit', 'Zepto'],
+    ingredients: [
+      { id: 'lentils', name: 'Black lentils', qty: '200g', defaultSelected: true },
+      { id: 'tomatoes', name: 'Tomatoes', qty: '3', defaultSelected: true },
+      { id: 'butter', name: 'Butter', qty: '2 tbsp', defaultSelected: true },
+      { id: 'cream', name: 'Fresh cream', qty: '100ml', defaultSelected: true },
+      { id: 'garlic', name: 'Garlic', qty: '6 cloves', defaultSelected: false },
+      { id: 'garam-masala', name: 'Garam masala', qty: '1 tsp', defaultSelected: false },
+    ],
+  },
+  {
+    id: 'acai-bowl',
+    name: 'Acai Bowl',
+    by: '@healthybowl',
+    time: '10 min',
+    tag: 'Healthy',
+    checkoutStores: ['Blinkit', 'Instamart'],
+    ingredients: [
+      { id: 'acai', name: 'Frozen acai', qty: '2 packs', defaultSelected: true },
+      { id: 'banana', name: 'Banana', qty: '2', defaultSelected: true },
+      { id: 'granola', name: 'Granola', qty: '1 pack', defaultSelected: true },
+      { id: 'berries', name: 'Mixed berries', qty: '150g', defaultSelected: true },
+      { id: 'chia', name: 'Chia seeds', qty: '2 tsp', defaultSelected: false },
+    ],
+  },
+  {
+    id: 'mango-lassi',
+    name: 'Mango Lassi',
+    by: '@spicelab',
+    time: '5 min',
+    tag: 'Drink',
+    checkoutStores: ['Zepto'],
+    ingredients: [
+      { id: 'mangoes', name: 'Mangoes', qty: '3', defaultSelected: true },
+      { id: 'yogurt', name: 'Yogurt', qty: '500g', defaultSelected: true },
+      { id: 'milk', name: 'Milk', qty: '150ml', defaultSelected: true },
+      { id: 'cardamom', name: 'Cardamom', qty: '1 tsp', defaultSelected: false },
+      { id: 'sugar', name: 'Sugar', qty: '2 tbsp', defaultSelected: false },
+    ],
+  },
+]
+
+const SAVED_RECIPE_TILES = [
+  'Saved post',
+  'Recipe note',
+  'Dinner idea',
+  'Pasta reel',
+  'Dal Makhani',
+  'Grocery tip',
+  'Creator clip',
+  'Dessert post',
+  'Lunch plan',
+  'Soup reel',
+  'Pantry list',
+  'Cooking clip',
+  'Meal prep',
+  'Weekend cook',
+  'Sauce note',
 ]
 
 export default function Home() {
@@ -179,11 +328,17 @@ export default function Home() {
   const [aboutPhase, setAboutPhase] = useState(0) // 0=camera roll, 1=selected, 2=cart
   const [checkoutPreset, setCheckoutPreset] = useState(0)
   const [navOpen, setNavOpen] = useState(false)
+  const [selectedRecipeId, setSelectedRecipeId] = useState(RECIPE_LIBRARY[0].id)
+  const [selectedIngredientIds, setSelectedIngredientIds] = useState<string[]>(
+    RECIPE_LIBRARY[0].ingredients.filter((ingredient) => ingredient.defaultSelected).map((ingredient) => ingredient.id)
+  )
   const statsRef                = useRef<HTMLDivElement>(null)
   const statsVis                = useVisible(statsRef)
   const c1 = useCounter(4200, 1800, statsVis)
   const c2 = useCounter(38,   1400, statsVis)
   const c3 = useCounter(96,   1600, statsVis)
+
+  const selectedRecipe = RECIPE_LIBRARY.find((recipe) => recipe.id === selectedRecipeId) ?? RECIPE_LIBRARY[0]
 
   useEffect(() => {
     const t = setInterval(() => setCartFill(n => (n >= 4 ? 0 : n + 1)), 800)
@@ -223,6 +378,14 @@ export default function Home() {
     return () => { supabase.removeChannel(channel) }
   }, [])
 
+  useEffect(() => {
+    setSelectedIngredientIds(
+      selectedRecipe.ingredients
+        .filter((ingredient) => ingredient.defaultSelected)
+        .map((ingredient) => ingredient.id)
+    )
+  }, [selectedRecipe])
+
   async function join(source: 'hero' | 'footer') {
     const email = source === 'hero' ? heroEmail : footerEmail
     if (!email.includes('@')) return
@@ -258,39 +421,122 @@ export default function Home() {
     setNavOpen(false)
   }
 
-  const recipes = [
-    { name: 'Dal Makhani', by: '@priyacooks', time: '45 min', tag: 'Vegetarian' },
-    { name: 'Acai Bowl',   by: '@healthybowl', time: '10 min', tag: 'Healthy' },
-    { name: 'Mango Lassi', by: '@spicelab',   time: '5 min',  tag: 'Drink' },
-  ]
+  function toggleIngredient(ingredientId: string) {
+    setSelectedIngredientIds((current) =>
+      current.includes(ingredientId)
+        ? current.filter((id) => id !== ingredientId)
+        : [...current, ingredientId]
+    )
+  }
 
   const activeCheckoutPlan = SPLIT_CHECKOUT_PLANS[checkoutPreset] ?? SPLIT_CHECKOUT_PLANS[0]
   const splitCheckoutSubtotal = activeCheckoutPlan.baskets.reduce((sum, basket) => sum + basket.subtotal, 0)
-  const splitCheckoutFees = activeCheckoutPlan.baskets.reduce((sum, basket) => sum + basket.deliveryFee, 0)
-  const splitCheckoutTotal = splitCheckoutSubtotal + splitCheckoutFees
-  const splitCheckoutSavings = Math.max(activeCheckoutPlan.singleStoreEstimate - splitCheckoutTotal, 0)
+  const splitCheckoutSavings = Math.max(activeCheckoutPlan.singleStoreEstimate - splitCheckoutSubtotal, 0)
   const splitStoreLabel = activeCheckoutPlan.baskets.map((basket) => basket.store).join(' + ')
   const primaryStore = 'Blinkit'
+  const selectedIngredients = selectedRecipe.ingredients.filter((ingredient) => selectedIngredientIds.includes(ingredient.id))
+  const pantryIngredients = selectedRecipe.ingredients.filter((ingredient) => !selectedIngredientIds.includes(ingredient.id))
 
   const steps = [
     {
       label: 'Find a recipe you love',
-      sub: 'Browse recipes shared by real food creators on social media or right here on Cookd.',
+      sub: 'Open a recipe, keep only the ingredients you need, then move straight into cart or checkout.',
       visual: (
         <div style={{ width: '100%', animation: 'fadeUp .4s ease' }}>
-          <div style={{ fontSize: 12, fontWeight: 600, color: RED, opacity: .4, marginBottom: 16 }}>Trending now</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {recipes.map(r => (
-              <div key={r.name}
-                onMouseEnter={() => setHovered(r.name)} onMouseLeave={() => setHovered(null)}
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderRadius: 12, background: hovered === r.name ? `rgba(150,45,73,.05)` : BG, border: '1px solid rgba(150,45,73,.07)', cursor: 'pointer', transition: 'background .15s' }}>
+          <div style={{ fontSize: 12, fontWeight: 600, color: RED, opacity: .4, marginBottom: 14 }}>Saved recipes</div>
+          <div className="recipe-browser">
+            <div className="recipe-choice-grid">
+              {RECIPE_LIBRARY.map((recipe) => {
+                const active = recipe.id === selectedRecipe.id
+                return (
+                  <button
+                    key={recipe.id}
+                    type="button"
+                    className={`recipe-choice-card${active ? ' active' : ''}`}
+                    onClick={() => setSelectedRecipeId(recipe.id)}
+                    onMouseEnter={() => setHovered(recipe.name)}
+                    onMouseLeave={() => setHovered(null)}
+                  >
+                    <div>
+                      <div style={{ fontSize: 14, fontWeight: 700, color: RED }}>{recipe.name}</div>
+                      <div style={{ fontSize: 11, color: RED, opacity: .5, marginTop: 3 }}>
+                        {recipe.by} · {recipe.time}
+                      </div>
+                    </div>
+                    <span style={{ fontSize: 10, padding: '4px 10px', borderRadius: 999, background: active || hovered === recipe.name ? 'rgba(150,45,73,.12)' : 'rgba(150,45,73,.06)', color: RED, fontWeight: 700 }}>
+                      {recipe.tag}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+
+            <div className="recipe-detail-card">
+              <div className="ingredient-toolbar">
                 <div>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: RED }}>{r.name}</div>
-                  <div style={{ fontSize: 11, color: RED, opacity: .5 }}>{r.by} · {r.time}</div>
+                  <div style={{ fontSize: 15, fontWeight: 800, color: RED }}>{selectedRecipe.name}</div>
+                  <div style={{ fontSize: 11, color: RED, opacity: .48, marginTop: 4 }}>
+                    {selectedRecipe.by} · {selectedRecipe.time}
+                  </div>
                 </div>
-                <span style={{ fontSize: 10, padding: '3px 10px', borderRadius: 999, background: `rgba(150,45,73,.08)`, color: RED, fontWeight: 600 }}>{r.tag}</span>
+                <div className="selection-pill">
+                  {selectedIngredients.length} selected
+                </div>
               </div>
-            ))}
+
+              <div className="ingredient-picker">
+                {selectedRecipe.ingredients.map((ingredient) => {
+                  const active = selectedIngredientIds.includes(ingredient.id)
+                  return (
+                    <button
+                      key={ingredient.id}
+                      type="button"
+                      className={`ingredient-tile${active ? ' active' : ''}`}
+                      onClick={() => toggleIngredient(ingredient.id)}
+                    >
+                      <span className={`ingredient-check${active ? ' active' : ''}`}>
+                        {active && (
+                          <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                            <path d="M1 4L3.5 6.5L9 1" stroke={CREAM} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        )}
+                      </span>
+                      <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 2 }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: RED }}>{ingredient.name}</span>
+                        <span style={{ fontSize: 10, color: RED, opacity: .48 }}>{ingredient.qty}</span>
+                      </span>
+                      <span style={{ marginLeft: 'auto', fontSize: 9, fontWeight: 700, color: RED, opacity: active ? .8 : .38 }}>
+                        {active ? 'Add' : 'At home'}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+
+              <div className="ingredient-toolbar ingredient-toolbar-footer">
+                <div style={{ fontSize: 11, color: RED, opacity: .55 }}>
+                  {selectedIngredients.length} to order
+                  <span style={{ opacity: .3 }}> · </span>
+                  {pantryIngredients.length} already at home
+                </div>
+                <div className="recipe-actions">
+                  <button
+                    type="button"
+                    className="recipe-action-primary"
+                    onClick={() => setOpenStep(1)}
+                  >
+                    Add selected
+                  </button>
+                  <button
+                    type="button"
+                    className="recipe-action-secondary"
+                    onClick={() => setOpenStep(2)}
+                  >
+                    Checkout
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       ),
@@ -300,15 +546,21 @@ export default function Home() {
       sub: 'One tap saves the recipe and pulls every ingredient into your personal pantry list.',
       visual: (
         <div style={{ width: '100%', animation: 'fadeUp .4s ease' }}>
-          <div style={{ fontWeight: 700, fontSize: 17, color: RED, marginBottom: 4 }}>Dal Makhani</div>
-          <div style={{ fontSize: 12, color: RED, opacity: .5, marginBottom: 20 }}>Saved from @priyacooks</div>
+          <div style={{ fontWeight: 700, fontSize: 17, color: RED, marginBottom: 4 }}>{selectedRecipe.name}</div>
+          <div style={{ fontSize: 12, color: RED, opacity: .5, marginBottom: 20 }}>Saved from {selectedRecipe.by}</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {['Black lentils 200g', 'Butter 2 tbsp', 'Tomatoes 3', 'Cream 100ml', 'Garam masala 1 tsp'].map((item, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, animation: `slideIn .3s ease ${i * 0.06}s both` }}>
-                <div style={{ width: 6, height: 6, borderRadius: '50%', background: RED, opacity: .4, flexShrink: 0 }} />
-                <span style={{ fontSize: 13, color: RED, opacity: .7 }}>{item}</span>
-              </div>
-            ))}
+            {selectedRecipe.ingredients.map((ingredient, i) => {
+              const active = selectedIngredientIds.includes(ingredient.id)
+              return (
+                <div key={ingredient.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, animation: `slideIn .3s ease ${i * 0.06}s both`, padding: '10px 12px', borderRadius: 12, background: active ? 'rgba(150,45,73,.07)' : 'rgba(150,45,73,.03)', border: `1px solid ${active ? 'rgba(150,45,73,.12)' : 'rgba(150,45,73,.07)'}` }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: active ? RED : 'rgba(150,45,73,.18)', flexShrink: 0 }} />
+                    <span style={{ fontSize: 13, color: RED, opacity: active ? .82 : .5 }}>{ingredient.name}</span>
+                  </div>
+                  <span style={{ fontSize: 11, color: RED, opacity: .45 }}>{ingredient.qty}</span>
+                </div>
+              )
+            })}
           </div>
         </div>
       ),
@@ -319,7 +571,9 @@ export default function Home() {
       visual: (
         <div className="split-checkout-demo" style={{ width: '100%', animation: 'fadeUp .4s ease' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-            <div style={{ fontSize: 12, fontWeight: 600, color: RED, opacity: .46 }}>Cart ready — 6 ingredients</div>
+            <div style={{ fontSize: 12, fontWeight: 600, color: RED, opacity: .46 }}>
+              Cart ready — {activeCheckoutPlan.rows.length} items
+            </div>
             <span style={{ fontSize: 10, fontWeight: 600, color: RED, opacity: .65, padding: '3px 8px', borderRadius: 999, border: '1px solid rgba(150,45,73,.17)', background: 'rgba(150,45,73,.05)' }}>
               Landing preview
             </span>
@@ -358,23 +612,33 @@ export default function Home() {
             </span>
           </div>
 
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 10 }}>
-            {['Black lentils', 'Butter', 'Vine tomatoes', 'Fresh cream', 'Onion', 'Spice mix'].map((item) => (
-              <span
-                key={item}
-                style={{
-                  fontSize: 10,
-                  fontWeight: 600,
-                  color: RED,
-                  opacity: .6,
-                  borderRadius: 999,
-                  background: 'rgba(150,45,73,.06)',
-                  border: '1px solid rgba(150,45,73,.1)',
-                  padding: '4px 10px',
-                }}
-              >
-                {item}
-              </span>
+          <div className="compare-board">
+            <div className="compare-header-row">
+              <span style={{ fontSize: 10, fontWeight: 700, color: RED, opacity: .42, textTransform: 'uppercase', letterSpacing: '.08em' }}>Compare</span>
+              {activeCheckoutPlan.rows[0].options.map((option) => (
+                <span key={`header-${option.store}`} style={{ fontSize: 10, fontWeight: 700, color: RED, opacity: .48, textAlign: 'center' }}>
+                  {option.store}
+                </span>
+              ))}
+            </div>
+            {activeCheckoutPlan.rows.map((row) => (
+              <div key={`${activeCheckoutPlan.id}-${row.item}`} className="compare-row">
+                <div style={{ fontSize: 11, fontWeight: 700, color: RED }}>{row.item}</div>
+                {row.options.map((option) => {
+                  const selected = option.store === row.selectedStore
+                  return (
+                    <div
+                      key={`${row.item}-${option.store}`}
+                      className={`compare-cell${selected ? ' selected' : ''}`}
+                    >
+                      <div style={{ fontSize: 11, fontWeight: 700, color: RED }}>{formatRs(option.price)}</div>
+                      <div style={{ fontSize: 9, color: RED, opacity: selected ? .85 : .42 }}>
+                        {selected ? 'Chosen' : option.store}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
             ))}
           </div>
 
@@ -384,20 +648,22 @@ export default function Home() {
                 <div key={`${activeCheckoutPlan.id}-${basket.store}`} className="split-card" style={{ animationDelay: `${idx * 90}ms` }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
                     <div style={{ fontSize: 13, fontWeight: 700, color: RED }}>{basket.store}</div>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: RED, opacity: .5 }}>{basket.eta}</div>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: RED, opacity: .45 }}>{basket.items.length} item{basket.items.length > 1 ? 's' : ''}</div>
                   </div>
-                  <div style={{ fontSize: 10, color: RED, opacity: .55, lineHeight: 1.45, minHeight: 28 }}>
-                    {basket.items.join(', ')}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minHeight: 64 }}>
+                    {basket.items.map((item) => (
+                      <div key={`${basket.store}-${item}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+                        <span style={{ fontSize: 11, color: RED, opacity: .7 }}>{item}</span>
+                        <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'rgba(150,45,73,.25)', flexShrink: 0 }} />
+                      </div>
+                    ))}
                   </div>
-                  <div style={{ borderTop: '1px solid rgba(150,45,73,.1)', marginTop: 10, paddingTop: 8, display: 'flex', justifyContent: 'space-between', gap: 10 }}>
+                  <div style={{ borderTop: '1px solid rgba(150,45,73,.1)', marginTop: 10, paddingTop: 8, display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'end' }}>
                     <div>
-                      <div style={{ fontSize: 9, color: RED, opacity: .45 }}>Subtotal</div>
+                      <div style={{ fontSize: 9, color: RED, opacity: .45 }}>Store subtotal</div>
                       <div style={{ fontSize: 12, fontWeight: 700, color: RED }}>{formatRs(basket.subtotal)}</div>
                     </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: 9, color: RED, opacity: .45 }}>Delivery</div>
-                      <div style={{ fontSize: 12, fontWeight: 700, color: RED }}>{formatRs(basket.deliveryFee)}</div>
-                    </div>
+                    <div style={{ fontSize: 10, color: RED, opacity: .5 }}>From {basket.store}</div>
                   </div>
                 </div>
               ))}
@@ -416,24 +682,24 @@ export default function Home() {
 
           <div className="split-summary">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16 }}>
-              <span style={{ fontSize: 11, color: RED, opacity: .5 }}>Split checkout total</span>
-              <span style={{ fontSize: 15, fontWeight: 800, color: RED }}>{formatRs(splitCheckoutTotal)}</span>
+              <span style={{ fontSize: 11, color: RED, opacity: .5 }}>Split total</span>
+              <span style={{ fontSize: 15, fontWeight: 800, color: RED }}>{formatRs(splitCheckoutSubtotal)}</span>
             </div>
             <div style={{ marginTop: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16 }}>
-              <span style={{ fontSize: 11, color: RED, opacity: .5 }}>Single-store estimate</span>
+              <span style={{ fontSize: 11, color: RED, opacity: .5 }}>One-store total</span>
               <span style={{ fontSize: 12, fontWeight: 700, color: RED, opacity: .75 }}>{formatRs(activeCheckoutPlan.singleStoreEstimate)}</span>
             </div>
             <div style={{ marginTop: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16 }}>
-              <span style={{ fontSize: 11, color: RED, opacity: .5 }}>Subtotal + delivery</span>
-              <span style={{ fontSize: 12, fontWeight: 700, color: RED }}>{formatRs(splitCheckoutSubtotal)} + {formatRs(splitCheckoutFees)}</span>
+              <span style={{ fontSize: 11, color: RED, opacity: .5 }}>Difference</span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: RED }}>{formatRs(splitCheckoutSavings)}</span>
             </div>
           </div>
 
           <div style={{ marginTop: 12, padding: '13px 0', background: RED, borderRadius: 10, textAlign: 'center', fontSize: 13, fontWeight: 700, color: CREAM }}>
-            Split checkout: {splitStoreLabel}
+            Order from: {splitStoreLabel}
           </div>
           <div style={{ marginTop: 6, textAlign: 'center', fontSize: 10, color: RED, opacity: .55 }}>
-            Potential savings in this preview: {formatRs(splitCheckoutSavings)}. Final delivery-fee optimization ships later.
+            Compare stores, pick your split, and checkout only what you need.
           </div>
         </div>
       ),
@@ -558,6 +824,202 @@ export default function Home() {
           top: 88px;
         }
 
+        .recipe-browser {
+          display: flex;
+          flex-direction: column;
+          gap: 14px;
+        }
+        .recipe-choice-grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 10px;
+        }
+        .recipe-choice-card {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          padding: 14px 16px;
+          border-radius: 14px;
+          border: 1px solid rgba(150,45,73,.08);
+          background: ${WHITE};
+          text-align: left;
+          cursor: pointer;
+          transition: border-color .2s ease, background .2s ease, transform .2s ease;
+        }
+        .recipe-choice-card:hover {
+          transform: translateY(-1px);
+          border-color: rgba(150,45,73,.22);
+        }
+        .recipe-choice-card.active {
+          background: rgba(150,45,73,.07);
+          border-color: rgba(150,45,73,.22);
+        }
+        .recipe-detail-card {
+          border-radius: 16px;
+          border: 1px solid rgba(150,45,73,.1);
+          background: ${WHITE};
+          padding: 16px;
+          display: flex;
+          flex-direction: column;
+          gap: 14px;
+        }
+        .ingredient-toolbar {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+        }
+        .ingredient-toolbar-footer {
+          align-items: end;
+        }
+        .selection-pill {
+          flex-shrink: 0;
+          padding: 6px 10px;
+          border-radius: 999px;
+          background: rgba(150,45,73,.08);
+          color: ${RED};
+          font-size: 10px;
+          font-weight: 700;
+        }
+        .ingredient-picker {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 10px;
+        }
+        .ingredient-tile {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          width: 100%;
+          padding: 11px 12px;
+          border-radius: 12px;
+          border: 1px solid rgba(150,45,73,.08);
+          background: rgba(150,45,73,.03);
+          text-align: left;
+          cursor: pointer;
+          transition: border-color .18s ease, background .18s ease, transform .18s ease;
+        }
+        .ingredient-tile:hover {
+          transform: translateY(-1px);
+          border-color: rgba(150,45,73,.2);
+        }
+        .ingredient-tile.active {
+          background: rgba(150,45,73,.08);
+          border-color: rgba(150,45,73,.22);
+        }
+        .ingredient-check {
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          border: 1px solid rgba(150,45,73,.18);
+          background: ${WHITE};
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+        }
+        .ingredient-check.active {
+          background: ${RED};
+          border-color: ${RED};
+        }
+        .recipe-actions {
+          display: flex;
+          gap: 8px;
+        }
+        .recipe-action-primary,
+        .recipe-action-secondary {
+          height: 38px;
+          padding: 0 14px;
+          border-radius: 10px;
+          font-size: 12px;
+          font-weight: 700;
+          cursor: pointer;
+        }
+        .recipe-action-primary {
+          border: none;
+          background: ${RED};
+          color: ${CREAM};
+        }
+        .recipe-action-secondary {
+          border: 1px solid rgba(150,45,73,.16);
+          background: ${WHITE};
+          color: ${RED};
+        }
+
+        .compare-board {
+          margin-top: 14px;
+          padding: 12px;
+          border-radius: 14px;
+          border: 1px solid rgba(150,45,73,.1);
+          background: rgba(150,45,73,.03);
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+        .compare-header-row,
+        .compare-row {
+          display: grid;
+          grid-template-columns: 1.1fr repeat(3, minmax(0, 1fr));
+          gap: 8px;
+          align-items: stretch;
+        }
+        .compare-cell {
+          padding: 10px 8px;
+          border-radius: 12px;
+          border: 1px solid rgba(150,45,73,.08);
+          background: ${WHITE};
+          text-align: center;
+        }
+        .compare-cell.selected {
+          background: rgba(150,45,73,.1);
+          border-color: rgba(150,45,73,.24);
+          box-shadow: inset 0 0 0 1px rgba(150,45,73,.08);
+        }
+        .store-mark {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          min-width: 24px;
+          height: 24px;
+          padding: 0 6px;
+          border-radius: 7px;
+          background: rgba(150,45,73,.08);
+          color: ${RED};
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: .02em;
+          flex-shrink: 0;
+        }
+        .saved-shot-grid {
+          padding: 8px;
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 4px;
+          animation: fadeUp .35s ease both;
+        }
+        .saved-shot-tile {
+          aspect-ratio: 1;
+          border-radius: 8px;
+          padding: 10px 8px;
+          background: rgba(150,45,73,.05);
+          border: 1px solid rgba(150,45,73,.06);
+          display: flex;
+          align-items: end;
+          justify-content: start;
+          text-align: left;
+          font-size: 9px;
+          line-height: 1.3;
+          white-space: pre-line;
+          color: rgba(150,45,73,.62);
+        }
+        .saved-shot-tile.focused {
+          background: ${BG};
+          border: 2px solid ${RED};
+          color: ${RED};
+          transform: scale(1.04);
+        }
+
         .split-preset-row {
           display: grid;
           grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -651,7 +1113,20 @@ export default function Home() {
         }
 
         @media (max-width: 640px) {
+          .ingredient-picker {
+            grid-template-columns: 1fr;
+          }
+          .ingredient-toolbar,
+          .ingredient-toolbar-footer,
+          .recipe-actions {
+            flex-direction: column;
+            align-items: stretch;
+          }
           .split-preset-row {
+            grid-template-columns: 1fr;
+          }
+          .compare-header-row,
+          .compare-row {
             grid-template-columns: 1fr;
           }
           .split-cards {
@@ -748,7 +1223,7 @@ export default function Home() {
               From saved recipe<br />to groceries ordered.
             </h1>
             <p className="fade-up" style={{ fontSize: 16, color: RED, opacity: .65, lineHeight: 1.75, maxWidth: 400, marginBottom: 36 }}>
-              Cookd pulls ingredients from any recipe, builds your cart, and checks out across stores like Blinkit and Zepto in one guided flow.
+            Coookd turns any recipe into a ready-to-checkout cart across any grocery store.
             </p>
             {joined ? (
               <div className="fade-up" style={{ marginTop: 4 }}>
@@ -827,8 +1302,7 @@ export default function Home() {
           <div className="marquee-track" style={{ display: 'flex', animation: 'marquee 22s linear infinite', width: 'max-content' }}>
             {[...STORES, ...STORES].map((s, i) => (
               <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '8px 20px', margin: '0 6px', borderRadius: 999, border: `1.5px solid rgba(150,45,73,.15)`, fontSize: 13, fontWeight: 600, color: RED, whiteSpace: 'nowrap', background: WHITE }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={s.logo} alt={s.name} width={24} height={24} style={{ borderRadius: 4, objectFit: 'contain', flexShrink: 0 }} />
+                <span className="store-mark" aria-hidden="true">{s.mark}</span>
                 {s.name}
               </span>
             ))}
@@ -836,7 +1310,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* WHAT IS COOKD */}
+      {/* WHAT IS COOOKD */}
       <section id="about" style={{ background: `radial-gradient(ellipse at 65% 40%, rgba(150,45,73,.07) 0%, transparent 55%), ${BG}`, padding: '64px 28px' }}>
         <div style={{ maxWidth: 1080, margin: '0 auto', display: 'flex', alignItems: 'center', gap: 72, flexWrap: 'wrap' }}>
 
@@ -849,7 +1323,7 @@ export default function Home() {
               You saw it on social media. You saved it. But three weeks later it is buried under 400 other screenshots and you are ordering takeout again.
             </p>
             <p style={{ fontSize: 16, color: RED, opacity: .6, lineHeight: 1.8, marginBottom: 28 }}>
-              Cookd fixes that. Find a recipe, tap once, and every ingredient lands in your cart. No searching, no copying, no forgetting.
+              Coookd fixes that. Find a recipe, tap once, and every ingredient lands in your cart. No searching, no copying, no forgetting.
             </p>
             {/* Upload zone */}
             <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: RED, opacity: .4, marginBottom: 10 }}>Start here</p>
@@ -911,18 +1385,22 @@ export default function Home() {
 
                 {/* Phase 0: cluttered camera roll */}
                 {aboutPhase === 0 && (
-                  <div style={{ padding: 8, display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 3, animation: 'fadeUp .35s ease both' }}>
-                    {Array.from({ length: 15 }).map((_, i) => (
-                      <div key={i} style={{
-                        aspectRatio: '1', borderRadius: 6, overflow: 'hidden',
-                        background: [
-                          `rgba(150,45,73,.08)`, `rgba(150,45,73,.12)`, `rgba(243,234,195,.8)`,
-                          `rgba(150,45,73,.06)`, `rgba(243,234,195,.6)`, `rgba(150,45,73,.14)`,
-                        ][i % 6],
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: 18
-                      }}>
-                        {['🍝','📸','🥗','📸','🍜','📸','🍕','📸','🥘','📸','🍛','📸','🥙','📸','🍲'][i]}
+                  <div className="saved-shot-grid">
+                    {SAVED_RECIPE_TILES.map((label, i) => (
+                      <div
+                        key={label}
+                        className="saved-shot-tile"
+                        style={{
+                          background: [
+                            'rgba(150,45,73,.06)',
+                            'rgba(150,45,73,.08)',
+                            'rgba(243,234,195,.82)',
+                            'rgba(150,45,73,.05)',
+                            'rgba(243,234,195,.65)',
+                          ][i % 5],
+                        }}
+                      >
+                        {label}
                       </div>
                     ))}
                   </div>
@@ -930,21 +1408,19 @@ export default function Home() {
 
                 {/* Phase 1: one recipe highlighted */}
                 {aboutPhase === 1 && (
-                  <div style={{ padding: 8, display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 3, animation: 'fadeUp .35s ease both' }}>
-                    {Array.from({ length: 15 }).map((_, i) => (
-                      <div key={i} style={{
-                        aspectRatio: '1', borderRadius: 6, overflow: 'hidden',
-                        background: i === 4 ? BG : `rgba(150,45,73,.05)`,
-                        opacity: i === 4 ? 1 : 0.28,
-                        outline: i === 4 ? `2.5px solid ${RED}` : 'none',
-                        transform: i === 4 ? 'scale(1.07)' : 'scale(1)',
-                        transition: 'all .3s ease',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: i === 4 ? 22 : 16
-                      }}>
-                        {i === 4 ? '🍜' : ['🍝','📸','🥗','📸','🍜','📸','🍕','📸','🥘','📸','🍛','📸','🥙','📸','🍲'][i]}
-                      </div>
-                    ))}
+                  <div className="saved-shot-grid">
+                    {SAVED_RECIPE_TILES.map((label, i) => {
+                      const focused = i === 4
+                      return (
+                        <div
+                          key={`${label}-${i}`}
+                          className={`saved-shot-tile${focused ? ' focused' : ''}`}
+                          style={{ opacity: focused ? 1 : 0.28 }}
+                        >
+                          {focused ? `${selectedRecipe.name}\nTap to build cart` : label}
+                        </div>
+                      )
+                    })}
                   </div>
                 )}
 
@@ -952,18 +1428,20 @@ export default function Home() {
                 {aboutPhase === 2 && (
                   <div style={{ padding: '14px', animation: 'fadeUp .35s ease both' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
-                      <span style={{ fontSize: 18 }}>🍜</span>
                       <div>
-                        <div style={{ fontSize: 11, fontWeight: 700, color: RED }}>Thai Noodle Soup</div>
+                        <div style={{ fontSize: 11, fontWeight: 700, color: RED }}>{selectedRecipe.name}</div>
                         <div style={{ fontSize: 9, color: RED, opacity: .5 }}>Adding ingredients to cart...</div>
                       </div>
                     </div>
                     {[
-                      { label: 'Rice noodles', qty: '200g', delay: 0 },
-                      { label: 'Coconut milk', qty: '400ml', delay: 150 },
-                      { label: 'Lemongrass', qty: '2 stalks', delay: 300 },
-                      { label: 'Thai basil', qty: '1 bunch', delay: 450 },
-                      { label: 'Tofu', qty: '250g', delay: 600 },
+                      ...selectedRecipe.ingredients
+                        .filter((ingredient) => ingredient.defaultSelected)
+                        .slice(0, 4)
+                        .map((ingredient, index) => ({
+                          label: ingredient.name,
+                          qty: ingredient.qty,
+                          delay: index * 150,
+                        })),
                     ].map((item) => (
                       <div key={item.label} style={{
                         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -973,7 +1451,9 @@ export default function Home() {
                       }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
                           <div style={{ width: 14, height: 14, borderRadius: '50%', background: RED, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <span style={{ color: WHITE, fontSize: 8, fontWeight: 900 }}>✓</span>
+                            <svg width="8" height="6" viewBox="0 0 10 8" fill="none">
+                              <path d="M1 4L3.5 6.5L9 1" stroke={WHITE} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
                           </div>
                           <span style={{ fontSize: 11, color: RED, fontWeight: 500 }}>{item.label}</span>
                         </div>
@@ -1111,7 +1591,7 @@ export default function Home() {
                   Every ingredient you list comes with an affiliate link. When your followers order, you earn. No brand deals or sponsorships required.
                 </p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  {['Earn on every grocery order your recipe drives', 'See exactly which recipes get cooked, not just watched', 'One link works across all your social media channels', 'No upfront cost. Cookd takes a cut only when you earn'].map(pt => (
+                  {['Earn on every grocery order your recipe drives', 'See exactly which recipes get cooked, not just watched', 'One link works across all your social media channels', 'No upfront cost. Coookd takes a cut only when you earn'].map(pt => (
                     <div key={pt} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
                       <div style={{ width: 18, height: 18, borderRadius: '50%', background: RED, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
                         <svg width="9" height="7" viewBox="0 0 9 7" fill="none"><path d="M1 3.5L3 5.5L8 1" stroke={CREAM} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
@@ -1174,7 +1654,7 @@ export default function Home() {
             Ready to cook tonight?
           </h2>
           <p style={{ fontSize: 15, color: RED, opacity: .55, lineHeight: 1.7, marginBottom: 32 }}>
-            Join the waitlist and be the first to know when Cookd launches.
+            Join the waitlist and be the first to know when Coookd launches.
           </p>
           {joined ? (
             <p style={{ fontSize: 15, color: RED, fontWeight: 600 }}>You are on the list. We will reach out before launch.</p>
@@ -1212,7 +1692,7 @@ export default function Home() {
               >{l}</a>
             ))}
           </div>
-          <span style={{ fontSize: 12, color: RED, opacity: .3 }}>&#169; 2026 Cookd</span>
+          <span style={{ fontSize: 12, color: RED, opacity: .3 }}>&#169; 2026 Coookd</span>
         </div>
       </footer>
     </main>

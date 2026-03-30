@@ -1,4 +1,5 @@
 'use client'
+import Image from 'next/image'
 import { useState, useEffect, useRef } from 'react'
 import { getSupabaseBrowserClient } from '@/lib/supabase'
 
@@ -221,13 +222,13 @@ function Logo({ size = 20 }: { size?: number }) {
 }
 
 const STORES = [
-  { name: 'Blinkit', mark: 'B' },
-  { name: 'Amazon Fresh', mark: 'AF' },
-  { name: 'Zepto', mark: 'Z' },
-  { name: 'Flipkart Minutes', mark: 'FM' },
-  { name: 'BigBasket', mark: 'BB' },
-  { name: 'JioMart', mark: 'JM' },
-  { name: 'Instamart', mark: 'I' },
+  { name: 'Blinkit', logo: '/logos/blinkit-badge.svg' },
+  { name: 'Amazon Fresh', logo: '/logos/amazon-fresh.svg' },
+  { name: 'Zepto', logo: '/logos/zepto-badge.svg' },
+  { name: 'Flipkart Minutes', logo: '/logos/flipkart-minutes.svg' },
+  { name: 'BigBasket', logo: '/logos/bigbasket-badge.svg' },
+  { name: 'JioMart', logo: '/logos/jiomart-badge.svg' },
+  { name: 'Instamart', logo: '/logos/instamart-badge.svg' },
 ]
 
 type RecipeIngredient = {
@@ -976,20 +977,12 @@ export default function Home() {
           border-color: rgba(150,45,73,.24);
           box-shadow: inset 0 0 0 1px rgba(150,45,73,.08);
         }
-        .store-mark {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          min-width: 24px;
+        .store-logo {
+          width: 24px;
           height: 24px;
-          padding: 0 6px;
-          border-radius: 7px;
-          background: rgba(150,45,73,.08);
-          color: ${RED};
-          font-size: 10px;
-          font-weight: 800;
-          letter-spacing: .02em;
           flex-shrink: 0;
+          border-radius: 7px;
+          overflow: hidden;
         }
         .saved-shot-grid {
           padding: 8px;
@@ -1299,10 +1292,12 @@ export default function Home() {
         <div style={{ position: 'relative', width: '100%', overflow: 'hidden' }}>
           <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 80, background: `linear-gradient(to right, ${WHITE}, transparent)`, zIndex: 2 }} />
           <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 80, background: `linear-gradient(to left, ${WHITE}, transparent)`, zIndex: 2 }} />
-          <div className="marquee-track" style={{ display: 'flex', animation: 'marquee 22s linear infinite', width: 'max-content' }}>
+          <div className="marquee-track" style={{ display: 'flex', animation: 'marquee 22s linear infinite', width: 'max-content', padding: '0 88px' }}>
             {[...STORES, ...STORES].map((s, i) => (
               <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '8px 20px', margin: '0 6px', borderRadius: 999, border: `1.5px solid rgba(150,45,73,.15)`, fontSize: 13, fontWeight: 600, color: RED, whiteSpace: 'nowrap', background: WHITE }}>
-                <span className="store-mark" aria-hidden="true">{s.mark}</span>
+                <span className="store-logo" aria-hidden="true">
+                  <Image src={s.logo} alt="" width={24} height={24} />
+                </span>
                 {s.name}
               </span>
             ))}

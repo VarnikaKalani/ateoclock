@@ -9,179 +9,6 @@ const RED2  = '#b8455f'
 const BG    = '#fdf8ee'
 const WHITE = '#ffffff'
 
-type SplitBasket = {
-  store: string
-  subtotal: number
-  items: string[]
-}
-
-type CompareOption = {
-  store: string
-  price: number
-}
-
-type CompareRow = {
-  item: string
-  selectedStore: string
-  options: CompareOption[]
-}
-
-type SplitPlan = {
-  id: string
-  label: string
-  hint: string
-  reason: string
-  tag: string
-  rows: CompareRow[]
-  baskets: SplitBasket[]
-  singleStoreEstimate: number
-}
-
-const SPLIT_CHECKOUT_PLANS: SplitPlan[] = [
-  {
-    id: 'single-store',
-    label: 'Single store',
-    hint: '1 checkout',
-    reason: 'Keep every item in one cart when simplicity matters most.',
-    tag: 'Simplest',
-    rows: [
-      {
-        item: 'Butter',
-        selectedStore: 'Blinkit',
-        options: [
-          { store: 'Blinkit', price: 59 },
-          { store: 'Zepto', price: 61 },
-          { store: 'Instamart', price: 56 },
-        ],
-      },
-      {
-        item: 'Fresh cream',
-        selectedStore: 'Blinkit',
-        options: [
-          { store: 'Blinkit', price: 44 },
-          { store: 'Zepto', price: 46 },
-          { store: 'Instamart', price: 45 },
-        ],
-      },
-      {
-        item: 'Tomatoes',
-        selectedStore: 'Blinkit',
-        options: [
-          { store: 'Blinkit', price: 38 },
-          { store: 'Zepto', price: 32 },
-          { store: 'Instamart', price: 36 },
-        ],
-      },
-    ],
-    baskets: [
-      {
-        store: 'Blinkit',
-        subtotal: 141,
-        items: ['Butter', 'Fresh cream', 'Tomatoes'],
-      },
-    ],
-    singleStoreEstimate: 141,
-  },
-  {
-    id: 'recommended-split',
-    label: 'Recommended split',
-    hint: '2 checkouts',
-    reason: 'Move only the cheaper item into a second cart and keep the rest together.',
-    tag: 'Clear saving',
-    rows: [
-      {
-        item: 'Butter',
-        selectedStore: 'Blinkit',
-        options: [
-          { store: 'Blinkit', price: 59 },
-          { store: 'Zepto', price: 61 },
-          { store: 'Instamart', price: 56 },
-        ],
-      },
-      {
-        item: 'Fresh cream',
-        selectedStore: 'Blinkit',
-        options: [
-          { store: 'Blinkit', price: 44 },
-          { store: 'Zepto', price: 46 },
-          { store: 'Instamart', price: 45 },
-        ],
-      },
-      {
-        item: 'Tomatoes',
-        selectedStore: 'Zepto',
-        options: [
-          { store: 'Blinkit', price: 38 },
-          { store: 'Zepto', price: 32 },
-          { store: 'Instamart', price: 36 },
-        ],
-      },
-    ],
-    baskets: [
-      {
-        store: 'Blinkit',
-        subtotal: 103,
-        items: ['Butter', 'Fresh cream'],
-      },
-      {
-        store: 'Zepto',
-        subtotal: 32,
-        items: ['Tomatoes'],
-      },
-    ],
-    singleStoreEstimate: 141,
-  },
-  {
-    id: 'lowest-total',
-    label: 'Lowest bill',
-    hint: '2 checkouts',
-    reason: 'Pick the cheapest store for each item to lower the total in this preview.',
-    tag: 'Best value',
-    rows: [
-      {
-        item: 'Butter',
-        selectedStore: 'Instamart',
-        options: [
-          { store: 'Blinkit', price: 59 },
-          { store: 'Zepto', price: 61 },
-          { store: 'Instamart', price: 56 },
-        ],
-      },
-      {
-        item: 'Fresh cream',
-        selectedStore: 'Instamart',
-        options: [
-          { store: 'Blinkit', price: 44 },
-          { store: 'Zepto', price: 46 },
-          { store: 'Instamart', price: 45 },
-        ],
-      },
-      {
-        item: 'Tomatoes',
-        selectedStore: 'Zepto',
-        options: [
-          { store: 'Blinkit', price: 38 },
-          { store: 'Zepto', price: 32 },
-          { store: 'Instamart', price: 36 },
-        ],
-      },
-    ],
-    baskets: [
-      {
-        store: 'Zepto',
-        subtotal: 32,
-        items: ['Tomatoes'],
-      },
-      {
-        store: 'Instamart',
-        subtotal: 101,
-        items: ['Butter', 'Fresh cream'],
-      },
-    ],
-    singleStoreEstimate: 141,
-  },
-]
-
 function formatRs(price: number) {
   return `Rs ${Math.round(price)}`
 }
@@ -248,23 +75,13 @@ type RecipeCardData = {
   ingredients: RecipeIngredient[]
 }
 
+type FocusedCheckoutPrice = {
+  store: string
+  splitPrice: number
+  oneStorePrice: number
+}
+
 const RECIPE_LIBRARY: RecipeCardData[] = [
-  {
-    id: 'dal-makhani',
-    name: 'Dal Makhani',
-    by: '@priyacooks',
-    time: '45 min',
-    tag: 'Vegetarian',
-    checkoutStores: ['Blinkit', 'Zepto'],
-    ingredients: [
-      { id: 'lentils', name: 'Black lentils', qty: '200g', defaultSelected: true },
-      { id: 'tomatoes', name: 'Tomatoes', qty: '3', defaultSelected: true },
-      { id: 'butter', name: 'Butter', qty: '2 tbsp', defaultSelected: true },
-      { id: 'cream', name: 'Fresh cream', qty: '100ml', defaultSelected: true },
-      { id: 'garlic', name: 'Garlic', qty: '6 cloves', defaultSelected: false },
-      { id: 'garam-masala', name: 'Garam masala', qty: '1 tsp', defaultSelected: false },
-    ],
-  },
   {
     id: 'acai-bowl',
     name: 'Acai Bowl',
@@ -297,12 +114,23 @@ const RECIPE_LIBRARY: RecipeCardData[] = [
   },
 ]
 
+const DEFAULT_RECIPE_ID = 'acai-bowl'
+const DEFAULT_RECIPE = RECIPE_LIBRARY.find((recipe) => recipe.id === DEFAULT_RECIPE_ID) ?? RECIPE_LIBRARY[0]
+
+const FOCUSED_FLOW_PRICING: Record<string, FocusedCheckoutPrice> = {
+  acai: { store: 'Blinkit', splitPrice: 279, oneStorePrice: 304 },
+  banana: { store: 'Instamart', splitPrice: 26, oneStorePrice: 31 },
+  granola: { store: 'Blinkit', splitPrice: 172, oneStorePrice: 189 },
+  berries: { store: 'Instamart', splitPrice: 164, oneStorePrice: 178 },
+  chia: { store: 'Blinkit', splitPrice: 38, oneStorePrice: 44 },
+}
+
 const SAVED_RECIPE_TILES = [
   'Saved post',
   'Recipe note',
   'Dinner idea',
   'Pasta reel',
-  'Dal Makhani',
+  'Acai Bowl',
   'Grocery tip',
   'Creator clip',
   'Dessert post',
@@ -317,9 +145,8 @@ const SAVED_RECIPE_TILES = [
 
 export default function Home() {
   const [tab, setTab]           = useState<'cook' | 'creator'>('cook')
-  const [openStep, setOpenStep] = useState<number | null>(0)
+  const [demoStep, setDemoStep] = useState<0 | 1 | 2>(0)
   const [cartFill, setCartFill] = useState(0)
-  const [hovered, setHovered]   = useState<string | null>(null)
   const [heroEmail, setHeroEmail]   = useState('')
   const [footerEmail, setFooterEmail] = useState('')
   const [joined, setJoined]         = useState(false)
@@ -327,11 +154,9 @@ export default function Home() {
   const [dragOver, setDragOver] = useState(false)
   const [uploadedFile, setUploadedFile] = useState<string | null>(null)
   const [aboutPhase, setAboutPhase] = useState(0) // 0=camera roll, 1=selected, 2=cart
-  const [checkoutPreset, setCheckoutPreset] = useState(0)
   const [navOpen, setNavOpen] = useState(false)
-  const [selectedRecipeId, setSelectedRecipeId] = useState(RECIPE_LIBRARY[0].id)
   const [selectedIngredientIds, setSelectedIngredientIds] = useState<string[]>(
-    RECIPE_LIBRARY[0].ingredients.filter((ingredient) => ingredient.defaultSelected).map((ingredient) => ingredient.id)
+    DEFAULT_RECIPE.ingredients.filter((ingredient) => ingredient.defaultSelected).map((ingredient) => ingredient.id)
   )
   const statsRef                = useRef<HTMLDivElement>(null)
   const statsVis                = useVisible(statsRef)
@@ -339,7 +164,7 @@ export default function Home() {
   const c2 = useCounter(38,   1400, statsVis)
   const c3 = useCounter(96,   1600, statsVis)
 
-  const selectedRecipe = RECIPE_LIBRARY.find((recipe) => recipe.id === selectedRecipeId) ?? RECIPE_LIBRARY[0]
+  const selectedRecipe = DEFAULT_RECIPE
 
   useEffect(() => {
     const t = setInterval(() => setCartFill(n => (n >= 4 ? 0 : n + 1)), 800)
@@ -378,14 +203,6 @@ export default function Home() {
 
     return () => { supabase.removeChannel(channel) }
   }, [])
-
-  useEffect(() => {
-    setSelectedIngredientIds(
-      selectedRecipe.ingredients
-        .filter((ingredient) => ingredient.defaultSelected)
-        .map((ingredient) => ingredient.id)
-    )
-  }, [selectedRecipe])
 
   async function join(source: 'hero' | 'footer') {
     const email = source === 'hero' ? heroEmail : footerEmail
@@ -430,284 +247,201 @@ export default function Home() {
     )
   }
 
-  const activeCheckoutPlan = SPLIT_CHECKOUT_PLANS[checkoutPreset] ?? SPLIT_CHECKOUT_PLANS[0]
-  const splitCheckoutSubtotal = activeCheckoutPlan.baskets.reduce((sum, basket) => sum + basket.subtotal, 0)
-  const splitCheckoutSavings = Math.max(activeCheckoutPlan.singleStoreEstimate - splitCheckoutSubtotal, 0)
-  const splitStoreLabel = activeCheckoutPlan.baskets.map((basket) => basket.store).join(' + ')
   const primaryStore = 'Blinkit'
   const selectedIngredients = selectedRecipe.ingredients.filter((ingredient) => selectedIngredientIds.includes(ingredient.id))
   const pantryIngredients = selectedRecipe.ingredients.filter((ingredient) => !selectedIngredientIds.includes(ingredient.id))
+  const focusedOrderItems = selectedIngredients.map((ingredient) => ({
+    ...ingredient,
+    ...FOCUSED_FLOW_PRICING[ingredient.id],
+  }))
+  const focusedCartGroups = Array.from(
+    focusedOrderItems.reduce((groups, item) => {
+      const existingGroup = groups.get(item.store)
+      if (existingGroup) {
+        existingGroup.items.push(item)
+        existingGroup.subtotal += item.splitPrice
+        return groups
+      }
 
-  const steps = [
-    {
-      label: 'Find a recipe you love',
-      sub: 'Open a recipe, keep only the ingredients you need, then move straight into cart or checkout.',
-      visual: (
-        <div style={{ width: '100%', animation: 'fadeUp .4s ease' }}>
-          <div style={{ fontSize: 12, fontWeight: 600, color: RED, opacity: .4, marginBottom: 14 }}>Saved recipes</div>
-          <div className="recipe-browser">
-            <div className="recipe-choice-grid">
-              {RECIPE_LIBRARY.map((recipe) => {
-                const active = recipe.id === selectedRecipe.id
-                return (
-                  <button
-                    key={recipe.id}
-                    type="button"
-                    className={`recipe-choice-card${active ? ' active' : ''}`}
-                    onClick={() => setSelectedRecipeId(recipe.id)}
-                    onMouseEnter={() => setHovered(recipe.name)}
-                    onMouseLeave={() => setHovered(null)}
-                  >
-                    <div>
-                      <div style={{ fontSize: 14, fontWeight: 700, color: RED }}>{recipe.name}</div>
-                      <div style={{ fontSize: 11, color: RED, opacity: .5, marginTop: 3 }}>
-                        {recipe.by} · {recipe.time}
-                      </div>
-                    </div>
-                    <span style={{ fontSize: 10, padding: '4px 10px', borderRadius: 999, background: active || hovered === recipe.name ? 'rgba(150,45,73,.12)' : 'rgba(150,45,73,.06)', color: RED, fontWeight: 700 }}>
-                      {recipe.tag}
-                    </span>
-                  </button>
-                )
-              })}
-            </div>
+      groups.set(item.store, {
+        store: item.store,
+        items: [item],
+        subtotal: item.splitPrice,
+      })
+      return groups
+    }, new Map<string, { store: string; items: typeof focusedOrderItems; subtotal: number }>())
+      .values()
+  )
+  const focusedSplitTotal = focusedOrderItems.reduce((sum, item) => sum + item.splitPrice, 0)
+  const focusedStoreLabel = focusedCartGroups.map((group) => group.store).join(' + ') || 'selected stores'
 
-            <div className="recipe-detail-card">
-              <div className="ingredient-toolbar">
-                <div>
-                  <div style={{ fontSize: 15, fontWeight: 800, color: RED }}>{selectedRecipe.name}</div>
-                  <div style={{ fontSize: 11, color: RED, opacity: .48, marginTop: 4 }}>
-                    {selectedRecipe.by} · {selectedRecipe.time}
-                  </div>
-                </div>
-                <div className="selection-pill">
-                  {selectedIngredients.length} selected
-                </div>
-              </div>
+  function goToDemoStep(step: 0 | 1 | 2) {
+    setDemoStep(step)
+  }
 
-              <div className="ingredient-picker">
-                {selectedRecipe.ingredients.map((ingredient) => {
-                  const active = selectedIngredientIds.includes(ingredient.id)
-                  return (
-                    <button
-                      key={ingredient.id}
-                      type="button"
-                      className={`ingredient-tile${active ? ' active' : ''}`}
-                      onClick={() => toggleIngredient(ingredient.id)}
-                    >
-                      <span className={`ingredient-check${active ? ' active' : ''}`}>
-                        {active && (
-                          <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                            <path d="M1 4L3.5 6.5L9 1" stroke={CREAM} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-                          </svg>
-                        )}
-                      </span>
-                      <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 2 }}>
-                        <span style={{ fontSize: 11, fontWeight: 700, color: RED }}>{ingredient.name}</span>
-                        <span style={{ fontSize: 10, color: RED, opacity: .48 }}>{ingredient.qty}</span>
-                      </span>
-                      <span style={{ marginLeft: 'auto', fontSize: 9, fontWeight: 700, color: RED, opacity: active ? .8 : .38 }}>
-                        {active ? 'Add' : 'At home'}
-                      </span>
-                    </button>
-                  )
-                })}
-              </div>
+  function advanceDemoStep() {
+    setDemoStep((current) => {
+      if (current === 0) return 1
+      if (current === 1) return 2
+      return 2
+    })
+  }
 
-              <div className="ingredient-toolbar ingredient-toolbar-footer">
-                <div style={{ fontSize: 11, color: RED, opacity: .55 }}>
-                  {selectedIngredients.length} to order
-                  <span style={{ opacity: .3 }}> · </span>
-                  {pantryIngredients.length} already at home
-                </div>
-                <div className="recipe-actions">
-                  <button
-                    type="button"
-                    className="recipe-action-primary"
-                    onClick={() => setOpenStep(1)}
-                  >
-                    Add selected
-                  </button>
-                  <button
-                    type="button"
-                    className="recipe-action-secondary"
-                    onClick={() => setOpenStep(2)}
-                  >
-                    Checkout
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
+  const demoStepMeta = [
+    { label: 'Recipe', title: 'Recipe selected', helper: 'View ingredients.', cta: 'Continue' },
+    { label: 'Ingredients', title: 'Pick what to order', helper: 'Keep pantry items off.', cta: 'Build cart' },
+    { label: 'Checkout', title: 'Checkout across stores', helper: 'Selected items grouped.', cta: 'Checkout' },
+  ] as const
+
+  const demoRecipeCard = (
+    <div className="demo-recipe-card">
+      <div className="demo-recipe-thumb" aria-hidden="true">
+        <div className="demo-thumb-plate" />
+        <div className="demo-thumb-bowl" />
+        <div className="demo-thumb-swirl" />
+      </div>
+      <div style={{ minWidth: 0, flex: 1 }}>
+        <div style={{ fontSize: 18, fontWeight: 800, color: RED, letterSpacing: '-.02em' }}>{selectedRecipe.name}</div>
+        <div style={{ marginTop: 4, fontSize: 12, color: RED, opacity: .56 }}>{selectedRecipe.by} · {selectedRecipe.time}</div>
+      </div>
+      <span className="demo-tag">{selectedRecipe.tag}</span>
+    </div>
+  )
+
+  const currentStepTitle = demoStepMeta[demoStep].title
+  const currentStepHelper = demoStepMeta[demoStep].helper
+
+  const currentCounterText = demoStep === 0
+    ? `${selectedRecipe.ingredients.length} items`
+    : demoStep === 1
+      ? `${selectedIngredients.length} to order`
+      : `${focusedCartGroups.length} carts`
+
+  const currentFooterText = demoStep === 0
+    ? `${selectedRecipe.ingredients.length} ingredients`
+    : demoStep === 1
+      ? `${selectedIngredients.length} to order · ${pantryIngredients.length} at home`
+      : `${focusedCartGroups.length} carts · ${focusedStoreLabel}`
+
+  const demoStateContent = (
+    <div key={`step-${demoStep + 1}`} className="demo-state">
+      <div className="demo-panel-title-row">
+        <div>
+          <div className="demo-panel-title">{currentStepTitle}</div>
+          <div className="demo-panel-caption">{currentStepHelper}</div>
         </div>
-      ),
-    },
-    {
-      label: 'Save it to your list',
-      sub: 'One tap saves the recipe and pulls every ingredient into your personal pantry list.',
-      visual: (
-        <div style={{ width: '100%', animation: 'fadeUp .4s ease' }}>
-          <div style={{ fontWeight: 700, fontSize: 17, color: RED, marginBottom: 4 }}>{selectedRecipe.name}</div>
-          <div style={{ fontSize: 12, color: RED, opacity: .5, marginBottom: 20 }}>Saved from {selectedRecipe.by}</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {selectedRecipe.ingredients.map((ingredient, i) => {
-              const active = selectedIngredientIds.includes(ingredient.id)
-              return (
-                <div key={ingredient.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, animation: `slideIn .3s ease ${i * 0.06}s both`, padding: '10px 12px', borderRadius: 12, background: active ? 'rgba(150,45,73,.07)' : 'rgba(150,45,73,.03)', border: `1px solid ${active ? 'rgba(150,45,73,.12)' : 'rgba(150,45,73,.07)'}` }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: active ? RED : 'rgba(150,45,73,.18)', flexShrink: 0 }} />
-                    <span style={{ fontSize: 13, color: RED, opacity: active ? .82 : .5 }}>{ingredient.name}</span>
-                  </div>
-                  <span style={{ fontSize: 11, color: RED, opacity: .45 }}>{ingredient.qty}</span>
-                </div>
-              )
-            })}
-          </div>
+        <span className="demo-counter-pill">{currentCounterText}</span>
+      </div>
+
+      {demoRecipeCard}
+
+      <div className={`demo-ingredient-grid${demoStep === 2 ? ' is-faded' : ''}`}>
+        {selectedRecipe.ingredients.map((ingredient) => {
+          const active = selectedIngredientIds.includes(ingredient.id)
+          const interactive = demoStep === 1
+          const metaLabel = demoStep === 0 ? ingredient.qty : active ? 'To order' : 'At home'
+
+          return (
+            <button
+              key={ingredient.id}
+              type="button"
+              className={`demo-ingredient-pill${active ? ' is-selected' : ''}${demoStep !== 0 && !active ? ' is-muted' : ''}${interactive ? ' is-interactive' : ''}`}
+              onClick={interactive ? () => toggleIngredient(ingredient.id) : undefined}
+              disabled={!interactive}
+              aria-pressed={interactive ? active : undefined}
+            >
+              <span className={`demo-ingredient-marker${demoStep === 0 ? ' is-neutral' : active ? ' is-selected' : ''}`}>
+                {demoStep !== 0 && active ? (
+                  <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                    <path d="M1 4L3.5 6.5L9 1" stroke={CREAM} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                ) : null}
+              </span>
+              <span className="demo-ingredient-name">{ingredient.name}</span>
+              <span className={`demo-ingredient-meta${demoStep === 0 ? ' is-qty' : active ? ' is-strong' : ''}`}>{metaLabel}</span>
+            </button>
+          )
+        })}
+      </div>
+
+      <div className={`demo-result-card${demoStep === 2 ? ' is-active' : ''}`}>
+        <div className="demo-result-header">
+          <span>Store grouping</span>
+          <span>{demoStep === 2 ? `${focusedCartGroups.length} carts` : demoStep === 1 ? 'Build cart' : 'Next'}</span>
         </div>
-      ),
-    },
-    {
-      label: 'Order in 60 seconds',
-      sub: 'Pick a preset and preview how one recipe can checkout across Blinkit, Zepto, and more in one guided flow.',
-      visual: (
-        <div className="split-checkout-demo" style={{ width: '100%', animation: 'fadeUp .4s ease' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-            <div style={{ fontSize: 12, fontWeight: 600, color: RED, opacity: .46 }}>
-              Cart ready — {activeCheckoutPlan.rows.length} items
-            </div>
-            <span style={{ fontSize: 10, fontWeight: 600, color: RED, opacity: .65, padding: '3px 8px', borderRadius: 999, border: '1px solid rgba(150,45,73,.17)', background: 'rgba(150,45,73,.05)' }}>
-              Landing preview
-            </span>
-          </div>
 
-          <div className="split-preset-row">
-            {SPLIT_CHECKOUT_PLANS.map((plan, idx) => {
-              const active = idx === checkoutPreset
-              return (
-                <button
-                  key={plan.id}
-                  type="button"
-                  onClick={() => setCheckoutPreset(idx)}
-                  style={{
-                    borderRadius: 10,
-                    border: `1px solid ${active ? RED : 'rgba(150,45,73,.14)'}`,
-                    padding: '9px 10px',
-                    textAlign: 'left',
-                    background: active ? 'rgba(150,45,73,.1)' : WHITE,
-                    color: RED,
-                    cursor: 'pointer',
-                    transition: 'all .2s ease',
-                  }}
-                >
-                  <div style={{ fontSize: 12, fontWeight: 700, lineHeight: 1.2 }}>{plan.label}</div>
-                  <div style={{ fontSize: 10, opacity: .55, marginTop: 3 }}>{plan.hint}</div>
-                </button>
-              )
-            })}
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, marginTop: 10 }}>
-            <div style={{ fontSize: 11, color: RED, opacity: .6, lineHeight: 1.55, maxWidth: 400 }}>{activeCheckoutPlan.reason}</div>
-            <span style={{ flexShrink: 0, fontSize: 10, fontWeight: 700, color: RED, borderRadius: 999, background: 'rgba(150,45,73,.08)', padding: '5px 10px' }}>
-              {activeCheckoutPlan.tag}
-            </span>
-          </div>
-
-          <div className="compare-board">
-            <div className="compare-header-row">
-              <span style={{ fontSize: 10, fontWeight: 700, color: RED, opacity: .42, textTransform: 'uppercase', letterSpacing: '.08em' }}>Compare</span>
-              {activeCheckoutPlan.rows[0].options.map((option) => (
-                <span key={`header-${option.store}`} style={{ fontSize: 10, fontWeight: 700, color: RED, opacity: .48, textAlign: 'center' }}>
-                  {option.store}
-                </span>
-              ))}
-            </div>
-            {activeCheckoutPlan.rows.map((row) => (
-              <div key={`${activeCheckoutPlan.id}-${row.item}`} className="compare-row">
-                <div style={{ fontSize: 11, fontWeight: 700, color: RED }}>{row.item}</div>
-                {row.options.map((option) => {
-                  const selected = option.store === row.selectedStore
-                  return (
-                    <div
-                      key={`${row.item}-${option.store}`}
-                      className={`compare-cell${selected ? ' selected' : ''}`}
-                    >
-                      <div style={{ fontSize: 11, fontWeight: 700, color: RED }}>{formatRs(option.price)}</div>
-                      <div style={{ fontSize: 9, color: RED, opacity: selected ? .85 : .42 }}>
-                        {selected ? 'Chosen' : option.store}
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            ))}
-          </div>
-
-          <div key={activeCheckoutPlan.id} className="split-scene">
-            <div className="split-cards">
-              {activeCheckoutPlan.baskets.map((basket, idx) => (
-                <div key={`${activeCheckoutPlan.id}-${basket.store}`} className="split-card" style={{ animationDelay: `${idx * 90}ms` }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: RED }}>{basket.store}</div>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: RED, opacity: .45 }}>{basket.items.length} item{basket.items.length > 1 ? 's' : ''}</div>
+        {demoStep === 2 ? (
+          <>
+            <div className="demo-result-groups">
+              {focusedCartGroups.length > 0 ? (
+                focusedCartGroups.map((group) => (
+                  <div key={group.store} className="demo-result-group">
+                    <div className="demo-result-store">{group.store}</div>
+                    <div className="demo-result-items">{group.items.map((item) => item.name).join(' · ')}</div>
                   </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minHeight: 64 }}>
-                    {basket.items.map((item) => (
-                      <div key={`${basket.store}-${item}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
-                        <span style={{ fontSize: 11, color: RED, opacity: .7 }}>{item}</span>
-                        <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'rgba(150,45,73,.25)', flexShrink: 0 }} />
-                      </div>
-                    ))}
-                  </div>
-                  <div style={{ borderTop: '1px solid rgba(150,45,73,.1)', marginTop: 10, paddingTop: 8, display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'end' }}>
-                    <div>
-                      <div style={{ fontSize: 9, color: RED, opacity: .45 }}>Store subtotal</div>
-                      <div style={{ fontSize: 12, fontWeight: 700, color: RED }}>{formatRs(basket.subtotal)}</div>
-                    </div>
-                    <div style={{ fontSize: 10, color: RED, opacity: .5 }}>From {basket.store}</div>
-                  </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <div className="demo-result-placeholder">Select ingredients to order.</div>
+              )}
             </div>
+            <div className="demo-result-summary">
+              <span>Split total</span>
+              <strong>{formatRs(focusedSplitTotal)}</strong>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="demo-result-placeholder">
+              {demoStep === 0 ? 'Continue to choose what you need.' : 'Build cart to group selected items.'}
+            </div>
+            <div className="demo-result-summary subtle">
+              <span>Split total</span>
+              <strong>Updates next</strong>
+            </div>
+          </>
+        )}
+      </div>
 
-            <div className="split-flow">
-              {activeCheckoutPlan.baskets.map((basket, idx) => (
-                <div key={`flow-${basket.store}`} className="split-flow-node">
-                  <span>{basket.store}</span>
-                  {idx < activeCheckoutPlan.baskets.length - 1 && <span className="split-flow-dot" />}
-                </div>
-              ))}
-              <span className="split-flow-end">Checkout sequence</span>
-            </div>
-          </div>
+      <div className="demo-compact-footer">
+        <div className="demo-footer-note">{currentFooterText}</div>
+        <button
+          type="button"
+          className="demo-primary-button demo-primary-button-compact"
+          disabled={(demoStep === 1 || demoStep === 2) && selectedIngredients.length === 0}
+          onClick={demoStep < 2 ? advanceDemoStep : undefined}
+        >
+          {demoStepMeta[demoStep].cta}
+        </button>
+      </div>
+    </div>
+  )
 
-          <div className="split-summary">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16 }}>
-              <span style={{ fontSize: 11, color: RED, opacity: .5 }}>Split total</span>
-              <span style={{ fontSize: 15, fontWeight: 800, color: RED }}>{formatRs(splitCheckoutSubtotal)}</span>
-            </div>
-            <div style={{ marginTop: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16 }}>
-              <span style={{ fontSize: 11, color: RED, opacity: .5 }}>One-store total</span>
-              <span style={{ fontSize: 12, fontWeight: 700, color: RED, opacity: .75 }}>{formatRs(activeCheckoutPlan.singleStoreEstimate)}</span>
-            </div>
-            <div style={{ marginTop: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16 }}>
-              <span style={{ fontSize: 11, color: RED, opacity: .5 }}>Difference</span>
-              <span style={{ fontSize: 12, fontWeight: 700, color: RED }}>{formatRs(splitCheckoutSavings)}</span>
-            </div>
-          </div>
-
-          <div style={{ marginTop: 12, padding: '13px 0', background: RED, borderRadius: 10, textAlign: 'center', fontSize: 13, fontWeight: 700, color: CREAM }}>
-            Order from: {splitStoreLabel}
-          </div>
-          <div style={{ marginTop: 6, textAlign: 'center', fontSize: 10, color: RED, opacity: .55 }}>
-            Compare stores, pick your split, and checkout only what you need.
-          </div>
+  const focusedFlowPanel = (
+    <div className="product-demo-card" style={{ width: '100%' }}>
+      <div className="demo-panel-topbar">
+        <div className="demo-progress">
+          {demoStepMeta.map((step, index) => (
+            <button
+              key={step.label}
+              type="button"
+              className={`demo-progress-step${demoStep === index ? ' active' : ''}`}
+              onClick={() => goToDemoStep(index as 0 | 1 | 2)}
+              aria-label={`Step ${index + 1}: ${step.label}`}
+              aria-current={demoStep === index ? 'step' : undefined}
+            >
+              <span className="demo-progress-index">0{index + 1}</span>
+              <span className="demo-progress-label">{step.label}</span>
+            </button>
+          ))}
         </div>
-      ),
-    },
-  ]
+        <span className="demo-step-chip">Interactive demo</span>
+      </div>
 
-  const ingredients = ['Black lentils', 'Vine tomatoes', 'Butter', 'Heavy cream']
+      {demoStateContent}
+    </div>
+  )
+
+  const ingredients = ['Frozen acai', 'Banana', 'Granola', 'Mixed berries']
 
   return (
     <main style={{ background: BG, color: RED, fontFamily: "'Inter', system-ui, sans-serif", overflowX: 'hidden' }}>
@@ -808,144 +542,374 @@ export default function Home() {
           padding: 4px 0;
         }
 
-        .how-grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 48px;
-          align-items: start;
-        }
         .hero-grid {
           display: grid;
           grid-template-columns: 1fr 1fr;
           gap: 72px;
           align-items: center;
         }
-        .how-panel {
-          position: sticky;
-          top: 88px;
-        }
-
-        .recipe-browser {
+        .how-demo-shell {
           display: flex;
-          flex-direction: column;
-          gap: 14px;
+          justify-content: center;
         }
-        .recipe-choice-grid {
+        .product-demo-card {
+          max-width: 620px;
+          padding: 28px;
+          border-radius: 24px;
+          border: 1px solid rgba(150,45,73,.1);
+          background: linear-gradient(180deg, #fffefb 0%, #fffaf4 100%);
+          box-shadow: 0 18px 40px rgba(150,45,73,.06);
+        }
+        .demo-panel-topbar {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 16px;
+          margin-bottom: 20px;
+        }
+        .demo-progress {
+          flex: 1;
           display: grid;
-          grid-template-columns: 1fr;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
           gap: 10px;
         }
-        .recipe-choice-card {
+        .demo-progress-step {
           display: flex;
           align-items: center;
-          justify-content: space-between;
-          gap: 12px;
-          padding: 14px 16px;
-          border-radius: 14px;
-          border: 1px solid rgba(150,45,73,.08);
-          background: ${WHITE};
+          gap: 10px;
+          padding: 11px 12px;
+          border-radius: 16px;
+          border: 1px solid rgba(150,45,73,.12);
+          background: rgba(255,255,255,.78);
+          color: ${RED};
           text-align: left;
           cursor: pointer;
-          transition: border-color .2s ease, background .2s ease, transform .2s ease;
+          transition: all .22s ease;
         }
-        .recipe-choice-card:hover {
+        .demo-progress-step:hover {
+          border-color: rgba(150,45,73,.24);
           transform: translateY(-1px);
-          border-color: rgba(150,45,73,.22);
         }
-        .recipe-choice-card.active {
-          background: rgba(150,45,73,.07);
-          border-color: rgba(150,45,73,.22);
+        .demo-progress-step.active {
+          background: ${RED};
+          border-color: ${RED};
+          color: ${CREAM};
+          box-shadow: 0 8px 20px rgba(150,45,73,.16);
         }
-        .recipe-detail-card {
-          border-radius: 16px;
-          border: 1px solid rgba(150,45,73,.1);
-          background: ${WHITE};
-          padding: 16px;
+        .demo-progress-index {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 32px;
+          height: 32px;
+          border-radius: 999px;
+          background: rgba(150,45,73,.08);
+          color: rgba(150,45,73,.76);
+          font-size: 11px;
+          font-weight: 800;
+          letter-spacing: .04em;
+          flex-shrink: 0;
+        }
+        .demo-progress-step.active .demo-progress-index {
+          background: rgba(243,234,195,.18);
+          color: ${CREAM};
+        }
+        .demo-progress-label {
+          font-size: 12px;
+          font-weight: 800;
+          letter-spacing: -.01em;
+        }
+        .demo-step-chip {
+          padding: 7px 12px;
+          border-radius: 999px;
+          background: rgba(150,45,73,.06);
+          color: ${RED};
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: .08em;
+          text-transform: uppercase;
+        }
+        .demo-state {
           display: flex;
           flex-direction: column;
-          gap: 14px;
+          gap: 24px;
+          animation: fadeUp .28s ease both;
         }
-        .ingredient-toolbar {
+        .demo-panel-title-row {
           display: flex;
-          align-items: center;
+          align-items: start;
           justify-content: space-between;
           gap: 12px;
         }
-        .ingredient-toolbar-footer {
-          align-items: end;
+        .demo-panel-title {
+          font-size: 18px;
+          line-height: 1.1;
+          font-weight: 800;
+          letter-spacing: -.03em;
+          color: ${RED};
         }
-        .selection-pill {
+        .demo-panel-caption {
+          margin-top: 4px;
+          font-size: 11px;
+          line-height: 1.4;
+          color: rgba(150,45,73,.56);
+        }
+        .demo-counter-pill {
           flex-shrink: 0;
-          padding: 6px 10px;
+          padding: 8px 11px;
           border-radius: 999px;
-          background: rgba(150,45,73,.08);
+          background: rgba(150,45,73,.05);
+          border: 1px solid rgba(150,45,73,.08);
+          color: ${RED};
+          font-size: 11px;
+          font-weight: 700;
+        }
+        .demo-recipe-card {
+          width: 100%;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 16px 18px;
+          border-radius: 18px;
+          border: 1px solid rgba(150,45,73,.1);
+          background: rgba(255,255,255,.92);
+          text-align: left;
+        }
+        .demo-recipe-thumb {
+          width: 64px;
+          height: 64px;
+          flex-shrink: 0;
+          border-radius: 16px;
+          background: radial-gradient(circle at 30% 25%, rgba(255,255,255,.9), rgba(255,255,255,.2) 34%, rgba(150,45,73,.18) 35%, rgba(150,45,73,.08) 100%);
+          border: 1px solid rgba(150,45,73,.08);
+          position: relative;
+          overflow: hidden;
+        }
+        .demo-thumb-plate {
+          position: absolute;
+          inset: 11px;
+          border-radius: 999px;
+          background: rgba(255,255,255,.75);
+        }
+        .demo-thumb-bowl {
+          position: absolute;
+          inset: 17px;
+          border-radius: 999px;
+          background: linear-gradient(180deg, #733120 0%, #9f4a2d 100%);
+          box-shadow: inset 0 -6px 10px rgba(76,22,17,.18);
+        }
+        .demo-thumb-swirl {
+          position: absolute;
+          width: 16px;
+          height: 16px;
+          right: 14px;
+          top: 12px;
+          border-radius: 999px;
+          background: rgba(245,236,220,.9);
+          box-shadow: 0 0 0 5px rgba(245,236,220,.2);
+        }
+        .demo-tag {
+          flex-shrink: 0;
+          padding: 7px 10px;
+          border-radius: 999px;
+          background: rgba(150,45,73,.05);
           color: ${RED};
           font-size: 10px;
           font-weight: 700;
         }
-        .ingredient-picker {
+        .demo-ingredient-grid {
           display: grid;
           grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 10px;
+          gap: 12px;
         }
-        .ingredient-tile {
+        .demo-ingredient-grid.is-faded {
+          opacity: .88;
+        }
+        .demo-ingredient-pill {
           display: flex;
           align-items: center;
           gap: 10px;
           width: 100%;
-          padding: 11px 12px;
-          border-radius: 12px;
+          min-height: 46px;
+          padding: 12px 14px;
+          border-radius: 13px;
           border: 1px solid rgba(150,45,73,.08);
           background: rgba(150,45,73,.03);
           text-align: left;
+          transition: border-color .18s ease, background .18s ease, opacity .18s ease;
+        }
+        .demo-ingredient-pill:disabled {
+          cursor: default;
+          opacity: 1;
+        }
+        .demo-ingredient-pill.is-interactive {
           cursor: pointer;
-          transition: border-color .18s ease, background .18s ease, transform .18s ease;
         }
-        .ingredient-tile:hover {
-          transform: translateY(-1px);
-          border-color: rgba(150,45,73,.2);
+        .demo-ingredient-pill.is-interactive:hover {
+          border-color: rgba(150,45,73,.14);
         }
-        .ingredient-tile.active {
-          background: rgba(150,45,73,.08);
-          border-color: rgba(150,45,73,.22);
+        .demo-ingredient-pill.is-selected {
+          background: rgba(150,45,73,.06);
+          border-color: rgba(150,45,73,.12);
         }
-        .ingredient-check {
-          width: 20px;
-          height: 20px;
-          border-radius: 50%;
+        .demo-ingredient-pill.is-muted {
+          background: rgba(150,45,73,.02);
+        }
+        .demo-ingredient-marker {
+          width: 18px;
+          height: 18px;
+          border-radius: 999px;
           border: 1px solid rgba(150,45,73,.18);
-          background: ${WHITE};
+          background: rgba(255,255,255,.9);
           display: inline-flex;
           align-items: center;
           justify-content: center;
           flex-shrink: 0;
+          transition: all .18s ease;
         }
-        .ingredient-check.active {
+        .demo-ingredient-marker.is-neutral {
+          border-color: rgba(150,45,73,.12);
+          background: rgba(255,255,255,.72);
+        }
+        .demo-ingredient-marker.is-selected {
           background: ${RED};
           border-color: ${RED};
         }
-        .recipe-actions {
-          display: flex;
-          gap: 8px;
+        .demo-ingredient-marker.is-selected svg {
+          animation: pulse .22s ease;
         }
-        .recipe-action-primary,
-        .recipe-action-secondary {
-          height: 38px;
-          padding: 0 14px;
-          border-radius: 10px;
+        .demo-ingredient-name {
+          min-width: 0;
           font-size: 12px;
           font-weight: 700;
-          cursor: pointer;
+          color: ${RED};
         }
-        .recipe-action-primary {
+        .demo-ingredient-meta {
+          margin-left: auto;
+          padding: 5px 8px;
+          border-radius: 999px;
+          background: rgba(150,45,73,.04);
+          color: rgba(150,45,73,.55);
+          font-size: 9px;
+          font-weight: 700;
+          white-space: nowrap;
+        }
+        .demo-ingredient-meta.is-qty {
+          padding: 0;
+          border-radius: 0;
+          background: transparent;
+          font-size: 11px;
+          font-weight: 600;
+          color: rgba(150,45,73,.5);
+        }
+        .demo-ingredient-meta.is-strong {
+          background: rgba(150,45,73,.08);
+          color: ${RED};
+        }
+        .demo-result-card {
+          border-radius: 18px;
+          border: 1px solid rgba(150,45,73,.08);
+          background: rgba(255,255,255,.88);
+          padding: 16px 18px;
+        }
+        .demo-result-card.is-active {
+          animation: fadeUp .24s ease both;
+        }
+        .demo-result-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 10px;
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: .08em;
+          text-transform: uppercase;
+          color: rgba(150,45,73,.5);
+        }
+        .demo-result-groups {
+          margin-top: 14px;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+        .demo-result-group {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+        .demo-result-store {
+          font-size: 13px;
+          font-weight: 800;
+          color: ${RED};
+        }
+        .demo-result-items {
+          font-size: 12px;
+          line-height: 1.5;
+          color: rgba(150,45,73,.7);
+        }
+        .demo-result-placeholder {
+          margin-top: 14px;
+          font-size: 12px;
+          line-height: 1.5;
+          color: rgba(150,45,73,.5);
+        }
+        .demo-result-summary {
+          margin-top: 16px;
+          padding-top: 12px;
+          border-top: 1px solid rgba(150,45,73,.08);
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          font-size: 11px;
+          color: rgba(150,45,73,.55);
+        }
+        .demo-result-summary strong {
+          font-size: 14px;
+          color: ${RED};
+        }
+        .demo-result-summary.subtle strong {
+          font-size: 12px;
+          color: rgba(150,45,73,.62);
+        }
+        .demo-footer-note {
+          font-size: 11px;
+          color: rgba(150,45,73,.56);
+        }
+        .demo-compact-footer {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 16px;
+        }
+        .demo-primary-button {
+          width: 100%;
+          height: 48px;
           border: none;
+          border-radius: 16px;
           background: ${RED};
           color: ${CREAM};
+          font-size: 15px;
+          font-weight: 800;
+          cursor: pointer;
+          transition: transform .18s ease, box-shadow .18s ease, opacity .18s ease;
         }
-        .recipe-action-secondary {
-          border: 1px solid rgba(150,45,73,.16);
-          background: ${WHITE};
-          color: ${RED};
+        .demo-primary-button:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 12px 24px rgba(150,45,73,.14);
+        }
+        .demo-primary-button:disabled {
+          cursor: not-allowed;
+          opacity: .45;
+          box-shadow: none;
+          transform: none;
+        }
+        .demo-primary-button-compact {
+          width: auto;
+          min-width: 148px;
+          height: 48px;
+          padding: 0 20px;
+          flex-shrink: 0;
         }
 
         .compare-board {
@@ -1080,13 +1044,8 @@ export default function Home() {
             grid-template-columns: 1fr;
             gap: 28px;
           }
-          .how-grid {
-            grid-template-columns: 1fr;
-            gap: 24px;
-          }
-          .how-panel {
-            position: static;
-            top: auto;
+          .product-demo-card {
+            max-width: 100%;
           }
         }
 
@@ -1106,16 +1065,30 @@ export default function Home() {
         }
 
         @media (max-width: 640px) {
-          .ingredient-picker {
-            grid-template-columns: 1fr;
+          .product-demo-card {
+            padding: 20px;
+            border-radius: 22px;
           }
-          .ingredient-toolbar,
-          .ingredient-toolbar-footer,
-          .recipe-actions {
+          .demo-panel-topbar,
+          .demo-panel-title-row,
+          .demo-recipe-card,
+          .demo-compact-footer {
             flex-direction: column;
             align-items: stretch;
           }
-          .split-preset-row {
+          .demo-step-chip,
+          .demo-counter-pill,
+          .demo-tag {
+            align-self: flex-start;
+          }
+          .demo-ingredient-grid {
+            grid-template-columns: 1fr;
+          }
+          .demo-primary-button-compact {
+            width: 100%;
+          }
+          .demo-progress {
+            width: 100%;
             grid-template-columns: 1fr;
           }
           .compare-header-row,
@@ -1251,10 +1224,10 @@ export default function Home() {
           <div style={{ position: 'relative', height: 440 }}>
             <div className="card-hover float-a" style={{ position: 'absolute', top: 16, left: 0, width: 250, background: WHITE, borderRadius: 18, padding: 22, boxShadow: '0 8px 36px rgba(150,45,73,.1)', border: '1px solid rgba(150,45,73,.07)' }}>
               <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: RED, opacity: .4, marginBottom: 10 }}>Saved recipe</div>
-              <div style={{ fontWeight: 700, fontSize: 17, color: RED, marginBottom: 4 }}>Dal Makhani</div>
-              <div style={{ fontSize: 12, color: RED, opacity: .5, marginBottom: 14 }}>by @priyacooks</div>
+              <div style={{ fontWeight: 700, fontSize: 17, color: RED, marginBottom: 4 }}>Acai Bowl</div>
+              <div style={{ fontSize: 12, color: RED, opacity: .5, marginBottom: 14 }}>by @healthybowl</div>
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                {['45 min', 'Serves 4', 'Vegetarian'].map(t => (
+                {['10 min', 'Serves 1', 'Healthy'].map(t => (
                   <span key={t} style={{ fontSize: 11, padding: '3px 10px', borderRadius: 999, background: `rgba(150,45,73,.07)`, color: RED, fontWeight: 500 }}>{t}</span>
                 ))}
               </div>
@@ -1476,54 +1449,18 @@ export default function Home() {
       </section>
 
       {/* HOW IT WORKS */}
-      <section id="how-it-works" style={{ background: WHITE, padding: '64px 28px' }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+      <section id="how-it-works" style={{ background: WHITE, padding: '104px 28px 128px' }}>
+        <div style={{ maxWidth: 760, margin: '0 auto' }}>
           <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: RED, opacity: .4, marginBottom: 12, textAlign: 'center' }}>How it works</p>
-          <h2 style={{ fontSize: 'clamp(1.8rem,3vw,2.4rem)', fontWeight: 800, letterSpacing: '-1px', color: RED, textAlign: 'center', marginBottom: 36 }}>
+          <h2 style={{ fontSize: 'clamp(1.8rem,3vw,2.4rem)', fontWeight: 800, letterSpacing: '-1px', color: RED, textAlign: 'center', marginBottom: 14 }}>
             Three steps. Done.
           </h2>
+          <p style={{ marginBottom: 52, textAlign: 'center', fontSize: 15, color: RED, opacity: .52 }}>
+            From recipe to groceries in minutes.
+          </p>
 
-          <div className="how-grid">
-            {/* Accordion */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {steps.map((s, i) => (
-                <div key={i}
-                  onClick={() => setOpenStep(openStep === i ? null : i)}
-                  style={{ borderRadius: 16, cursor: 'pointer', background: openStep === i ? RED : WHITE, border: `1.5px solid ${openStep === i ? RED : 'rgba(150,45,73,.1)'}`, transition: 'all .25s', overflow: 'hidden' }}
-                  onMouseEnter={e => { if (openStep !== i) e.currentTarget.style.borderColor = 'rgba(150,45,73,.3)' }}
-                  onMouseLeave={e => { if (openStep !== i) e.currentTarget.style.borderColor = 'rgba(150,45,73,.1)' }}
-                >
-                  {/* Header row - always visible */}
-                  <div style={{ padding: '22px 24px', display: 'flex', alignItems: 'center', gap: 14 }}>
-                    <div style={{ width: 28, height: 28, borderRadius: '50%', background: openStep === i ? CREAM : `rgba(150,45,73,.1)`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <span style={{ fontSize: 12, fontWeight: 700, color: RED }}>{i + 1}</span>
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 15, fontWeight: 700, color: openStep === i ? CREAM : RED }}>{s.label}</div>
-                    </div>
-                    <div style={{ width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ transform: openStep === i ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform .25s' }}>
-                        <path d="M2 4L6 8L10 4" stroke={openStep === i ? CREAM : RED} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    </div>
-                  </div>
-
-                  {/* Expanded content */}
-                  {openStep === i && (
-                    <div style={{ padding: '0 24px 22px', animation: 'accordionOpen .2s ease' }}>
-                      <div style={{ fontSize: 13, color: CREAM, opacity: .75, lineHeight: 1.65 }}>{s.sub}</div>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            {/* Step visual panel */}
-            <div className="how-panel" style={{ background: BG, borderRadius: 20, padding: 32, border: `1px solid rgba(150,45,73,.07)`, minHeight: 280, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              {openStep !== null ? steps[openStep].visual : (
-                <div style={{ textAlign: 'center', color: RED, opacity: .3, fontSize: 14 }}>Click a step to see how it works</div>
-              )}
-            </div>
+          <div className="how-demo-shell">
+            {focusedFlowPanel}
           </div>
         </div>
       </section>
@@ -1562,14 +1499,14 @@ export default function Home() {
                 </div>
               </div>
               <div style={{ background: WHITE, borderRadius: 20, padding: 28, border: `1px solid rgba(150,45,73,.08)` }}>
-                <div style={{ fontWeight: 700, fontSize: 15, color: RED, marginBottom: 18 }}>Dal Makhani cook mode</div>
-                <div style={{ fontSize: 11, color: RED, opacity: .4, marginBottom: 8 }}>Step 3 of 8</div>
-                <div style={{ fontSize: 16, fontWeight: 700, color: RED, marginBottom: 10 }}>Saute onions until golden</div>
+                <div style={{ fontWeight: 700, fontSize: 15, color: RED, marginBottom: 18 }}>Acai Bowl prep mode</div>
+                <div style={{ fontSize: 11, color: RED, opacity: .4, marginBottom: 8 }}>Step 2 of 4</div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: RED, marginBottom: 10 }}>Blend until thick</div>
                 <div style={{ fontSize: 13, color: RED, opacity: .6, lineHeight: 1.65, marginBottom: 20 }}>
-                  Heat butter in a heavy pan over medium heat. Add onions and cook 12 to 15 min until deep golden. Stir occasionally.
+                  Blend frozen acai, banana, and a splash of milk for 45 seconds. Stop when the texture is scoopable, not drinkable.
                 </div>
                 <div style={{ display: 'flex', gap: 10 }}>
-                  <div style={{ flex: 1, padding: '11px 0', background: RED, borderRadius: 8, textAlign: 'center', fontSize: 13, fontWeight: 700, color: CREAM }}>15:00</div>
+                  <div style={{ flex: 1, padding: '11px 0', background: RED, borderRadius: 8, textAlign: 'center', fontSize: 13, fontWeight: 700, color: CREAM }}>00:45</div>
                   <div style={{ flex: 1, padding: '11px 0', background: `rgba(150,45,73,.08)`, borderRadius: 8, textAlign: 'center', fontSize: 13, fontWeight: 600, color: RED }}>Next step</div>
                 </div>
               </div>
@@ -1599,9 +1536,9 @@ export default function Home() {
               <div style={{ background: WHITE, borderRadius: 20, padding: 28, border: `1px solid rgba(150,45,73,.08)` }}>
                 <div style={{ fontSize: 12, fontWeight: 600, color: RED, opacity: .4, marginBottom: 20 }}>Last 7 days</div>
                 {[
-                  { name: 'Dal Makhani', carts: 142, pct: 85 },
-                  { name: 'Acai Bowl',   carts: 98,  pct: 58 },
-                  { name: 'Mango Lassi', carts: 61,  pct: 37 },
+                  { name: 'Acai Bowl', carts: 142, pct: 85 },
+                  { name: 'Mango Lassi', carts: 61, pct: 37 },
+                  { name: 'Berry Smoothie', carts: 48, pct: 29 },
                 ].map(r => (
                   <div key={r.name} style={{ marginBottom: 18 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 7 }}>

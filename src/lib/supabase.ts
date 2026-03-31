@@ -4,9 +4,9 @@ type Database = {
   public: {
     Tables: {
       waitlist: {
-        Row: { id: string; email: string; created_at: string }
-        Insert: { id?: string; email: string; created_at?: string }
-        Update: { id?: string; email?: string; created_at?: string }
+        Row: { id: string; email: string; created_at: string; role: string; country: string; instagram_url: string | null }
+        Insert: { id?: string; email: string; created_at?: string; role?: string; country?: string; instagram_url?: string | null }
+        Update: { id?: string; email?: string; created_at?: string; role?: string; country?: string; instagram_url?: string | null }
         Relationships: []
       }
     }

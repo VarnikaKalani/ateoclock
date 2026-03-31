@@ -192,7 +192,7 @@ export default function Home() {
     supabase
       .from('waitlist')
       .select('*', { count: 'exact', head: true })
-      .then(({ count }) => setWaitlistCount(count ?? 0))
+      .then(({ count }) => setWaitlistCount((count ?? 0) + 1000))
 
     const channel = supabase
       .channel('waitlist-count')

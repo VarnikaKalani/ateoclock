@@ -2,6 +2,7 @@
 import Image from 'next/image'
 import { useState, useEffect, useRef } from 'react'
 import { getSupabaseBrowserClient } from '@/lib/supabase'
+import WaitlistForm from '@/components/WaitlistForm'
 
 const RED   = '#962d49'
 const CREAM = '#f3eac3'
@@ -147,9 +148,6 @@ export default function Home() {
   const [tab, setTab]           = useState<'cook' | 'creator'>('cook')
   const [demoStep, setDemoStep] = useState<0 | 1 | 2>(0)
   const [cartFill, setCartFill] = useState(0)
-  const [heroEmail, setHeroEmail]   = useState('')
-  const [footerEmail, setFooterEmail] = useState('')
-  const [joined, setJoined]         = useState(false)
   const [waitlistCount, setWaitlistCount] = useState<number | null>(null)
   const [dragOver, setDragOver] = useState(false)
   const [uploadedFile, setUploadedFile] = useState<string | null>(null)
@@ -203,22 +201,6 @@ export default function Home() {
 
     return () => { supabase.removeChannel(channel) }
   }, [])
-
-  async function join(source: 'hero' | 'footer') {
-    const email = source === 'hero' ? heroEmail : footerEmail
-    if (!email.includes('@')) return
-    const response = await fetch('/api/waitlist', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
-    })
-
-    if (!response.ok) return
-
-    setJoined(true)
-    if (source === 'hero') setHeroEmail('')
-    if (source === 'footer') setFooterEmail('')
-  }
 
   function handleDrop(e: React.DragEvent) {
     e.preventDefault()
@@ -1191,33 +1173,15 @@ export default function Home() {
             <p className="fade-up" style={{ fontSize: 16, color: RED, opacity: .65, lineHeight: 1.75, maxWidth: 400, marginBottom: 36 }}>
             Coookd turns any recipe into a ready-to-checkout cart across any grocery store.
             </p>
-            {joined ? (
-              <div className="fade-up" style={{ marginTop: 4 }}>
-                <p style={{ fontSize: 15, color: RED, fontWeight: 600 }}>You are on the list.</p>
-                <p style={{ fontSize: 13, color: RED, opacity: .5, marginTop: 6 }}>We will reach out before launch.</p>
-              </div>
-            ) : (
-              <>
-                <div id="waitlist-form" className="fade-up" style={{ display: 'flex', gap: 10, maxWidth: 420 }}>
-                  <input type="email" value={heroEmail} onChange={e => setHeroEmail(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && join('hero')}
-                    placeholder="your@email.com"
-                    style={{ flex: 1, height: 48, padding: '0 16px', borderRadius: 10, border: `1.5px solid rgba(150,45,73,.22)`, background: WHITE, color: RED, fontSize: 14 }}
-                  />
-                  <button onClick={() => join('hero')}
-                    style={{ height: 48, padding: '0 24px', borderRadius: 10, background: RED, color: CREAM, fontSize: 14, fontWeight: 700, border: 'none', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'opacity .15s' }}
-                    onMouseEnter={e => (e.currentTarget.style.opacity = '.85')} onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
-                  >Get early access</button>
-                </div>
-                {waitlistCount !== null && waitlistCount > 0 && (
-                  <p className="fade-up" style={{ fontSize: 14, color: RED, opacity: .6, marginTop: 12 }}>
-                    Join <span style={{ color: RED, fontWeight: 700, opacity: 1 }}>{waitlistCount.toLocaleString()}</span> others on the waitlist.
-                  </p>
-                )}
-                <p style={{ fontSize: 12, color: RED, opacity: .3, marginTop: 6 }}>You can unsubscribe any time.</p>
-              </>
-            )
-            }
+            <div id="waitlist-form" className="fade-up">
+              <WaitlistForm />
+              {waitlistCount !== null && waitlistCount > 0 && (
+                <p style={{ fontSize: 14, color: RED, opacity: .6, marginTop: 12 }}>
+                  Join <span style={{ color: RED, fontWeight: 700, opacity: 1 }}>{waitlistCount.toLocaleString()}</span> others on the waitlist.
+                </p>
+              )}
+              <p style={{ fontSize: 12, color: RED, opacity: .3, marginTop: 6 }}>You can unsubscribe any time.</p>
+            </div>
           </div>
 
           {/* Animated mockup */}
@@ -1588,27 +1552,11 @@ export default function Home() {
           <p style={{ fontSize: 15, color: RED, opacity: .55, lineHeight: 1.7, marginBottom: 32 }}>
             Join the waitlist and be the first to know when Coookd launches.
           </p>
-          {joined ? (
-            <p style={{ fontSize: 15, color: RED, fontWeight: 600 }}>You are on the list. We will reach out before launch.</p>
-          ) : (
-            <>
-              <div style={{ display: 'flex', gap: 10, justifyContent: 'center', maxWidth: 420, margin: '0 auto' }}>
-                <input type="email" value={footerEmail} onChange={e => setFooterEmail(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && join('footer')}
-                  placeholder="your@email.com"
-                  style={{ flex: 1, height: 48, padding: '0 16px', borderRadius: 10, border: `1.5px solid rgba(150,45,73,.22)`, background: WHITE, color: RED, fontSize: 14 }}
-                />
-                <button onClick={() => join('footer')}
-                  style={{ height: 48, padding: '0 24px', borderRadius: 10, background: RED, color: CREAM, fontSize: 14, fontWeight: 700, border: 'none', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'opacity .15s' }}
-                  onMouseEnter={e => (e.currentTarget.style.opacity = '.85')} onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
-                >Join waitlist</button>
-              </div>
-              {waitlistCount !== null && waitlistCount > 0 && (
-                <p style={{ fontSize: 13, color: RED, opacity: .5, marginTop: 12 }}>
-                  Join <span style={{ fontWeight: 700, opacity: 1, color: RED }}>{waitlistCount.toLocaleString()}</span> others already on the list.
-                </p>
-              )}
-            </>
+          <WaitlistForm />
+          {waitlistCount !== null && waitlistCount > 0 && (
+            <p style={{ fontSize: 13, color: RED, opacity: .5, marginTop: 12, textAlign: 'center' }}>
+              Join <span style={{ fontWeight: 700, opacity: 1, color: RED }}>{waitlistCount.toLocaleString()}</span> others already on the list.
+            </p>
           )}
         </div>
       </section>

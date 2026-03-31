@@ -1,5 +1,15 @@
 @import "tailwindcss";
 
+:root {
+  --color-orange: #962d49;
+  --color-orange-dark: #7a2139;
+  --color-sand-dark: rgba(150, 45, 73, 0.22);
+  --color-warm-white: #ffffff;
+  --color-text: #962d49;
+  --color-green-light: #3a9e6f;
+  --font-sans: sans-serif;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;

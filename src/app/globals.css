@@ -1,5 +1,73 @@
 @import "tailwindcss";
 
+@theme {
+  /* Fonts */
+  --font-headline: var(--font-epilogue), serif;
+  --font-body: var(--font-manrope), sans-serif;
+  --font-label: var(--font-manrope), sans-serif;
+
+  /* Recipe page color tokens */
+  --color-primary: #6e1c2c;
+  --color-primary-container: #8c3342;
+  --color-primary-fixed: #ffd9dc;
+  --color-primary-fixed-dim: #ffb2ba;
+  --color-on-primary: #ffffff;
+  --color-on-primary-fixed: #400010;
+  --color-on-primary-fixed-variant: #7e2838;
+  --color-on-primary-container: #ffb0b8;
+  --color-inverse-primary: #ffb2ba;
+
+  --color-secondary: #77574d;
+  --color-secondary-container: #fed3c7;
+  --color-secondary-fixed: #ffdbd0;
+  --color-secondary-fixed-dim: #e7bdb1;
+  --color-on-secondary: #ffffff;
+  --color-on-secondary-container: #795950;
+  --color-on-secondary-fixed: #2c160e;
+  --color-on-secondary-fixed-variant: #5d4037;
+
+  --color-tertiary: #403a31;
+  --color-tertiary-container: #575147;
+  --color-tertiary-fixed: #ebe1d4;
+  --color-tertiary-fixed-dim: #cfc5b9;
+  --color-on-tertiary: #ffffff;
+  --color-on-tertiary-container: #cdc4b7;
+  --color-on-tertiary-fixed: #1f1b13;
+  --color-on-tertiary-fixed-variant: #4c463c;
+
+  --color-surface: #fdf8f5;
+  --color-surface-dim: #ded9d6;
+  --color-surface-bright: #fdf8f5;
+  --color-surface-variant: #e6e2df;
+  --color-surface-tint: #9c3f4e;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f8f3f0;
+  --color-surface-container: #f2edea;
+  --color-surface-container-high: #ece7e4;
+  --color-surface-container-highest: #e6e2df;
+
+  --color-background: #fdf8f5;
+  --color-on-background: #1c1b1a;
+  --color-on-surface: #1c1b1a;
+  --color-on-surface-variant: #554244;
+  --color-inverse-surface: #32302e;
+  --color-inverse-on-surface: #f5f0ed;
+
+  --color-outline: #887273;
+  --color-outline-variant: #dbc0c2;
+
+  --color-error: #ba1a1a;
+  --color-error-container: #ffdad6;
+  --color-on-error: #ffffff;
+  --color-on-error-container: #93000a;
+
+  /* Border radius */
+  --radius-DEFAULT: 0.25rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-full: 9999px;
+}
+
 :root {
   --color-orange: #962d49;
   --color-orange-dark: #7a2139;

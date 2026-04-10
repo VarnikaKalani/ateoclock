@@ -2,7 +2,6 @@
 import Image from 'next/image'
 import { useState, useEffect, useRef } from 'react'
 import { getSupabaseBrowserClient } from '@/lib/supabase'
-import WaitlistForm from '@/components/WaitlistForm'
 
 const RED   = '#962d49'
 const CREAM = '#f3eac3'
@@ -10,9 +9,6 @@ const RED2  = '#b8455f'
 const BG    = '#fdf8ee'
 const WHITE = '#ffffff'
 
-function formatRs(price: number) {
-  return `Rs ${Math.round(price)}`
-}
 
 function useCounter(target: number, duration = 1600, trigger: boolean) {
   const [val, setVal] = useState(0)
@@ -76,11 +72,6 @@ type RecipeCardData = {
   ingredients: RecipeIngredient[]
 }
 
-type FocusedCheckoutPrice = {
-  store: string
-  splitPrice: number
-  oneStorePrice: number
-}
 
 const RECIPE_LIBRARY: RecipeCardData[] = [
   {
@@ -118,13 +109,6 @@ const RECIPE_LIBRARY: RecipeCardData[] = [
 const DEFAULT_RECIPE_ID = 'acai-bowl'
 const DEFAULT_RECIPE = RECIPE_LIBRARY.find((recipe) => recipe.id === DEFAULT_RECIPE_ID) ?? RECIPE_LIBRARY[0]
 
-const FOCUSED_FLOW_PRICING: Record<string, FocusedCheckoutPrice> = {
-  acai: { store: 'Blinkit', splitPrice: 279, oneStorePrice: 304 },
-  banana: { store: 'Instamart', splitPrice: 26, oneStorePrice: 31 },
-  granola: { store: 'Blinkit', splitPrice: 172, oneStorePrice: 189 },
-  berries: { store: 'Instamart', splitPrice: 164, oneStorePrice: 178 },
-  chia: { store: 'Blinkit', splitPrice: 38, oneStorePrice: 44 },
-}
 
 const SAVED_RECIPE_TILES = [
   'Saved post',
@@ -146,16 +130,13 @@ const SAVED_RECIPE_TILES = [
 
 export default function Home() {
   const [tab, setTab]           = useState<'cook' | 'creator'>('cook')
-  const [demoStep, setDemoStep] = useState<0 | 1 | 2>(0)
   const [cartFill, setCartFill] = useState(0)
   const [waitlistCount, setWaitlistCount] = useState<number | null>(null)
   const [dragOver, setDragOver] = useState(false)
   const [uploadedFile, setUploadedFile] = useState<string | null>(null)
   const [aboutPhase, setAboutPhase] = useState(0) // 0=camera roll, 1=selected, 2=cart
   const [navOpen, setNavOpen] = useState(false)
-  const [selectedIngredientIds, setSelectedIngredientIds] = useState<string[]>(
-    DEFAULT_RECIPE.ingredients.filter((ingredient) => ingredient.defaultSelected).map((ingredient) => ingredient.id)
-  )
+
   const statsRef                = useRef<HTMLDivElement>(null)
   const statsVis                = useVisible(statsRef)
   const c1 = useCounter(4200, 1800, statsVis)
@@ -221,205 +202,159 @@ export default function Home() {
     setNavOpen(false)
   }
 
-  function toggleIngredient(ingredientId: string) {
-    setSelectedIngredientIds((current) =>
-      current.includes(ingredientId)
-        ? current.filter((id) => id !== ingredientId)
-        : [...current, ingredientId]
-    )
+
+  const DEMO_INGREDIENTS = [
+    { id: 'acai',      name: 'Organic Acai Base',  description: 'Frozen, Unsweetened', price: 12.50 },
+    { id: 'granola',   name: 'House Granola',       description: 'Almond & Cinnamon',  price: 8.00  },
+    { id: 'blueberry', name: 'Fresh Blueberries',   description: 'Pint, Seasonal',     price: 4.50  },
+    { id: 'honey',     name: 'Manuka Honey',        description: 'Raw, 250g Jar',      price: 18.90 },
+  ]
+  const STORE_MULTIPLIERS: Record<string, number> = {
+    'Blinkit': 1.00,
+    'Zepto': 0.97,
+    'Amazon Fresh': 1.05,
+    'BigBasket': 0.94,
+    'Instamart': 1.02,
   }
-
-  const primaryStore = 'Blinkit'
-  const selectedIngredients = selectedRecipe.ingredients.filter((ingredient) => selectedIngredientIds.includes(ingredient.id))
-  const pantryIngredients = selectedRecipe.ingredients.filter((ingredient) => !selectedIngredientIds.includes(ingredient.id))
-  const focusedOrderItems = selectedIngredients.map((ingredient) => ({
-    ...ingredient,
-    ...FOCUSED_FLOW_PRICING[ingredient.id],
-  }))
-  const focusedCartGroups = Array.from(
-    focusedOrderItems.reduce((groups, item) => {
-      const existingGroup = groups.get(item.store)
-      if (existingGroup) {
-        existingGroup.items.push(item)
-        existingGroup.subtotal += item.splitPrice
-        return groups
-      }
-
-      groups.set(item.store, {
-        store: item.store,
-        items: [item],
-        subtotal: item.splitPrice,
+  const [demoQty, setDemoQty] = useState<Record<string, number>>({ acai: 1, granola: 1, blueberry: 0, honey: 0 })
+  const [demoPanelStep, setDemoPanelStep] = useState<'pick' | 'checkout'>('pick')
+  const [demoStore, setDemoStore] = useState('')
+  const [demoCurrency, setDemoCurrency] = useState<{ symbol: string; rate: number }>({ symbol: '$', rate: 1 })
+  useEffect(() => {
+    fetch('https://ipapi.co/json/')
+      .then(r => r.json())
+      .then(d => {
+        const map: Record<string, { symbol: string; rate: number }> = {
+          IN: { symbol: 'Rs ', rate: 83.5 },
+          GB: { symbol: '£', rate: 0.79 },
+          EU: { symbol: '€', rate: 0.92 },
+          DE: { symbol: '€', rate: 0.92 },
+          FR: { symbol: '€', rate: 0.92 },
+          AU: { symbol: 'A$', rate: 1.53 },
+          CA: { symbol: 'C$', rate: 1.36 },
+          SG: { symbol: 'S$', rate: 1.34 },
+          AE: { symbol: 'AED ', rate: 3.67 },
+        }
+        const match = map[d.country_code]
+        if (match) setDemoCurrency(match)
       })
-      return groups
-    }, new Map<string, { store: string; items: typeof focusedOrderItems; subtotal: number }>())
-      .values()
-  )
-  const focusedSplitTotal = focusedOrderItems.reduce((sum, item) => sum + item.splitPrice, 0)
-  const focusedStoreLabel = focusedCartGroups.map((group) => group.store).join(' + ') || 'selected stores'
-
-  function goToDemoStep(step: 0 | 1 | 2) {
-    setDemoStep(step)
+      .catch(() => {})
+  }, [])
+  function demoAdjust(id: string, delta: number) {
+    setDemoQty(q => ({ ...q, [id]: Math.max(0, q[id] + delta) }))
+  }
+  const demoSelectedItems = DEMO_INGREDIENTS.filter(i => demoQty[i.id] > 0)
+  const demoBaseTotal = demoSelectedItems.reduce((sum, i) => sum + i.price * demoQty[i.id], 0)
+  const demoStoreTotal = demoStore ? demoBaseTotal * STORE_MULTIPLIERS[demoStore] : demoBaseTotal
+  function fmt(usd: number) {
+    const val = usd * demoCurrency.rate
+    return `${demoCurrency.symbol}${Math.round(val * 100) / 100}`
   }
 
-  function advanceDemoStep() {
-    setDemoStep((current) => {
-      if (current === 0) return 1
-      if (current === 1) return 2
-      return 2
-    })
-  }
-
-  const demoStepMeta = [
-    { label: 'Recipe', title: 'Recipe selected', helper: 'View ingredients.', cta: 'Continue' },
-    { label: 'Ingredients', title: 'Pick what to order', helper: 'Keep pantry items off.', cta: 'Build cart' },
-    { label: 'Checkout', title: 'Checkout across stores', helper: 'Selected items grouped.', cta: 'Checkout' },
-  ] as const
-
-  const demoRecipeCard = (
-    <div className="demo-recipe-card">
-      <div className="demo-recipe-thumb" aria-hidden="true">
-        <div className="demo-thumb-plate" />
-        <div className="demo-thumb-bowl" />
-        <div className="demo-thumb-swirl" />
-      </div>
-      <div style={{ minWidth: 0, flex: 1 }}>
-        <div style={{ fontSize: 18, fontWeight: 800, color: RED, letterSpacing: '-.02em' }}>{selectedRecipe.name}</div>
-        <div style={{ marginTop: 4, fontSize: 12, color: RED, opacity: .56 }}>{selectedRecipe.by} · {selectedRecipe.time}</div>
-      </div>
-      <span className="demo-tag">{selectedRecipe.tag}</span>
-    </div>
-  )
-
-  const currentStepTitle = demoStepMeta[demoStep].title
-  const currentStepHelper = demoStepMeta[demoStep].helper
-
-  const currentCounterText = demoStep === 0
-    ? `${selectedRecipe.ingredients.length} items`
-    : demoStep === 1
-      ? `${selectedIngredients.length} to order`
-      : `${focusedCartGroups.length} carts`
-
-  const currentFooterText = demoStep === 0
-    ? `${selectedRecipe.ingredients.length} ingredients`
-    : demoStep === 1
-      ? `${selectedIngredients.length} to order · ${pantryIngredients.length} at home`
-      : `${focusedCartGroups.length} carts · ${focusedStoreLabel}`
-
-  const demoStateContent = (
-    <div key={`step-${demoStep + 1}`} className="demo-state">
-      <div className="demo-panel-title-row">
-        <div>
-          <div className="demo-panel-title">{currentStepTitle}</div>
-          <div className="demo-panel-caption">{currentStepHelper}</div>
+  const focusedFlowPanel = (
+    <div style={{ display: 'grid', gridTemplateColumns: '2fr 3fr', gap: 32, alignItems: 'center', width: '100%' }}>
+      {/* Left: image */}
+      <div style={{ position: 'relative', borderRadius: 20, overflow: 'hidden', aspectRatio: '3 / 4', boxShadow: `0 8px 40px rgba(150,45,73,0.18)` }}>
+        <Image src="/acai.png" alt="Heritage Acai Bowl" fill style={{ objectFit: 'cover' }} />
+        <div style={{ position: 'absolute', bottom: 16, left: 16, right: 16, background: `rgba(253,248,238,0.92)`, backdropFilter: 'blur(8px)', borderRadius: 12, padding: '10px 14px' }}>
+          <div style={{ fontWeight: 800, fontSize: 15, color: RED, letterSpacing: '-0.02em' }}>Heritage Acai Bowl</div>
+          <div style={{ fontSize: 11, color: RED, opacity: 0.55, marginTop: 2 }}>Brazilian Berry Curation</div>
         </div>
-        <span className="demo-counter-pill">{currentCounterText}</span>
       </div>
 
-      {demoRecipeCard}
+      {/* Right: ingredient picker or checkout */}
+      <div style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
 
-      <div className={`demo-ingredient-grid${demoStep === 2 ? ' is-faded' : ''}`}>
-        {selectedRecipe.ingredients.map((ingredient) => {
-          const active = selectedIngredientIds.includes(ingredient.id)
-          const interactive = demoStep === 1
-          const metaLabel = demoStep === 0 ? ingredient.qty : active ? 'To order' : 'At home'
-
-          return (
-            <button
-              key={ingredient.id}
-              type="button"
-              className={`demo-ingredient-pill${active ? ' is-selected' : ''}${demoStep !== 0 && !active ? ' is-muted' : ''}${interactive ? ' is-interactive' : ''}`}
-              onClick={interactive ? () => toggleIngredient(ingredient.id) : undefined}
-              disabled={!interactive}
-              aria-pressed={interactive ? active : undefined}
-            >
-              <span className={`demo-ingredient-marker${demoStep === 0 ? ' is-neutral' : active ? ' is-selected' : ''}`}>
-                {demoStep !== 0 && active ? (
-                  <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                    <path d="M1 4L3.5 6.5L9 1" stroke={CREAM} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                ) : null}
-              </span>
-              <span className="demo-ingredient-name">{ingredient.name}</span>
-              <span className={`demo-ingredient-meta${demoStep === 0 ? ' is-qty' : active ? ' is-strong' : ''}`}>{metaLabel}</span>
-            </button>
-          )
-        })}
-      </div>
-
-      <div className={`demo-result-card${demoStep === 2 ? ' is-active' : ''}`}>
-        <div className="demo-result-header">
-          <span>Store grouping</span>
-          <span>{demoStep === 2 ? `${focusedCartGroups.length} carts` : demoStep === 1 ? 'Build cart' : 'Next'}</span>
-        </div>
-
-        {demoStep === 2 ? (
+        {demoPanelStep === 'pick' ? (
           <>
-            <div className="demo-result-groups">
-              {focusedCartGroups.length > 0 ? (
-                focusedCartGroups.map((group) => (
-                  <div key={group.store} className="demo-result-group">
-                    <div className="demo-result-store">{group.store}</div>
-                    <div className="demo-result-items">{group.items.map((item) => item.name).join(' · ')}</div>
+            <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.18em', color: RED, opacity: 0.45, marginBottom: 12 }}>Rapid Selection</div>
+            <div style={{ backgroundColor: WHITE, borderRadius: 18, border: `1px solid rgba(150,45,73,0.1)`, overflow: 'hidden', marginBottom: 14, boxShadow: '0 1px 6px rgba(0,0,0,0.04)' }}>
+              {DEMO_INGREDIENTS.map((item, idx) => {
+                const qty = demoQty[item.id]
+                const isLast = idx === DEMO_INGREDIENTS.length - 1
+                return (
+                  <div key={item.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', borderBottom: isLast ? 'none' : `1px solid rgba(150,45,73,0.07)` }}>
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: 13, color: RED }}>{item.name}</div>
+                      <div style={{ fontSize: 11, color: RED, opacity: 0.5, marginTop: 1 }}>{fmt(item.price)}</div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, backgroundColor: BG, borderRadius: 9999, padding: '3px', border: `1px solid rgba(150,45,73,0.1)` }}>
+                      <button type="button" onClick={() => demoAdjust(item.id, -1)}
+                        style={{ width: 26, height: 26, borderRadius: '50%', border: 'none', background: 'transparent', cursor: 'pointer', color: RED, fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
+                      <span style={{ width: 12, textAlign: 'center', fontSize: 12, fontWeight: 700, color: RED }}>{qty}</span>
+                      <button type="button" onClick={() => demoAdjust(item.id, 1)}
+                        style={{ width: 26, height: 26, borderRadius: '50%', border: qty > 0 ? 'none' : `1px solid rgba(150,45,73,0.25)`, background: qty > 0 ? RED : 'transparent', cursor: 'pointer', color: qty > 0 ? CREAM : RED, fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s' }}>+</button>
+                    </div>
                   </div>
-                ))
-              ) : (
-                <div className="demo-result-placeholder">Select ingredients to order.</div>
-              )}
+                )
+              })}
             </div>
-            <div className="demo-result-summary">
-              <span>Split total</span>
-              <strong>{formatRs(focusedSplitTotal)}</strong>
+            <div style={{ backgroundColor: BG, borderRadius: 18, padding: '14px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, border: `1px solid rgba(150,45,73,0.1)` }}>
+              <div>
+                <div style={{ fontSize: 10, fontWeight: 700, color: RED, opacity: 0.5, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 2 }}>
+                  {demoSelectedItems.length} item{demoSelectedItems.length !== 1 ? 's' : ''} selected
+                </div>
+                <div style={{ fontSize: '1.3rem', fontWeight: 800, color: RED, letterSpacing: '-0.03em' }}>{fmt(demoBaseTotal)}</div>
+              </div>
+              <button type="button"
+                onClick={() => { if (demoSelectedItems.length > 0) setDemoPanelStep('checkout') }}
+                style={{ padding: '10px 18px', borderRadius: 9999, background: demoSelectedItems.length > 0 ? RED : `rgba(150,45,73,0.2)`, color: demoSelectedItems.length > 0 ? CREAM : RED, fontWeight: 700, fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', border: 'none', cursor: demoSelectedItems.length > 0 ? 'pointer' : 'not-allowed', transition: 'all 0.2s', whiteSpace: 'nowrap' }}>
+                Complete →
+              </button>
             </div>
           </>
         ) : (
           <>
-            <div className="demo-result-placeholder">
-              {demoStep === 0 ? 'Continue to choose what you need.' : 'Build cart to group selected items.'}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+              <button type="button" onClick={() => { setDemoPanelStep('pick'); setDemoStore('') }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: RED, opacity: 0.5, fontSize: 18, lineHeight: 1, padding: 0 }}>←</button>
+              <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.18em', color: RED, opacity: 0.45 }}>Checkout</div>
             </div>
-            <div className="demo-result-summary subtle">
-              <span>Split total</span>
-              <strong>Updates next</strong>
+
+            {/* Order summary */}
+            <div style={{ backgroundColor: WHITE, borderRadius: 18, border: `1px solid rgba(150,45,73,0.1)`, overflow: 'hidden', marginBottom: 14 }}>
+              {demoSelectedItems.map((item, idx) => {
+                const isLast = idx === demoSelectedItems.length - 1
+                const storePrice = demoStore ? item.price * STORE_MULTIPLIERS[demoStore] : item.price
+                return (
+                  <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 14px', borderBottom: isLast ? 'none' : `1px solid rgba(150,45,73,0.07)` }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: RED }}>{item.name} <span style={{ fontWeight: 400, opacity: 0.5 }}>×{demoQty[item.id]}</span></div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: RED }}>{fmt(storePrice * demoQty[item.id])}</div>
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* Store dropdown */}
+            <div style={{ marginBottom: 12 }}>
+              <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: RED, opacity: 0.45, marginBottom: 6 }}>Choose store</div>
+              <select
+                value={demoStore}
+                onChange={e => setDemoStore(e.target.value)}
+                style={{ width: '100%', padding: '10px 14px', borderRadius: 12, border: `1.5px solid rgba(150,45,73,0.2)`, background: WHITE, color: demoStore ? RED : `rgba(150,45,73,0.4)`, fontFamily: "'Inter', system-ui, sans-serif", fontSize: 13, fontWeight: 600, cursor: 'pointer', appearance: 'none', outline: 'none' }}
+              >
+                <option value="" disabled>Select a store…</option>
+                {Object.keys(STORE_MULTIPLIERS).map(s => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Total + checkout button */}
+            <div style={{ backgroundColor: BG, borderRadius: 18, padding: '14px 16px', border: `1px solid rgba(150,45,73,0.1)` }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 12 }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: RED, opacity: 0.5, textTransform: 'uppercase', letterSpacing: '0.12em' }}>Total{demoStore ? ` via ${demoStore}` : ''}</div>
+                <div style={{ fontSize: '1.3rem', fontWeight: 800, color: RED, letterSpacing: '-0.03em' }}>{fmt(demoStoreTotal)}</div>
+              </div>
+              <button type="button"
+                disabled={!demoStore}
+                style={{ width: '100%', padding: '11px', borderRadius: 9999, background: demoStore ? RED : `rgba(150,45,73,0.2)`, color: demoStore ? CREAM : RED, fontWeight: 700, fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', border: 'none', cursor: demoStore ? 'pointer' : 'not-allowed', transition: 'all 0.2s' }}>
+                {demoStore ? `Checkout on ${demoStore} →` : 'Select a store to checkout'}
+              </button>
             </div>
           </>
         )}
       </div>
-
-      <div className="demo-compact-footer">
-        <div className="demo-footer-note">{currentFooterText}</div>
-        <button
-          type="button"
-          className="demo-primary-button demo-primary-button-compact"
-          disabled={(demoStep === 1 || demoStep === 2) && selectedIngredients.length === 0}
-          onClick={demoStep < 2 ? advanceDemoStep : undefined}
-        >
-          {demoStepMeta[demoStep].cta}
-        </button>
-      </div>
-    </div>
-  )
-
-  const focusedFlowPanel = (
-    <div className="product-demo-card" style={{ width: '100%' }}>
-      <div className="demo-panel-topbar">
-        <div className="demo-progress">
-          {demoStepMeta.map((step, index) => (
-            <button
-              key={step.label}
-              type="button"
-              className={`demo-progress-step${demoStep === index ? ' active' : ''}`}
-              onClick={() => goToDemoStep(index as 0 | 1 | 2)}
-              aria-label={`Step ${index + 1}: ${step.label}`}
-              aria-current={demoStep === index ? 'step' : undefined}
-            >
-              <span className="demo-progress-index">0{index + 1}</span>
-              <span className="demo-progress-label">{step.label}</span>
-            </button>
-          ))}
-        </div>
-        <span className="demo-step-chip">Interactive demo</span>
-      </div>
-
-      {demoStateContent}
     </div>
   )
 
@@ -533,6 +468,11 @@ export default function Home() {
         .how-demo-shell {
           display: flex;
           justify-content: center;
+        }
+        @media (max-width: 640px) {
+          .how-demo-shell > div {
+            grid-template-columns: 1fr !important;
+          }
         }
         .product-demo-card {
           max-width: 620px;
@@ -1164,23 +1104,28 @@ export default function Home() {
         <div className="hero-grid" style={{ maxWidth: 1100, margin: '0 auto', width: '100%' }}>
 
           <div>
-            <div className="fade-up" style={{ display: 'inline-block', fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: RED, opacity: .5, marginBottom: 18 }}>
+            <div className="fade-up" style={{ display: 'inline-block', fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: RED, opacity: .5, marginBottom: 14 }}>
               Early access
             </div>
-            <h1 className="fade-up" style={{ fontSize: 'clamp(2.6rem,4.5vw,3.8rem)', fontWeight: 800, lineHeight: 1.08, letterSpacing: '-2px', color: RED, marginBottom: 20 }}>
-              From saved recipe<br />to groceries ordered.
+            <h1 className="fade-up" style={{ fontSize: 'clamp(1.8rem,3vw,2.6rem)', fontWeight: 800, lineHeight: 1.15, letterSpacing: '-1px', color: RED, marginBottom: 16 }}>
+              From saved recipe to groceries ordered.
             </h1>
             <p className="fade-up" style={{ fontSize: 16, color: RED, opacity: .65, lineHeight: 1.75, maxWidth: 400, marginBottom: 36 }}>
             Coookd turns any recipe into a ready-to-checkout cart across any grocery store.
             </p>
-            <div id="waitlist-form" className="fade-up">
-              <WaitlistForm />
+            <div id="waitlist-form" className="fade-up" style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'flex-start' }}>
+              <a href="/waitlist"
+                style={{ display: 'inline-block', padding: '14px 32px', background: RED, color: CREAM, borderRadius: 10, fontWeight: 700, fontSize: 15, textDecoration: 'none', letterSpacing: '-0.01em', transition: 'opacity 0.2s' }}
+                onMouseEnter={e => (e.currentTarget.style.opacity = '.85')}
+                onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
+              >
+                Get early access →
+              </a>
               {waitlistCount !== null && waitlistCount > 0 && (
-                <p style={{ fontSize: 14, color: RED, opacity: .6, marginTop: 12 }}>
-                  Join <span style={{ color: RED, fontWeight: 700, opacity: 1 }}>{waitlistCount.toLocaleString()}</span> others on the waitlist.
+                <p style={{ fontSize: 13, color: RED, opacity: .5 }}>
+                  <span style={{ fontWeight: 700, opacity: 1, color: RED }}>{waitlistCount.toLocaleString()}</span> people already on the list
                 </p>
               )}
-              <p style={{ fontSize: 12, color: RED, opacity: .3, marginTop: 6 }}>You can unsubscribe any time.</p>
             </div>
           </div>
 
@@ -1211,7 +1156,7 @@ export default function Home() {
               </div>
               {cartFill >= 4 && (
                 <div style={{ marginTop: 14, padding: '10px 0', background: RED, borderRadius: 8, textAlign: 'center', fontSize: 12, fontWeight: 700, color: CREAM, animation: 'fadeUp .3s ease' }}>
-                  Order on {primaryStore}
+                  Order on Blinkit
                 </div>
               )}
             </div>
@@ -1393,7 +1338,7 @@ export default function Home() {
                       </div>
                     ))}
                     <div style={{ marginTop: 12, padding: '9px 14px', borderRadius: 10, background: RED, textAlign: 'center' }}>
-                      <span style={{ fontSize: 11, color: WHITE, fontWeight: 700 }}>Added to {primaryStore} cart</span>
+                      <span style={{ fontSize: 11, color: WHITE, fontWeight: 700 }}>Added to Blinkit cart</span>
                     </div>
                   </div>
                 )}
@@ -1413,14 +1358,14 @@ export default function Home() {
       </section>
 
       {/* HOW IT WORKS */}
-      <section id="how-it-works" style={{ background: WHITE, padding: '104px 28px 128px' }}>
-        <div style={{ maxWidth: 760, margin: '0 auto' }}>
+      <section id="how-it-works" style={{ background: WHITE, padding: '64px 28px' }}>
+        <div style={{ maxWidth: 860, margin: '0 auto' }}>
           <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: RED, opacity: .4, marginBottom: 12, textAlign: 'center' }}>How it works</p>
           <h2 style={{ fontSize: 'clamp(1.8rem,3vw,2.4rem)', fontWeight: 800, letterSpacing: '-1px', color: RED, textAlign: 'center', marginBottom: 14 }}>
-            Three steps. Done.
+            Pick a recipe. We&apos;ll handle the rest.
           </h2>
-          <p style={{ marginBottom: 52, textAlign: 'center', fontSize: 15, color: RED, opacity: .52 }}>
-            From recipe to groceries in minutes.
+          <p style={{ marginBottom: 36, textAlign: 'center', fontSize: 15, color: RED, opacity: .52 }}>
+            Select your ingredients, choose a store, and check out in one tap.
           </p>
 
           <div className="how-demo-shell">
@@ -1552,10 +1497,16 @@ export default function Home() {
           <p style={{ fontSize: 15, color: RED, opacity: .55, lineHeight: 1.7, marginBottom: 32 }}>
             Join the waitlist and be the first to know when Coookd launches.
           </p>
-          <WaitlistForm />
+          <a href="/waitlist"
+            style={{ display: 'inline-block', padding: '14px 36px', background: RED, color: CREAM, borderRadius: 10, fontWeight: 700, fontSize: 15, textDecoration: 'none', letterSpacing: '-0.01em', transition: 'opacity 0.2s' }}
+            onMouseEnter={e => (e.currentTarget.style.opacity = '.85')}
+            onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
+          >
+            Join the waitlist →
+          </a>
           {waitlistCount !== null && waitlistCount > 0 && (
-            <p style={{ fontSize: 13, color: RED, opacity: .5, marginTop: 12, textAlign: 'center' }}>
-              Join <span style={{ fontWeight: 700, opacity: 1, color: RED }}>{waitlistCount.toLocaleString()}</span> others already on the list.
+            <p style={{ fontSize: 13, color: RED, opacity: .5, marginTop: 14 }}>
+              <span style={{ fontWeight: 700, opacity: 1, color: RED }}>{waitlistCount.toLocaleString()}</span> people already on the list
             </p>
           )}
         </div>

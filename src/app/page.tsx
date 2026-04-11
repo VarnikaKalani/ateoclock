@@ -3,7 +3,6 @@ import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { useState, useEffect, useRef } from 'react'
 import { getSupabaseBrowserClient } from '@/lib/supabase'
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 
 const RED   = '#962d49'
 const CREAM = '#f3eac3'
@@ -344,73 +343,40 @@ const FAQS = [
 ]
 
 function FAQSection() {
+  const [open, setOpen] = useState<number | null>(null)
   return (
-    <section id="faq" style={{ background: WHITE, padding: '80px 28px', borderTop: `1px solid rgba(150,45,73,.07)` }}>
-      <div style={{ maxWidth: 720, margin: '0 auto', textAlign: 'center' }}>
-        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: RED, opacity: .4, marginBottom: 12 }}>FAQ</p>
-        <h2 style={{ fontSize: 'clamp(1.8rem,3vw,2.4rem)', fontWeight: 800, letterSpacing: '-1px', color: RED, marginBottom: 14, lineHeight: 1.2 }}>
-          Common questions
+    <section id="faq" style={{ background: `rgba(150,45,73,.04)`, padding: '80px 28px' }}>
+      <div style={{ maxWidth: 720, margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: 12 }}>
+          <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: RED, opacity: .45, background: `rgba(150,45,73,.08)`, padding: '4px 14px', borderRadius: 999 }}>FAQs</span>
+        </div>
+        <h2 style={{ fontSize: 'clamp(1.8rem,3vw,2.2rem)', fontWeight: 800, letterSpacing: '-1px', color: RED, textAlign: 'center', marginBottom: 8, lineHeight: 1.2 }}>
+          Frequently Asked Questions
         </h2>
-        <p style={{ fontSize: 15, color: RED, opacity: .5, lineHeight: 1.7, marginBottom: 36 }}>
-          Everything you need to know about Coookd.
+        <p style={{ fontSize: 14, color: RED, opacity: .5, lineHeight: 1.7, textAlign: 'center', marginBottom: 40, maxWidth: 480, margin: '0 auto 40px' }}>
+          Everything you need to know about using Coookd. Still curious? Drop us a message and we&apos;ll get right back to you.
         </p>
-        <FAQDialog />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+          {FAQS.map((faq, i) => (
+            <div key={i} style={{ borderTop: `1px solid rgba(150,45,73,.1)`, ...(i === FAQS.length - 1 ? { borderBottom: `1px solid rgba(150,45,73,.1)` } : {}) }}>
+              <button
+                type="button"
+                onClick={() => setOpen(open === i ? null : i)}
+                style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 0', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left', gap: 24, fontFamily: 'inherit' }}
+              >
+                <span style={{ fontSize: 15, fontWeight: 600, color: RED, lineHeight: 1.4 }}>{faq.q}</span>
+                <span style={{ width: 28, height: 28, borderRadius: '50%', border: `1.5px solid rgba(150,45,73,.25)`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 18, color: RED, transition: 'transform 0.2s', transform: open === i ? 'rotate(45deg)' : 'rotate(0deg)', lineHeight: 1 }}>+</span>
+              </button>
+              {open === i && (
+                <div style={{ paddingBottom: 20, fontSize: 14, color: RED, opacity: .6, lineHeight: 1.8 }}>
+                  {faq.a}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
     </section>
-  )
-}
-
-function FAQDialog() {
-  return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <button
-          type="button"
-          style={{ padding: '13px 32px', background: RED, color: CREAM, border: 'none', borderRadius: 12, fontWeight: 700, fontSize: 14, cursor: 'pointer', fontFamily: 'inherit', letterSpacing: '0.01em' }}
-        >
-          View all FAQs
-        </button>
-      </DialogTrigger>
-      <DialogContent className="flex flex-col gap-0 p-0 sm:max-h-[min(640px,80vh)] sm:max-w-lg [&>button:last-child]:hidden" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
-        <div className="overflow-y-auto">
-          <DialogHeader className="contents space-y-0 text-left">
-            <DialogTitle className="px-6 pt-6 text-base" style={{ color: RED, fontWeight: 800, letterSpacing: '-0.02em' }}>
-              Frequently Asked Questions
-            </DialogTitle>
-            <DialogDescription asChild>
-              <div className="p-6">
-                <div className="space-y-5">
-                  {FAQS.map((faq, i) => (
-                    <div key={i} className="space-y-1" style={{ borderBottom: i < FAQS.length - 1 ? `1px solid rgba(150,45,73,.08)` : 'none', paddingBottom: i < FAQS.length - 1 ? '20px' : 0 }}>
-                      <p style={{ fontWeight: 700, color: RED, fontSize: 14, marginBottom: 6 }}>{faq.q}</p>
-                      <p style={{ color: RED, opacity: .6, fontSize: 13, lineHeight: 1.75 }}>{faq.a}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </DialogDescription>
-          </DialogHeader>
-        </div>
-        <DialogFooter className="border-t px-6 py-4" style={{ borderColor: 'rgba(150,45,73,.1)' }}>
-          <DialogClose asChild>
-            <button
-              type="button"
-              style={{ padding: '9px 22px', borderRadius: 10, border: `1.5px solid rgba(150,45,73,.2)`, background: 'transparent', color: RED, fontWeight: 600, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}
-            >
-              Close
-            </button>
-          </DialogClose>
-          <DialogClose asChild>
-            <a
-              href="/waitlist"
-              style={{ padding: '9px 22px', borderRadius: 10, background: RED, color: CREAM, fontWeight: 700, fontSize: 13, textDecoration: 'none', display: 'inline-block' }}
-            >
-              Join the waitlist
-            </a>
-          </DialogClose>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
   )
 }
 

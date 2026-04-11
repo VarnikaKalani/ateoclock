@@ -3,6 +3,7 @@ import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { useState, useEffect, useRef } from 'react'
 import { getSupabaseBrowserClient } from '@/lib/supabase'
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 
 const RED   = '#962d49'
 const CREAM = '#f3eac3'
@@ -343,35 +344,73 @@ const FAQS = [
 ]
 
 function FAQSection() {
-  const [open, setOpen] = useState<number | null>(null)
   return (
     <section style={{ background: WHITE, padding: '80px 28px', borderTop: `1px solid rgba(150,45,73,.07)` }}>
-      <div style={{ maxWidth: 720, margin: '0 auto' }}>
-        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: RED, opacity: .4, marginBottom: 12, textAlign: 'center' }}>FAQ</p>
-        <h2 style={{ fontSize: 'clamp(1.8rem,3vw,2.4rem)', fontWeight: 800, letterSpacing: '-1px', color: RED, marginBottom: 48, lineHeight: 1.2, textAlign: 'center' }}>
+      <div style={{ maxWidth: 720, margin: '0 auto', textAlign: 'center' }}>
+        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: RED, opacity: .4, marginBottom: 12 }}>FAQ</p>
+        <h2 style={{ fontSize: 'clamp(1.8rem,3vw,2.4rem)', fontWeight: 800, letterSpacing: '-1px', color: RED, marginBottom: 14, lineHeight: 1.2 }}>
           Common questions
         </h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          {FAQS.map((faq, i) => (
-            <div key={i} style={{ borderRadius: 12, overflow: 'hidden', border: `1px solid rgba(150,45,73,.1)`, marginBottom: 4 }}>
-              <button
-                type="button"
-                onClick={() => setOpen(open === i ? null : i)}
-                style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 20px', background: open === i ? `rgba(150,45,73,.04)` : 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left', gap: 16, fontFamily: 'inherit' }}
-              >
-                <span style={{ fontSize: 15, fontWeight: 600, color: RED, lineHeight: 1.4 }}>{faq.q}</span>
-                <span style={{ fontSize: 18, color: RED, opacity: .45, flexShrink: 0, transition: 'transform 0.2s', transform: open === i ? 'rotate(45deg)' : 'rotate(0deg)', display: 'inline-block' }}>+</span>
-              </button>
-              {open === i && (
-                <div style={{ padding: '0 20px 18px', fontSize: 14, color: RED, opacity: .65, lineHeight: 1.75 }}>
-                  {faq.a}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
+        <p style={{ fontSize: 15, color: RED, opacity: .5, lineHeight: 1.7, marginBottom: 36 }}>
+          Everything you need to know about Coookd.
+        </p>
+        <FAQDialog />
       </div>
     </section>
+  )
+}
+
+function FAQDialog() {
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <button
+          type="button"
+          style={{ padding: '13px 32px', background: RED, color: CREAM, border: 'none', borderRadius: 12, fontWeight: 700, fontSize: 14, cursor: 'pointer', fontFamily: 'inherit', letterSpacing: '0.01em' }}
+        >
+          View all FAQs
+        </button>
+      </DialogTrigger>
+      <DialogContent className="flex flex-col gap-0 p-0 sm:max-h-[min(640px,80vh)] sm:max-w-lg [&>button:last-child]:hidden" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+        <div className="overflow-y-auto">
+          <DialogHeader className="contents space-y-0 text-left">
+            <DialogTitle className="px-6 pt-6 text-base" style={{ color: RED, fontWeight: 800, letterSpacing: '-0.02em' }}>
+              Frequently Asked Questions
+            </DialogTitle>
+            <DialogDescription asChild>
+              <div className="p-6">
+                <div className="space-y-5">
+                  {FAQS.map((faq, i) => (
+                    <div key={i} className="space-y-1" style={{ borderBottom: i < FAQS.length - 1 ? `1px solid rgba(150,45,73,.08)` : 'none', paddingBottom: i < FAQS.length - 1 ? '20px' : 0 }}>
+                      <p style={{ fontWeight: 700, color: RED, fontSize: 14, marginBottom: 6 }}>{faq.q}</p>
+                      <p style={{ color: RED, opacity: .6, fontSize: 13, lineHeight: 1.75 }}>{faq.a}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </DialogDescription>
+          </DialogHeader>
+        </div>
+        <DialogFooter className="border-t px-6 py-4" style={{ borderColor: 'rgba(150,45,73,.1)' }}>
+          <DialogClose asChild>
+            <button
+              type="button"
+              style={{ padding: '9px 22px', borderRadius: 10, border: `1.5px solid rgba(150,45,73,.2)`, background: 'transparent', color: RED, fontWeight: 600, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}
+            >
+              Close
+            </button>
+          </DialogClose>
+          <DialogClose asChild>
+            <a
+              href="/waitlist"
+              style={{ padding: '9px 22px', borderRadius: 10, background: RED, color: CREAM, fontWeight: 700, fontSize: 13, textDecoration: 'none', display: 'inline-block' }}
+            >
+              Join the waitlist
+            </a>
+          </DialogClose>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }
 

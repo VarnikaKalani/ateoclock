@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   /* Fonts */
   --font-headline: var(--font-epilogue), serif;
@@ -8,6 +10,7 @@
 
   /* Recipe page color tokens */
   --color-primary: #6e1c2c;
+  --color-primary-foreground: #ffffff;
   --color-primary-container: #8c3342;
   --color-primary-fixed: #ffd9dc;
   --color-primary-fixed-dim: #ffb2ba;
@@ -18,6 +21,7 @@
   --color-inverse-primary: #ffb2ba;
 
   --color-secondary: #77574d;
+  --color-secondary-foreground: #ffffff;
   --color-secondary-container: #fed3c7;
   --color-secondary-fixed: #ffdbd0;
   --color-secondary-fixed-dim: #e7bdb1;
@@ -47,6 +51,15 @@
   --color-surface-container-highest: #e6e2df;
 
   --color-background: #fdf8f5;
+  --color-foreground: #1c1b1a;
+  --color-muted-foreground: #554244;
+  --color-accent: #f2edea;
+  --color-accent-foreground: #1c1b1a;
+  --color-destructive: #ba1a1a;
+  --color-destructive-foreground: #ffffff;
+  --color-input: #dbc0c2;
+  --color-ring: #9c3f4e;
+  --color-spektr-cyan-50: #6e1c2c;
   --color-on-background: #1c1b1a;
   --color-on-surface: #1c1b1a;
   --color-on-surface-variant: #554244;
@@ -68,7 +81,32 @@
   --radius-full: 9999px;
 }
 
+.dark {
+  --color-background: #1c1b1a;
+  --color-foreground: #fdf8f5;
+  --color-primary: #ffb2ba;
+  --color-primary-foreground: #400010;
+  --color-secondary: #fed3c7;
+  --color-secondary-foreground: #2c160e;
+  --color-muted-foreground: #cdc4b7;
+  --color-accent: #32302e;
+  --color-accent-foreground: #fdf8f5;
+  --color-destructive: #ffdad6;
+  --color-destructive-foreground: #93000a;
+  --color-input: rgba(253, 248, 245, 0.24);
+  --color-ring: #ffb2ba;
+  --color-spektr-cyan-50: #fdf8f5;
+}
+
 :root {
+  /* Dialog / shadcn bare CSS vars */
+  --background: #fdf8f5;
+  --foreground: #1c1b1a;
+  --border: rgba(150,45,73,0.12);
+  --input: rgba(150,45,73,0.12);
+  --ring: #962d49;
+  --muted-foreground: rgba(150,45,73,0.5);
+
   --color-orange: #962d49;
   --color-orange-dark: #7a2139;
   --color-sand-dark: rgba(150, 45, 73, 0.22);

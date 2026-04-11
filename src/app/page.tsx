@@ -1,5 +1,6 @@
 'use client'
 import Image from 'next/image'
+import { motion } from 'framer-motion'
 import { useState, useEffect, useRef } from 'react'
 import { getSupabaseBrowserClient } from '@/lib/supabase'
 
@@ -54,6 +55,8 @@ const STORES = [
   { name: 'JioMart', logo: '/logos/jiomart-badge.svg' },
   { name: 'Instamart', logo: '/logos/instamart-badge.svg' },
 ]
+const STORE_MARQUEE_GROUPS = 3
+const HERO_TITLES = ['delivered', 'planned', 'sorted', 'ready', 'done']
 
 type RecipeIngredient = {
   id: string
@@ -128,9 +131,254 @@ const SAVED_RECIPE_TILES = [
   'Sauce note',
 ]
 
+function UpcomingFeaturesSection() {
+  const [urlStep, setUrlStep] = useState<0 | 1 | 2 | 3>(0)
+  const [demoServings, setDemoServings] = useState(2)
+
+  useEffect(() => {
+    const durations = [2000, 2200, 1800, 4000]
+    let step = 0
+    let t: ReturnType<typeof setTimeout>
+    const advance = () => {
+      step = ((step + 1) % 4) as 0 | 1 | 2 | 3
+      setUrlStep(step as 0 | 1 | 2 | 3)
+      t = setTimeout(advance, durations[step])
+    }
+    t = setTimeout(advance, durations[0])
+    return () => clearTimeout(t)
+  }, [])
+
+  const servingIngredients = [
+    { name: 'Organic Acai Base', base: 1, unit: 'pkg' },
+    { name: 'Fresh Blueberries', base: 0.5, unit: 'cup' },
+    { name: 'House Granola',     base: 0.25, unit: 'cup' },
+    { name: 'Manuka Honey',      base: 1, unit: 'tbsp' },
+  ]
+
+  const mockupStyle: React.CSSProperties = {
+    background: BG, borderRadius: 14, padding: 16, marginBottom: 20, minHeight: 210,
+  }
+  const rowStyle: React.CSSProperties = {
+    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+    padding: '7px 0', borderBottom: `1px solid rgba(150,45,73,.07)`,
+  }
+
+  return (
+    <section style={{ background: WHITE, padding: '80px 28px', borderTop: `1px solid rgba(150,45,73,.07)` }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: 56 }}>
+          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: RED, opacity: .4, marginBottom: 12 }}>Coming soon</p>
+          <h2 style={{ fontSize: 'clamp(1.8rem,3vw,2.4rem)', fontWeight: 800, letterSpacing: '-1px', color: RED, marginBottom: 14, lineHeight: 1.2 }}>
+            More ways to cook smarter
+          </h2>
+          <p style={{ fontSize: 15, color: RED, opacity: .55, lineHeight: 1.7, maxWidth: 500, margin: '0 auto' }}>
+            These features are in development and will be available at launch.
+          </p>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, alignItems: 'start' }}>
+
+          {/* Feature 1: URL import */}
+          <div style={{ background: BG, borderRadius: 20, overflow: 'hidden', border: `1px solid rgba(150,45,73,.1)`, padding: 28 }}>
+            <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.14em', color: RED, opacity: .38, marginBottom: 10 }}>Feature</p>
+            <h3 style={{ fontSize: 20, fontWeight: 800, color: RED, letterSpacing: '-0.5px', lineHeight: 1.3, marginBottom: 10 }}>
+              Paste a link. Get the full recipe.
+            </h3>
+            <p style={{ fontSize: 13, color: RED, opacity: .55, lineHeight: 1.7, marginBottom: 22 }}>
+              Drop in a YouTube or Instagram URL. Coookd reads the video, extracts every ingredient and kitchen tool mentioned, and builds a shoppable recipe — steps included.
+            </p>
+
+            <div style={mockupStyle}>
+              {/* URL input row */}
+              <div style={{ background: WHITE, borderRadius: 10, padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14, border: `1px solid rgba(150,45,73,.12)` }}>
+                <span style={{ fontSize: 10, fontWeight: 700, color: RED, opacity: .35, flexShrink: 0, textTransform: 'uppercase', letterSpacing: '0.1em' }}>URL</span>
+                <span style={{ fontSize: 12, color: urlStep >= 1 ? RED : 'rgba(150,45,73,.25)', flex: 1, fontFamily: 'monospace', transition: 'color 0.4s', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+                  {urlStep >= 1 ? 'youtube.com/watch?v=acai-bowl-recipe' : 'Paste a YouTube or Instagram link...'}
+                </span>
+                <div style={{ width: 26, height: 26, borderRadius: 7, background: urlStep === 1 ? RED : `rgba(150,45,73,.12)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, color: urlStep === 1 ? CREAM : RED, flexShrink: 0, transition: 'all 0.3s' }}>
+                  {urlStep === 2 ? '·' : '→'}
+                </div>
+              </div>
+
+              {urlStep === 2 && (
+                <div style={{ textAlign: 'center', padding: '24px 0', fontSize: 12, color: RED, opacity: .45 }}>
+                  Reading video — extracting ingredients and steps...
+                </div>
+              )}
+
+              {urlStep === 3 && (
+                <div style={{ animation: 'fadeUp 0.4s ease' }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: RED, marginBottom: 10, opacity: .7 }}>Heritage Acai Bowl — 4 ingredients · 2 tools · 3 steps</div>
+                  {[
+                    { name: 'Organic Acai Base', price: 'Rs 1,043', tag: null },
+                    { name: 'Manuka Honey',       price: 'Rs 1,577', tag: null },
+                    { name: 'High-Speed Blender', price: 'Rs 4,175', tag: 'tool' },
+                    { name: 'Mixing Bowl',        price: 'Rs 499',   tag: 'tool' },
+                  ].map((item, i) => (
+                    <div key={i} style={rowStyle}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ fontSize: 12, fontWeight: 600, color: RED }}>{item.name}</span>
+                        {item.tag && (
+                          <span style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', background: `rgba(150,45,73,.1)`, color: RED, opacity: .7, padding: '2px 6px', borderRadius: 4 }}>
+                            {item.tag}
+                          </span>
+                        )}
+                      </div>
+                      <span style={{ fontSize: 11, color: RED, opacity: .5 }}>{item.price}</span>
+                    </div>
+                  ))}
+                  <button type="button" style={{ marginTop: 14, width: '100%', padding: '9px', background: RED, color: CREAM, border: 'none', borderRadius: 9, fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
+                    Add all to cart
+                  </button>
+                </div>
+              )}
+
+              {urlStep === 0 && (
+                <div style={{ textAlign: 'center', padding: '32px 0', fontSize: 12, color: RED, opacity: .25 }}>
+                  Waiting for a link...
+                </div>
+              )}
+            </div>
+
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              {['Works with YouTube', 'Works with Instagram', 'Ingredients + tools', 'Buy links included'].map(tag => (
+                <span key={tag} style={{ fontSize: 11, fontWeight: 600, color: RED, opacity: .55, background: `rgba(150,45,73,.07)`, padding: '4px 10px', borderRadius: 6 }}>{tag}</span>
+              ))}
+            </div>
+          </div>
+
+          {/* Feature 2: Scalable servings */}
+          <div style={{ background: BG, borderRadius: 20, overflow: 'hidden', border: `1px solid rgba(150,45,73,.1)`, padding: 28 }}>
+            <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.14em', color: RED, opacity: .38, marginBottom: 10 }}>Feature</p>
+            <h3 style={{ fontSize: 20, fontWeight: 800, color: RED, letterSpacing: '-0.5px', lineHeight: 1.3, marginBottom: 10 }}>
+              Cook for any crowd.
+            </h3>
+            <p style={{ fontSize: 13, color: RED, opacity: .55, lineHeight: 1.7, marginBottom: 22 }}>
+              Set the number of servings and every ingredient quantity scales instantly. The grocery list recalculates in real time — no manual math, no guessing.
+            </p>
+
+            <div style={mockupStyle}>
+              {/* Servings control */}
+              <div style={{ background: WHITE, borderRadius: 10, padding: '12px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14, border: `1px solid rgba(150,45,73,.12)` }}>
+                <span style={{ fontSize: 12, fontWeight: 600, color: RED }}>Servings</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                  <button type="button" onClick={() => setDemoServings(s => Math.max(1, s - 1))}
+                    style={{ width: 28, height: 28, borderRadius: '50%', border: `1.5px solid rgba(150,45,73,.25)`, background: 'transparent', color: RED, fontWeight: 700, fontSize: 15, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>
+                    −
+                  </button>
+                  <span style={{ fontSize: 16, fontWeight: 800, color: RED, minWidth: 22, textAlign: 'center' }}>{demoServings}</span>
+                  <button type="button" onClick={() => setDemoServings(s => Math.min(12, s + 1))}
+                    style={{ width: 28, height: 28, borderRadius: '50%', border: `1.5px solid rgba(150,45,73,.25)`, background: 'transparent', color: RED, fontWeight: 700, fontSize: 15, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>
+                    +
+                  </button>
+                </div>
+              </div>
+
+              {/* Ingredient list */}
+              {servingIngredients.map((ing, i) => {
+                const qty = (ing.base * demoServings) / 2
+                const display = Number.isInteger(qty) ? qty.toString() : qty.toFixed(1)
+                return (
+                  <div key={i} style={rowStyle}>
+                    <span style={{ fontSize: 12, fontWeight: 600, color: RED }}>{ing.name}</span>
+                    <span style={{ fontSize: 12, color: RED, opacity: .55, transition: 'all 0.25s', fontVariantNumeric: 'tabular-nums' }}>
+                      {display} {ing.unit}
+                    </span>
+                  </div>
+                )
+              })}
+
+              <div style={{ marginTop: 16, padding: '10px 14px', background: WHITE, borderRadius: 10, border: `1px solid rgba(150,45,73,.08)`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: 11, color: RED, opacity: .5 }}>Estimated total</span>
+                <span style={{ fontSize: 14, fontWeight: 800, color: RED }}>${(34.99 * demoServings / 2).toFixed(2)}</span>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              {['Adjustable servings', 'Auto-scales quantities', 'Live price estimate', 'Works for any recipe'].map(tag => (
+                <span key={tag} style={{ fontSize: 11, fontWeight: 600, color: RED, opacity: .55, background: `rgba(150,45,73,.07)`, padding: '4px 10px', borderRadius: 6 }}>{tag}</span>
+              ))}
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+  )
+}
+
+const FAQS = [
+  {
+    q: "What is Coookd?",
+    a: "Coookd is a platform that turns any recipe into a grocery order. Pick a recipe, select your ingredients, choose a delivery store like Blinkit or Zepto, and check out — all in one tap.",
+  },
+  {
+    q: "Which grocery stores does Coookd support?",
+    a: "We currently support Blinkit, Zepto, Amazon Fresh, BigBasket, and Instamart. More stores are being added before launch.",
+  },
+  {
+    q: "Is Coookd free to use?",
+    a: "Yes — Coookd is free for home cooks. You only pay for the groceries you order through the store of your choice.",
+  },
+  {
+    q: "How does it work for creators?",
+    a: "If you're a food creator, you can link your recipes directly on Coookd. When your followers cook your recipe and order ingredients, you earn an affiliate commission — no brand deals needed.",
+  },
+  {
+    q: "When will Coookd launch?",
+    a: "We're in early access right now. Join the waitlist and we'll notify you the moment we go live — early members get priority access.",
+  },
+  {
+    q: "Does Coookd adjust for servings?",
+    a: "Yes. Scale up or down the number of servings and the ingredient quantities — and the grocery list — update automatically.",
+  },
+  {
+    q: "What countries is Coookd available in?",
+    a: "Our launch focus is India, with global expansion planned shortly after. Prices are displayed in your local currency based on your location.",
+  },
+  {
+    q: "How do I join the waitlist?",
+    a: "Hit the 'Join waitlist' button at the top of the page, fill in your details, and you're in. We'll reach out before launch with your early access invite.",
+  },
+]
+
+function FAQSection() {
+  const [open, setOpen] = useState<number | null>(null)
+  return (
+    <section style={{ background: WHITE, padding: '80px 28px', borderTop: `1px solid rgba(150,45,73,.07)` }}>
+      <div style={{ maxWidth: 720, margin: '0 auto' }}>
+        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: RED, opacity: .4, marginBottom: 12, textAlign: 'center' }}>FAQ</p>
+        <h2 style={{ fontSize: 'clamp(1.8rem,3vw,2.4rem)', fontWeight: 800, letterSpacing: '-1px', color: RED, marginBottom: 48, lineHeight: 1.2, textAlign: 'center' }}>
+          Common questions
+        </h2>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {FAQS.map((faq, i) => (
+            <div key={i} style={{ borderRadius: 12, overflow: 'hidden', border: `1px solid rgba(150,45,73,.1)`, marginBottom: 4 }}>
+              <button
+                type="button"
+                onClick={() => setOpen(open === i ? null : i)}
+                style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 20px', background: open === i ? `rgba(150,45,73,.04)` : 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left', gap: 16, fontFamily: 'inherit' }}
+              >
+                <span style={{ fontSize: 15, fontWeight: 600, color: RED, lineHeight: 1.4 }}>{faq.q}</span>
+                <span style={{ fontSize: 18, color: RED, opacity: .45, flexShrink: 0, transition: 'transform 0.2s', transform: open === i ? 'rotate(45deg)' : 'rotate(0deg)', display: 'inline-block' }}>+</span>
+              </button>
+              {open === i && (
+                <div style={{ padding: '0 20px 18px', fontSize: 14, color: RED, opacity: .65, lineHeight: 1.75 }}>
+                  {faq.a}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
 export default function Home() {
   const [tab, setTab]           = useState<'cook' | 'creator'>('cook')
   const [cartFill, setCartFill] = useState(0)
+  const [heroTitleNumber, setHeroTitleNumber] = useState(0)
   const [waitlistCount, setWaitlistCount] = useState<number | null>(null)
   const [dragOver, setDragOver] = useState(false)
   const [uploadedFile, setUploadedFile] = useState<string | null>(null)
@@ -149,6 +397,14 @@ export default function Home() {
     const t = setInterval(() => setCartFill(n => (n >= 4 ? 0 : n + 1)), 800)
     return () => clearInterval(t)
   }, [])
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setHeroTitleNumber(n => (n === HERO_TITLES.length - 1 ? 0 : n + 1))
+    }, 2000)
+
+    return () => clearTimeout(timeoutId)
+  }, [heroTitleNumber])
 
   useEffect(() => {
     const durations = [2200, 2000, 2800]
@@ -202,12 +458,28 @@ export default function Home() {
     setNavOpen(false)
   }
 
+  function scrollToSection(sectionId: string, nextTab?: 'cook' | 'creator') {
+    if (nextTab) {
+      setTab(nextTab)
+    }
+    document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    setNavOpen(false)
+  }
+
+  const navItems: Array<{ label: string; sectionId: string; tab?: 'cook' | 'creator' }> = [
+    { label: 'How it works', sectionId: 'how-it-works' },
+    { label: 'For creators', sectionId: 'for-creators', tab: 'creator' },
+    { label: 'About', sectionId: 'about' },
+  ]
+
 
   const DEMO_INGREDIENTS = [
-    { id: 'acai',      name: 'Organic Acai Base',  description: 'Frozen, Unsweetened', price: 12.50 },
-    { id: 'granola',   name: 'House Granola',       description: 'Almond & Cinnamon',  price: 8.00  },
-    { id: 'blueberry', name: 'Fresh Blueberries',   description: 'Pint, Seasonal',     price: 4.50  },
-    { id: 'honey',     name: 'Manuka Honey',        description: 'Raw, 250g Jar',      price: 18.90 },
+    { id: 'acai',       name: 'Organic Acai Base',   description: 'Frozen, Unsweetened',  price: 12.50 },
+    { id: 'kiwi',       name: 'Fresh Kiwi',          description: 'Pack of 4',            price: 3.50  },
+    { id: 'blueberry',  name: 'Fresh Blueberries',   description: 'Pint, Seasonal',       price: 4.50  },
+    { id: 'granola',    name: 'House Granola',        description: 'Almond & Cinnamon',   price: 8.00  },
+    { id: 'strawberry', name: 'Strawberries',         description: 'Fresh, 250g',          price: 3.99  },
+    { id: 'banana',     name: 'Ripe Bananas',         description: 'Bunch of 5',           price: 1.99  },
   ]
   const STORE_MULTIPLIERS: Record<string, number> = {
     'Blinkit': 1.00,
@@ -216,7 +488,7 @@ export default function Home() {
     'BigBasket': 0.94,
     'Instamart': 1.02,
   }
-  const [demoQty, setDemoQty] = useState<Record<string, number>>({ acai: 1, granola: 1, blueberry: 0, honey: 0 })
+  const [demoQty, setDemoQty] = useState<Record<string, number>>({ acai: 1, kiwi: 0, blueberry: 0, granola: 1, strawberry: 0, banana: 0 })
   const [demoPanelStep, setDemoPanelStep] = useState<'pick' | 'checkout'>('pick')
   const [demoStore, setDemoStore] = useState('')
   const [demoCurrency, setDemoCurrency] = useState<{ symbol: string; rate: number }>({ symbol: '$', rate: 1 })
@@ -251,6 +523,8 @@ export default function Home() {
     return `${demoCurrency.symbol}${Math.round(val * 100) / 100}`
   }
 
+  const ingredients = ['Frozen acai', 'Banana', 'Granola', 'Mixed berries']
+
   const focusedFlowPanel = (
     <div style={{ display: 'grid', gridTemplateColumns: '2fr 3fr', gap: 32, alignItems: 'center', width: '100%' }}>
       {/* Left: image */}
@@ -276,7 +550,7 @@ export default function Home() {
                   <div key={item.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', borderBottom: isLast ? 'none' : `1px solid rgba(150,45,73,0.07)` }}>
                     <div>
                       <div style={{ fontWeight: 700, fontSize: 13, color: RED }}>{item.name}</div>
-                      <div style={{ fontSize: 11, color: RED, opacity: 0.5, marginTop: 1 }}>{fmt(item.price)}</div>
+                      <div style={{ fontSize: 11, color: RED, opacity: 0.5, marginTop: 1 }}>{item.description}</div>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, backgroundColor: BG, borderRadius: 9999, padding: '3px', border: `1px solid rgba(150,45,73,0.1)` }}>
                       <button type="button" onClick={() => demoAdjust(item.id, -1)}
@@ -294,7 +568,9 @@ export default function Home() {
                 <div style={{ fontSize: 10, fontWeight: 700, color: RED, opacity: 0.5, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 2 }}>
                   {demoSelectedItems.length} item{demoSelectedItems.length !== 1 ? 's' : ''} selected
                 </div>
-                <div style={{ fontSize: '1.3rem', fontWeight: 800, color: RED, letterSpacing: '-0.03em' }}>{fmt(demoBaseTotal)}</div>
+                <div style={{ fontSize: 12, fontWeight: 700, color: RED, letterSpacing: '-0.01em' }}>
+                  {demoSelectedItems.length > 0 ? 'Pricing appears after store selection' : 'Add items to continue'}
+                </div>
               </div>
               <button type="button"
                 onClick={() => { if (demoSelectedItems.length > 0) setDemoPanelStep('checkout') }}
@@ -315,11 +591,13 @@ export default function Home() {
             <div style={{ backgroundColor: WHITE, borderRadius: 18, border: `1px solid rgba(150,45,73,0.1)`, overflow: 'hidden', marginBottom: 14 }}>
               {demoSelectedItems.map((item, idx) => {
                 const isLast = idx === demoSelectedItems.length - 1
-                const storePrice = demoStore ? item.price * STORE_MULTIPLIERS[demoStore] : item.price
+                const storePrice = demoStore ? item.price * STORE_MULTIPLIERS[demoStore] : null
                 return (
                   <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 14px', borderBottom: isLast ? 'none' : `1px solid rgba(150,45,73,0.07)` }}>
                     <div style={{ fontSize: 13, fontWeight: 600, color: RED }}>{item.name} <span style={{ fontWeight: 400, opacity: 0.5 }}>×{demoQty[item.id]}</span></div>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: RED }}>{fmt(storePrice * demoQty[item.id])}</div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: RED, opacity: demoStore ? 1 : 0.45, textTransform: demoStore ? 'none' : 'uppercase', letterSpacing: demoStore ? 'normal' : '0.08em' }}>
+                      {storePrice === null ? 'Hidden till store pick' : fmt(storePrice * demoQty[item.id])}
+                    </div>
                   </div>
                 )
               })}
@@ -344,7 +622,9 @@ export default function Home() {
             <div style={{ backgroundColor: BG, borderRadius: 18, padding: '14px 16px', border: `1px solid rgba(150,45,73,0.1)` }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 12 }}>
                 <div style={{ fontSize: 10, fontWeight: 700, color: RED, opacity: 0.5, textTransform: 'uppercase', letterSpacing: '0.12em' }}>Total{demoStore ? ` via ${demoStore}` : ''}</div>
-                <div style={{ fontSize: '1.3rem', fontWeight: 800, color: RED, letterSpacing: '-0.03em' }}>{fmt(demoStoreTotal)}</div>
+                <div style={{ fontSize: demoStore ? '1.3rem' : 11, fontWeight: 800, color: RED, letterSpacing: demoStore ? '-0.03em' : '0.08em', textTransform: demoStore ? 'none' : 'uppercase', opacity: demoStore ? 1 : 0.45 }}>
+                  {demoStore ? fmt(demoStoreTotal) : 'Hidden till store pick'}
+                </div>
               </div>
               <button type="button"
                 disabled={!demoStore}
@@ -357,8 +637,6 @@ export default function Home() {
       </div>
     </div>
   )
-
-  const ingredients = ['Frozen acai', 'Banana', 'Granola', 'Mixed berries']
 
   return (
     <main style={{ background: BG, color: RED, fontFamily: "'Inter', system-ui, sans-serif", overflowX: 'hidden' }}>
@@ -374,7 +652,7 @@ export default function Home() {
         @keyframes pulse     { 0%,100% { opacity:1; transform:scale(1); }  50% { opacity:.6; transform:scale(.94); } }
         @keyframes barGrow   { from { width:0; } }
         @keyframes accordionOpen { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
-        @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+        @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(calc(-100% / ${STORE_MARQUEE_GROUPS})); } }
         @keyframes splitSceneIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
         @keyframes splitCardIn { from { opacity:0; transform:translateY(10px) scale(.99); } to { opacity:1; transform:translateY(0) scale(1); } }
         @keyframes splitPulse { 0%,100% { transform:scale(.9); opacity:.45; } 50% { transform:scale(1.2); opacity:1; } }
@@ -457,6 +735,10 @@ export default function Home() {
           text-decoration: none;
           opacity: .75;
           padding: 4px 0;
+          background: none;
+          border: none;
+          text-align: left;
+          cursor: pointer;
         }
 
         .hero-grid {
@@ -1050,18 +1332,20 @@ export default function Home() {
           <div style={{ height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <Logo size={22} />
             <div className="nav-desktop">
-              {['How it works', 'For creators', 'About'].map(l => (
-                <a key={l} href={`#${l.toLowerCase().replace(/ /g, '-')}`}
-                  style={{ fontSize: 13, fontWeight: 500, color: RED, opacity: .65, textDecoration: 'none', transition: 'opacity .15s' }}
+              {navItems.map(({ label, sectionId, tab: nextTab }) => (
+                <button key={label} type="button"
+                  onClick={() => scrollToSection(sectionId, nextTab)}
+                  style={{ fontSize: 13, fontWeight: 500, color: RED, opacity: .65, textDecoration: 'none', transition: 'opacity .15s', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
+                  aria-label={label}
                   onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
                   onMouseLeave={e => (e.currentTarget.style.opacity = '.65')}
-                >{l}</a>
+                >{label}</button>
               ))}
-              <button onClick={scrollToWaitlist}
-                style={{ padding: '9px 22px', borderRadius: 8, background: RED, color: CREAM, fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer', transition: 'opacity .15s' }}
+              <a href="/waitlist"
+                style={{ padding: '9px 22px', borderRadius: 8, background: RED, color: CREAM, fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer', transition: 'opacity .15s', textDecoration: 'none' }}
                 onMouseEnter={e => (e.currentTarget.style.opacity = '.85')}
                 onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
-              >Join waitlist</button>
+              >Join waitlist</a>
             </div>
 
             <button
@@ -1077,23 +1361,21 @@ export default function Home() {
 
           {navOpen && (
             <div id="mobile-menu" className="nav-mobile">
-              {['How it works', 'For creators', 'About'].map(l => (
-                <a
-                  key={`mobile-${l}`}
-                  href={`#${l.toLowerCase().replace(/ /g, '-')}`}
+              {navItems.map(({ label, sectionId, tab: nextTab }) => (
+                <button
+                  key={`mobile-${label}`}
+                  type="button"
                   className="nav-mobile-link"
-                  onClick={() => setNavOpen(false)}
+                  onClick={() => scrollToSection(sectionId, nextTab)}
                 >
-                  {l}
-                </a>
+                  {label}
+                </button>
               ))}
-              <button
-                type="button"
-                onClick={scrollToWaitlist}
-                style={{ marginTop: 2, width: '100%', padding: '10px 14px', borderRadius: 8, background: RED, color: CREAM, fontSize: 13, fontWeight: 700, border: 'none', cursor: 'pointer' }}
+              <a href="/waitlist"
+                style={{ marginTop: 2, display: 'block', width: '100%', padding: '10px 14px', borderRadius: 8, background: RED, color: CREAM, fontSize: 13, fontWeight: 700, textDecoration: 'none', textAlign: 'center', boxSizing: 'border-box' }}
               >
                 Join waitlist
-              </button>
+              </a>
             </div>
           )}
         </div>
@@ -1108,10 +1390,27 @@ export default function Home() {
               Early access
             </div>
             <h1 className="fade-up" style={{ fontSize: 'clamp(1.8rem,3vw,2.6rem)', fontWeight: 800, lineHeight: 1.15, letterSpacing: '-1px', color: RED, marginBottom: 16 }}>
-              From saved recipe to groceries ordered.
+              From saved recipe to groceries{' '}
+              <span style={{ position: 'relative', display: 'inline-block', minWidth: '8ch', height: '1.1em', verticalAlign: 'bottom', overflow: 'hidden' }}>
+                {HERO_TITLES.map((title, index) => (
+                  <motion.span
+                    key={title}
+                    style={{ position: 'absolute', left: 0, whiteSpace: 'nowrap' }}
+                    initial={{ opacity: 0, y: '-100%' }}
+                    transition={{ type: 'spring', stiffness: 50 }}
+                    animate={
+                      heroTitleNumber === index
+                        ? { y: 0, opacity: 1 }
+                        : { y: heroTitleNumber > index ? '-150%' : '150%', opacity: 0 }
+                    }
+                  >
+                    {title}
+                  </motion.span>
+                ))}
+              </span>
             </h1>
             <p className="fade-up" style={{ fontSize: 16, color: RED, opacity: .65, lineHeight: 1.75, maxWidth: 400, marginBottom: 36 }}>
-            Coookd turns any recipe into a ready-to-checkout cart across any grocery store.
+              Coookd turns any recipe into a ready-to-checkout cart across any grocery store.
             </p>
             <div id="waitlist-form" className="fade-up" style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'flex-start' }}>
               <a href="/waitlist"
@@ -1174,25 +1473,111 @@ export default function Home() {
         <div style={{ position: 'relative', width: '100%', overflow: 'hidden' }}>
           <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 80, background: `linear-gradient(to right, ${WHITE}, transparent)`, zIndex: 2 }} />
           <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 80, background: `linear-gradient(to left, ${WHITE}, transparent)`, zIndex: 2 }} />
-          <div className="marquee-track" style={{ display: 'flex', animation: 'marquee 22s linear infinite', width: 'max-content', padding: '0 88px' }}>
-            {[...STORES, ...STORES].map((s, i) => (
-              <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '8px 20px', margin: '0 6px', borderRadius: 999, border: `1.5px solid rgba(150,45,73,.15)`, fontSize: 13, fontWeight: 600, color: RED, whiteSpace: 'nowrap', background: WHITE }}>
-                <span className="store-logo" aria-hidden="true">
-                  <Image src={s.logo} alt="" width={24} height={24} />
-                </span>
-                {s.name}
-              </span>
+          <div className="marquee-track" style={{ display: 'flex', animation: 'marquee 24s linear infinite', width: 'max-content', willChange: 'transform' }}>
+            {Array.from({ length: STORE_MARQUEE_GROUPS }).map((_, groupIndex) => (
+              <div
+                key={groupIndex}
+                style={{ display: 'flex', flexShrink: 0, gap: 12 }}
+                aria-hidden={groupIndex === 0 ? undefined : true}
+              >
+                {STORES.map((s) => (
+                  <span key={`${groupIndex}-${s.name}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '8px 20px', borderRadius: 999, border: `1.5px solid rgba(150,45,73,.15)`, fontSize: 13, fontWeight: 600, color: RED, whiteSpace: 'nowrap', background: WHITE }}>
+                    <span className="store-logo" aria-hidden="true">
+                      <Image src={s.logo} alt="" width={24} height={24} />
+                    </span>
+                    {s.name}
+                  </span>
+                ))}
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* WHAT IS COOOKD */}
-      <section id="about" style={{ background: `radial-gradient(ellipse at 65% 40%, rgba(150,45,73,.07) 0%, transparent 55%), ${BG}`, padding: '64px 28px' }}>
+      {/* ABOUT */}
+      <section id="about" style={{ background: WHITE, padding: '72px 28px 60px', borderTop: `1px solid rgba(150,45,73,.07)` }}>
+        <div style={{ maxWidth: 1080, margin: '0 auto' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 28, alignItems: 'end', marginBottom: 18 }}>
+            <div>
+              <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: RED, opacity: .4, marginBottom: 12 }}>About Coookd</p>
+              <h2 style={{ fontSize: 'clamp(1.9rem,3vw,2.7rem)', fontWeight: 800, letterSpacing: '-1.2px', color: RED, marginBottom: 10, lineHeight: 1.08 }}>
+                See a recipe. Build the cart. Cook tonight.
+              </h2>
+            </div>
+
+            <div style={{ justifySelf: 'end', width: '100%', maxWidth: 420, background: BG, borderRadius: 20, padding: '18px 20px', border: `1px solid rgba(150,45,73,.1)` }}>
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: RED, opacity: .45, marginBottom: 8 }}>
+                What it is
+              </div>
+              <div style={{ fontSize: 15, lineHeight: 1.65, color: RED, opacity: .72 }}>
+                A shoppable recipe layer that turns saved inspiration into an editable grocery basket, then lets the shopper choose the store at the end.
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 14, marginBottom: 14 }}>
+            {[
+              {
+                number: '01',
+                title: 'Save',
+                body: 'Any screenshot, creator post, or recipe link.',
+              },
+              {
+                number: '02',
+                title: 'Build',
+                body: 'Ingredients become one clean, editable basket.',
+              },
+              {
+                number: '03',
+                title: 'Choose',
+                body: 'Pick Blinkit, Amazon Fresh, Zepto, or whoever fits best.',
+              },
+            ].map(card => (
+              <div key={card.number} style={{ background: WHITE, borderRadius: 20, padding: '18px 18px 16px', border: `1px solid rgba(150,45,73,.12)`, boxShadow: '0 10px 26px rgba(150,45,73,.05)' }}>
+                <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '.16em', textTransform: 'uppercase', color: RED, opacity: .35, marginBottom: 16 }}>
+                  {card.number}
+                </div>
+                <div style={{ fontSize: 20, fontWeight: 800, letterSpacing: '-0.03em', color: RED, marginBottom: 6 }}>
+                  {card.title}
+                </div>
+                <div style={{ fontSize: 13, lineHeight: 1.6, color: RED, opacity: .66 }}>
+                  {card.body}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14 }}>
+            {[
+              {
+                label: 'For cooks',
+                body: 'Less copying. Less searching. Faster dinner.',
+              },
+              {
+                label: 'For creators',
+                body: 'Recipe inspiration becomes measurable shopping intent.',
+              },
+            ].map(card => (
+              <div key={card.label} style={{ background: `linear-gradient(180deg, rgba(150,45,73,.05) 0%, rgba(150,45,73,.02) 100%)`, borderRadius: 18, padding: '16px 18px', border: `1px solid rgba(150,45,73,.09)` }}>
+                <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: RED, opacity: .45, marginBottom: 8 }}>
+                  {card.label}
+                </div>
+                <div style={{ fontSize: 14, lineHeight: 1.6, color: RED, opacity: .74 }}>
+                  {card.body}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* SCREENSHOT FLOW */}
+      <section style={{ background: `radial-gradient(ellipse at 65% 40%, rgba(150,45,73,.07) 0%, transparent 55%), ${BG}`, padding: '64px 28px' }}>
         <div style={{ maxWidth: 1080, margin: '0 auto', display: 'flex', alignItems: 'center', gap: 72, flexWrap: 'wrap' }}>
 
           {/* Left: text + upload */}
           <div style={{ flex: '1 1 340px', minWidth: 280 }}>
+            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: RED, opacity: .4, marginBottom: 12 }}>How it starts</p>
             <h2 style={{ fontSize: 'clamp(1.6rem,2.4vw,2.2rem)', fontWeight: 800, letterSpacing: '-1px', color: RED, marginBottom: 20, lineHeight: 1.2 }}>
               You screenshot recipes.<br />They disappear into your camera roll.
             </h2>
@@ -1469,6 +1854,9 @@ export default function Home() {
         </div>
       </section>
 
+      {/* UPCOMING FEATURES */}
+      <UpcomingFeaturesSection />
+
       {/* STATS */}
       <div ref={statsRef} style={{ background: RED, padding: '52px 28px' }}>
         <div style={{ maxWidth: 900, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 32, textAlign: 'center' }}>
@@ -1511,6 +1899,9 @@ export default function Home() {
           )}
         </div>
       </section>
+
+      {/* FAQ */}
+      <FAQSection />
 
       {/* FOOTER */}
       <footer style={{ background: BG, borderTop: `1px solid rgba(150,45,73,.08)`, padding: '24px 28px' }}>

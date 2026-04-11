@@ -168,7 +168,7 @@ function UpcomingFeaturesSection() {
     <section style={{ background: WHITE, padding: '80px 28px', borderTop: `1px solid rgba(150,45,73,.07)` }}>
       <div style={{ maxWidth: 1100, margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: 56 }}>
-          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: RED, opacity: .4, marginBottom: 12 }}>Coming soon</p>
+          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: RED, opacity: .4, marginBottom: 12 }}>Features</p>
           <h2 style={{ fontSize: 'clamp(1.8rem,3vw,2.4rem)', fontWeight: 800, letterSpacing: '-1px', color: RED, marginBottom: 14, lineHeight: 1.2 }}>
             More ways to cook smarter
           </h2>
@@ -345,7 +345,7 @@ const FAQS = [
 
 function FAQSection() {
   return (
-    <section style={{ background: WHITE, padding: '80px 28px', borderTop: `1px solid rgba(150,45,73,.07)` }}>
+    <section id="faq" style={{ background: WHITE, padding: '80px 28px', borderTop: `1px solid rgba(150,45,73,.07)` }}>
       <div style={{ maxWidth: 720, margin: '0 auto', textAlign: 'center' }}>
         <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: RED, opacity: .4, marginBottom: 12 }}>FAQ</p>
         <h2 style={{ fontSize: 'clamp(1.8rem,3vw,2.4rem)', fontWeight: 800, letterSpacing: '-1px', color: RED, marginBottom: 14, lineHeight: 1.2 }}>
@@ -506,9 +506,9 @@ export default function Home() {
   }
 
   const navItems: Array<{ label: string; sectionId: string; tab?: 'cook' | 'creator' }> = [
-    { label: 'How it works', sectionId: 'how-it-works' },
-    { label: 'For creators', sectionId: 'for-creators', tab: 'creator' },
     { label: 'About', sectionId: 'about' },
+    { label: 'Features', sectionId: 'how-it-works' },
+    { label: 'FAQs', sectionId: 'faq' },
   ]
 
 

@@ -16,8 +16,8 @@ const COUNTRIES = [
   "United Kingdom", "United States", "Vietnam", "Zimbabwe",
 ];
 
-const RED = "#962d49";
-const CREAM = "#f3eac3";
+const RED = "#F28695";
+const CREAM = "#F2E6B8";
 
 type Role = "user" | "creator";
 type Status = "idle" | "loading" | "success" | "error";
@@ -31,7 +31,7 @@ export default function WaitlistForm({ dark = false }: { dark?: boolean }) {
   const [expanded, setExpanded] = useState(false);
 
   const bg = dark ? "rgba(255,255,255,0.07)" : "#fff";
-  const border = `1.5px solid rgba(150,45,73,0.15)`;
+  const border = `1.5px solid rgba(242,134,149,0.15)`;
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -54,7 +54,7 @@ export default function WaitlistForm({ dark = false }: { dark?: boolean }) {
 
   if (status === "success") {
     return (
-      <p style={{ fontSize: 14, fontWeight: 600, color: "#3a9e6f", padding: "12px 0" }}>
+      <p style={{ fontSize: 14, fontWeight: 600, color: "#F1CCA6", padding: "12px 0" }}>
         You&apos;re on the list — we&apos;ll be in touch. 🎉
       </p>
     );
@@ -69,7 +69,7 @@ export default function WaitlistForm({ dark = false }: { dark?: boolean }) {
         border,
         borderRadius: 12,
         overflow: "hidden",
-        boxShadow: "0 2px 12px rgba(150,45,73,0.08)",
+        boxShadow: "0 2px 12px rgba(242,134,149,0.08)",
         marginBottom: expanded ? 10 : 0,
       }}>
         {/* Role pill */}
@@ -122,7 +122,7 @@ export default function WaitlistForm({ dark = false }: { dark?: boolean }) {
           style={{
             flexShrink: 0,
             padding: "0 20px",
-            background: status === "loading" ? "rgba(150,45,73,0.7)" : RED,
+            background: status === "loading" ? "rgba(242,134,149,0.7)" : RED,
             color: CREAM,
             border: "none",
             fontSize: 13,
@@ -173,7 +173,7 @@ export default function WaitlistForm({ dark = false }: { dark?: boolean }) {
               borderRadius: 10,
               background: bg,
               fontSize: 13,
-              color: country ? (dark ? "#fff" : RED) : "rgba(150,45,73,0.4)",
+              color: country ? (dark ? "#fff" : RED) : "rgba(242,134,149,0.4)",
               outline: "none",
               appearance: "none",
               cursor: "pointer",

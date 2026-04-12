@@ -1,11 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 
-const RED = "#962d49";
-const CREAM = "#f3eac3";
-const BG = "#fdf8f5";
-const FIELD_BG = "#f0ebe8";
+const RED = "#F28695";
+const CREAM = "#F2E6B8";
+const BG = "#F2E6B8";
+const FIELD_BG = "#F2E6B8";
 
 const COUNTRIES = [
   "Afghanistan", "Albania", "Algeria", "Argentina", "Australia", "Austria",
@@ -74,27 +75,27 @@ export default function WaitlistPage() {
 
   if (status === "success") {
     return (
-      <div style={{ minHeight: "100vh", background: BG, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", fontFamily: "'Inter', system-ui, sans-serif", color: RED, textAlign: "center", padding: 32 }}>
+      <div style={{ minHeight: "100vh", background: BG, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-inter), sans-serif", color: RED, textAlign: "center", padding: 32 }}>
         <div style={{ fontSize: 48, marginBottom: 20 }}>🎉</div>
         <h1 style={{ fontSize: "clamp(1.8rem,3vw,2.4rem)", fontWeight: 800, letterSpacing: "-0.04em", marginBottom: 12 }}>You&apos;re in.</h1>
         <p style={{ fontSize: 16, opacity: 0.55, maxWidth: 380, lineHeight: 1.7, marginBottom: 32 }}>
           We&apos;ll reach out before launch. Keep an eye on your inbox.
         </p>
-        <a href="/" style={{ padding: "13px 28px", background: RED, color: CREAM, borderRadius: 12, fontWeight: 700, fontSize: 14, textDecoration: "none" }}>
+        <Link href="/" style={{ padding: "13px 28px", background: RED, color: CREAM, borderRadius: 12, fontWeight: 700, fontSize: 14, textDecoration: "none" }}>
           Back to home
-        </a>
+        </Link>
       </div>
     );
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: BG, fontFamily: "'Inter', system-ui, sans-serif", color: RED }}>
+    <div style={{ minHeight: "100vh", background: BG, fontFamily: "var(--font-inter), sans-serif", color: RED }}>
 
       {/* Nav */}
       <nav style={{ padding: "22px 36px" }}>
-        <a href="/" style={{ textDecoration: "none", fontWeight: 800, fontSize: 18, color: RED, letterSpacing: "-0.04em", opacity: 0.85 }}>
+        <Link href="/" style={{ textDecoration: "none", fontWeight: 800, fontSize: 18, color: RED, letterSpacing: "-0.04em", opacity: 0.85 }}>
           ← Coookd
-        </a>
+        </Link>
       </nav>
 
       {/* Content */}
@@ -131,7 +132,7 @@ export default function WaitlistPage() {
                   background: role === r ? "#fff" : "transparent",
                   color: RED,
                   opacity: role === r ? 1 : 0.4,
-                  boxShadow: role === r ? "0 2px 10px rgba(150,45,73,0.12)" : "none",
+                  boxShadow: role === r ? "0 2px 10px rgba(242,134,149,0.12)" : "none",
                 }}
               >
                 {r === "user" ? "User" : "Creator"}
@@ -160,7 +161,7 @@ export default function WaitlistPage() {
                 onChange={e => setCountry(e.target.value)}
                 required
                 disabled={status === "loading"}
-                style={{ ...fieldStyle, appearance: "none", cursor: "pointer", color: country ? RED : "rgba(150,45,73,0.35)" }}
+                style={{ ...fieldStyle, appearance: "none", cursor: "pointer", color: country ? RED : "rgba(242,134,149,0.35)" }}
               >
                 <option value="" disabled>Country</option>
                 {COUNTRIES.map(c => (
@@ -195,7 +196,7 @@ export default function WaitlistPage() {
             style={{
               width: "100%",
               padding: "18px",
-              background: status === "loading" ? "rgba(150,45,73,0.65)" : RED,
+              background: status === "loading" ? "rgba(242,134,149,0.65)" : RED,
               color: CREAM,
               border: "none",
               borderRadius: 16,

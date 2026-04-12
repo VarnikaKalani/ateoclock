@@ -74,7 +74,7 @@ export default function PillMorphTabs({
               transition={{ type: "spring", stiffness: 300, damping: 28 }}
               className="absolute pointer-events-none top-0 bottom-0 rounded-full"
               style={{
-                background: "rgba(150,45,73,0.08)",
+                background: "rgba(242,134,149,0.08)",
                 left: indicator.left,
                 width: indicator.width,
               }}
@@ -90,7 +90,7 @@ export default function PillMorphTabs({
                   ref={(el: HTMLButtonElement | null) => { triggerRefs.current[it.value] = el }}
                   className={cn(
                     "relative z-10 rounded-full text-sm font-medium transition-colors bg-transparent shadow-none border-none",
-                    isActive ? "text-[#962d49] opacity-100" : "text-[#962d49] opacity-50 hover:opacity-75"
+                    isActive ? "text-[#F28695] opacity-100" : "text-[#F28695] opacity-50 hover:opacity-75"
                   )}
                   style={{ fontFamily: "inherit", padding: "8px 20px" }}
                 >

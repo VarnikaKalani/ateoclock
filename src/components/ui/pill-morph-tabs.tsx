@@ -80,7 +80,7 @@ export default function PillMorphTabs({
               }}
             />
           )}
-          <TabsList className="relative flex gap-0 bg-transparent p-0 h-auto">
+          <TabsList className="relative flex gap-2 bg-transparent p-0 h-auto">
             {items.map((it) => {
               const isActive = it.value === value;
               return (
@@ -89,10 +89,10 @@ export default function PillMorphTabs({
                   value={it.value}
                   ref={(el: HTMLButtonElement | null) => { triggerRefs.current[it.value] = el }}
                   className={cn(
-                    "relative z-10 px-5 py-2 rounded-full text-sm font-medium transition-colors bg-transparent shadow-none border-none",
+                    "relative z-10 rounded-full text-sm font-medium transition-colors bg-transparent shadow-none border-none",
                     isActive ? "text-[#962d49] opacity-100" : "text-[#962d49] opacity-50 hover:opacity-75"
                   )}
-                  style={{ fontFamily: "inherit" }}
+                  style={{ fontFamily: "inherit", padding: "8px 20px" }}
                 >
                   {it.label}
                 </TabsTrigger>

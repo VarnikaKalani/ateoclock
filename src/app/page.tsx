@@ -3,6 +3,7 @@ import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { useState, useEffect, useRef } from 'react'
 import { getSupabaseBrowserClient } from '@/lib/supabase'
+import PillMorphTabs from '@/components/ui/pill-morph-tabs'
 
 const RED   = '#962d49'
 const CREAM = '#f3eac3'
@@ -1332,26 +1333,30 @@ export default function Home() {
       `}</style>
 
       {/* NAV */}
-      <nav style={{ position: 'sticky', top: 0, zIndex: 100, background: 'rgba(253,248,238,.95)', backdropFilter: 'blur(16px)', boxShadow: '0 2px 16px rgba(0,0,0,.07)', padding: '0 28px' }}>
+      <nav style={{ position: 'sticky', top: 0, zIndex: 100, background: 'rgba(253,248,238,.95)', backdropFilter: 'blur(16px)', boxShadow: '0 1px 0 rgba(150,45,73,.08)', padding: '0 28px' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
           <div style={{ height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <Logo size={22} />
-            <div className="nav-desktop">
-              {navItems.map(({ label, sectionId, tab: nextTab }) => (
-                <button key={label} type="button"
-                  onClick={() => scrollToSection(sectionId, nextTab)}
-                  style={{ fontSize: 13, fontWeight: 500, color: RED, opacity: .65, textDecoration: 'none', transition: 'opacity .15s', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
-                  aria-label={label}
-                  onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
-                  onMouseLeave={e => (e.currentTarget.style.opacity = '.65')}
-                >{label}</button>
-              ))}
-              <a href="/waitlist"
-                style={{ padding: '9px 22px', borderRadius: 8, background: RED, color: CREAM, fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer', transition: 'opacity .15s', textDecoration: 'none' }}
-                onMouseEnter={e => (e.currentTarget.style.opacity = '.85')}
-                onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
-              >Join waitlist</a>
+            <div className="nav-desktop" style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)' }}>
+              <PillMorphTabs
+                items={navItems.map(({ label, sectionId }) => ({
+                  value: sectionId,
+                  label,
+                  panel: null,
+                }))}
+                defaultValue={navItems[0].sectionId}
+                onValueChange={(sectionId) => {
+                  const item = navItems.find(n => n.sectionId === sectionId)
+                  if (item) scrollToSection(item.sectionId, item.tab)
+                }}
+              />
             </div>
+            <a href="/waitlist"
+              style={{ padding: '9px 22px', borderRadius: 999, background: RED, color: CREAM, fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer', transition: 'opacity .15s', textDecoration: 'none', flexShrink: 0 }}
+              onMouseEnter={e => (e.currentTarget.style.opacity = '.85')}
+              onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
+            >Join waitlist</a>
+            <div className="nav-desktop" style={{ display: 'none' }} />
 
             <button
               type="button"

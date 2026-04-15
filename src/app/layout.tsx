@@ -9,11 +9,11 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Coookd — From Recipe to Reality",
+  title: "ateoclock - From Recipe to Reality",
   description:
-    "Coookd connects food creators with home cooks. Share a recipe, your audience cooks it tonight with one tap.",
+    "ateoclock connects food creators with home cooks. Share a recipe, your audience cooks it tonight with one tap.",
   openGraph: {
-    title: "Coookd — From Recipe to Reality",
+    title: "ateoclock - From Recipe to Reality",
     description:
       "One tap from your favourite creator's recipe to groceries at your door.",
     type: "website",
@@ -26,7 +26,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en" data-scroll-behavior="smooth" className={inter.variable}>
       <body>{children}</body>
     </html>
   );

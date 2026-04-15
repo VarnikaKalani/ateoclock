@@ -13,26 +13,26 @@ import { useIsMobile } from "@/hooks/use-mobile";
 const CHIPS = [
   {
     id: 1,
-    title: "Order in one tap",
-    description: "From recipe to checkout instantly",
+    title: "Acai base",
+    description: "200g · Added to Blinkit",
     icon: ShoppingCart02Icon,
   },
   {
     id: 2,
-    title: "Any store, any time",
-    description: "Blinkit, Zepto, Amazon Fresh and more",
+    title: "Blueberries",
+    description: "1 cup · Added to Zepto",
     icon: Store02Icon,
   },
   {
     id: 3,
-    title: "Cook more, stress less",
-    description: "No more manual grocery lists",
+    title: "Granola",
+    description: "½ cup · Added to Amazon Fresh",
     icon: ChefHatIcon,
   },
   {
     id: 4,
-    title: "Creators earn too",
-    description: "Affiliate income from every cart",
+    title: "Manuka Honey",
+    description: "2 tbsp · Added to BigBasket",
     icon: MoneyBag02Icon,
   },
 ];
@@ -52,9 +52,9 @@ const Bucket = () => {
   }, []);
 
   return (
-    <div className="flex flex-col gap-4 items-center justify-center h-fit relative w-full">
+    <div className="flex flex-col gap-3 items-center justify-center h-fit relative w-full">
       <div
-        className="relative isolate w-full max-w-[655px]"
+        className="relative isolate w-full max-w-[500px]"
         style={{ aspectRatio: "655/352" }}
       >
         <svg
@@ -69,28 +69,28 @@ const Bucket = () => {
             <div style={{ backdropFilter: "blur(11.03px)", clipPath: "url(#bgblur_0_51_65_clip_path)", height: "100%", width: "100%" }}></div>
           </foreignObject>
           <g filter="url(#filter1_dddi_51_65)" data-figma-bg-blur-radius="22.0545">
-            <path d="M535.59 78.7427L487.973 42.8776L558.738 13.9516C562.902 12.2494 564.984 11.3984 567.143 11.5597C569.301 11.7211 571.233 12.8723 575.098 15.1747L590.22 24.1832C603.923 32.347 610.775 36.4289 610.372 42.0779C609.97 47.7269 602.609 50.7964 587.887 56.9354L535.59 78.7427Z" fill="white" fillOpacity="0.42" shapeRendering="crispEdges" />
+            <path d="M535.59 78.7427L487.973 42.8776L558.738 13.9516C562.902 12.2494 564.984 11.3984 567.143 11.5597C569.301 11.7211 571.233 12.8723 575.098 15.1747L590.22 24.1832C603.923 32.347 610.775 36.4289 610.372 42.0779C609.97 47.7269 602.609 50.7964 587.887 56.9354L535.59 78.7427Z" fill="#F1E8C7" fillOpacity="0.78" stroke="#74823F" strokeOpacity="0.16" shapeRendering="crispEdges" />
           </g>
           <foreignObject x="-3.43323e-05" y="-10.9516" width="215.96" height="167.786">
             <div style={{ backdropFilter: "blur(11.03px)", clipPath: "url(#bgblur_1_51_65_clip_path)", height: "100%", width: "100%" }}></div>
           </foreignObject>
           <g filter="url(#filter2_dddi_51_65)" data-figma-bg-blur-radius="22.0545">
-            <path d="M123.116 79.1145L171.548 42.8776L97.2715 12.5164C94.8305 11.5186 93.61 11.0197 92.3446 11.1143C91.0793 11.2089 89.9465 11.8837 87.681 13.2334L56.155 32.0149C48.1832 36.7641 44.1973 39.1386 44.4205 42.4378C44.6438 45.737 48.9132 47.553 57.4522 51.1849L123.116 79.1145Z" fill="white" fillOpacity="0.42" shapeRendering="crispEdges" />
+            <path d="M123.116 79.1145L171.548 42.8776L97.2715 12.5164C94.8305 11.5186 93.61 11.0197 92.3446 11.1143C91.0793 11.2089 89.9465 11.8837 87.681 13.2334L56.155 32.0149C48.1832 36.7641 44.1973 39.1386 44.4205 42.4378C44.6438 45.737 48.9132 47.553 57.4522 51.1849L123.116 79.1145Z" fill="#F1E8C7" fillOpacity="0.78" stroke="#74823F" strokeOpacity="0.16" shapeRendering="crispEdges" />
           </g>
           <foreignObject x="78.7048" y="20.823" width="501.297" height="136.012">
             <div style={{ backdropFilter: "blur(11.03px)", clipPath: "url(#bgblur_2_51_65_clip_path)", height: "100%", width: "100%" }}></div>
           </foreignObject>
           <g filter="url(#filter3_dddi_51_65)" data-figma-bg-blur-radius="22.0545">
-            <path d="M487.973 42.8774L171.548 42.8775L123.116 79.1144L535.59 78.7424L487.973 42.8774Z" fill="url(#paint0_linear_51_65)" fillOpacity="0.72" shapeRendering="crispEdges" />
+            <path d="M487.973 42.8774L171.548 42.8775L123.116 79.1144L535.59 78.7424L487.973 42.8774Z" fill="url(#paint0_linear_51_65)" fillOpacity="0.78" stroke="#74823F" strokeOpacity="0.12" shapeRendering="crispEdges" />
           </g>
           <foreignObject x="78.7048" y="20.823" width="137.255" height="136.012">
             <div style={{ backdropFilter: "blur(11.03px)", clipPath: "url(#bgblur_3_51_65_clip_path)", height: "100%", width: "100%" }}></div>
           </foreignObject>
           <g filter="url(#filter4_dddi_51_65)" data-figma-bg-blur-radius="22.0545">
-            <path d="M171.548 78.9088V42.8774L123.116 79.1144L171.548 78.9088Z" fill="white" fillOpacity="0.32" shapeRendering="crispEdges" />
+            <path d="M171.548 78.9088V42.8774L123.116 79.1144L171.548 78.9088Z" fill="#F1E8C7" fillOpacity="0.58" stroke="#74823F" strokeOpacity="0.14" shapeRendering="crispEdges" />
           </g>
           <g filter="url(#filter5_dddi_51_65)" data-figma-bg-blur-radius="22.0545">
-            <path d="M487.973 78.9088V42.8774L536.404 79.1144L487.973 78.9088Z" fill="white" fillOpacity="0.32" shapeRendering="crispEdges" />
+            <path d="M487.973 78.9088V42.8774L536.404 79.1144L487.973 78.9088Z" fill="#F1E8C7" fillOpacity="0.58" stroke="#74823F" strokeOpacity="0.14" shapeRendering="crispEdges" />
           </g>
           <defs>
             <filter id="filter0_i_51_65" x="123.766" y="79.1595" width="413" height="275.676" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
@@ -247,33 +247,33 @@ const Bucket = () => {
               <rect x="123.766" y="0" width="413" height="352" />
             </clipPath>
             <linearGradient id="paint0_linear_51_65" x1="329.353" y1="42.8774" x2="329.353" y2="79.1144" gradientUnits="userSpaceOnUse">
-              <stop stopColor="white" stopOpacity="0.4" />
-              <stop offset="1" stopColor="white" stopOpacity="0.2" />
+              <stop stopColor="#F1E8C7" stopOpacity="0.9" />
+              <stop offset="1" stopColor="#F1E8C7" stopOpacity="0.44" />
             </linearGradient>
           </defs>
         </svg>
 
         <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
-          <div className="relative w-full h-full flex justify-center items-center" style={{ paddingBottom: "65%" }}>
+          <div className="relative w-full h-full flex justify-center items-center" style={{ paddingBottom: "38%" }}>
             <AnimatePresence mode="popLayout">
               {items.map((chip, index) => {
                 if (index !== 0) return null;
                 return (
                   <motion.div
                     key={chip.id}
-                    initial={{ y: isMobile ? -70 : -100, opacity: 0, scale: 0.8 }}
-                    animate={{ y: 0, opacity: 1, scale: isMobile ? 1 : 1.25 }}
-                    exit={{ y: isMobile ? 100 : 130, scale: 0.8, transition: { duration: 0.8 } }}
+                    initial={{ y: isMobile ? -42 : -58, opacity: 0, scale: 0.78 }}
+                    animate={{ y: 0, opacity: 1, scale: isMobile ? 0.82 : 0.9 }}
+                    exit={{ y: isMobile ? 62 : 78, scale: 0.76, transition: { duration: 0.8 } }}
                     transition={{ duration: 0.5, ease: [0.455, 0.03, 0.515, 0.955] }}
-                    className="z-10 rounded-full p-2 w-[240px] shadow-sm absolute pointer-events-auto flex items-center gap-2 origin-bottom"
-                    style={{ background: '#fff', border: '1px solid rgba(242,134,149,0.15)' }}
+                    className="z-10 rounded-full p-1.5 w-[180px] max-w-[58%] shadow-sm absolute pointer-events-auto flex items-center gap-1.5 origin-bottom"
+                    style={{ background: '#fff', border: '1px solid rgba(116,130,63,0.18)', boxShadow: '0 12px 28px rgba(116,130,63,0.12)' }}
                   >
-                    <div className="flex size-10 shrink-0 items-center justify-center rounded-full" style={{ background: 'rgba(242,134,149,0.08)' }}>
-                      <HugeiconsIcon icon={chip.icon} className="size-5" style={{ color: '#F28695' }} />
+                    <div className="flex size-8 shrink-0 items-center justify-center rounded-full" style={{ background: 'rgba(116,130,63,0.08)' }}>
+                      <HugeiconsIcon icon={chip.icon} className="size-4" style={{ color: '#74823F' }} />
                     </div>
-                    <div className="flex flex-col gap-0.5">
-                      <span className="text-sm font-semibold leading-none" style={{ color: '#F28695' }}>{chip.title}</span>
-                      <span className="text-xs" style={{ color: 'rgba(242,134,149,0.55)' }}>{chip.description}</span>
+                    <div className="flex min-w-0 flex-col gap-0.5">
+                      <span className="truncate text-xs font-semibold leading-tight" style={{ color: '#74823F' }}>{chip.title}</span>
+                      <span className="truncate text-[10px] leading-tight" style={{ color: 'rgba(116,130,63,0.55)' }}>{chip.description}</span>
                     </div>
                   </motion.div>
                 );
@@ -294,7 +294,9 @@ const Bucket = () => {
           <g filter="url(#filter0_i_51_65)">
             <path
               d="M512.766 79.1595L147.766 79.1624C136.453 79.1625 130.796 79.1626 127.281 82.6773C123.766 86.192 123.766 91.8488 123.766 103.162V327.159C123.766 338.473 123.766 344.13 127.281 347.645C130.796 351.159 136.453 351.159 147.766 351.159H512.766C524.08 351.159 529.737 351.159 533.252 347.645C536.766 344.13 536.766 338.473 536.766 327.159V103.159C536.766 91.8457 536.766 86.1888 533.252 82.6741C529.737 79.1594 524.08 79.1594 512.766 79.1595Z"
-              style={{ fill: '#F2E6B8' }}
+              style={{ fill: '#F1E8C7' }}
+              stroke="#74823F"
+              strokeOpacity="0.1"
             />
           </g>
           <g clipPath="url(#center_box_clip)">
@@ -303,7 +305,7 @@ const Bucket = () => {
             </foreignObject>
           </g>
           <g filter="url(#filter6_dddi_51_65)" data-figma-bg-blur-radius="22.0545">
-            <path d="M74.6011 164.033L123.116 79.1138L535.59 78.7419L581.532 164.469C588.006 176.55 591.243 182.59 588.568 187.06C585.892 191.529 579.039 191.529 565.333 191.529H90.5591C76.4759 191.529 69.4343 191.529 66.7781 186.953C64.1219 182.376 67.615 176.262 74.6011 164.033Z" fill="white" fillOpacity="0.42" shapeRendering="crispEdges" />
+            <path d="M74.6011 164.033L123.116 79.1138L535.59 78.7419L581.532 164.469C588.006 176.55 591.243 182.59 588.568 187.06C585.892 191.529 579.039 191.529 565.333 191.529H90.5591C76.4759 191.529 69.4343 191.529 66.7781 186.953C64.1219 182.376 67.615 176.262 74.6011 164.033Z" fill="#F1E8C7" fillOpacity="0.68" stroke="#74823F" strokeOpacity="0.16" shapeRendering="crispEdges" />
           </g>
         </svg>
       </div>

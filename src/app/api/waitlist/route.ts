@@ -47,7 +47,7 @@ export async function POST(request: Request) {
     const supabase = getSupabaseServerClient();
     const { error } = await supabase.from("waitlist").upsert(
       { email, role, country, instagram_url: instagramUrl },
-      { onConflict: "email", ignoreDuplicates: true },
+      { onConflict: "email" },
     );
 
     if (error) {

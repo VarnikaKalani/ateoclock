@@ -28,6 +28,8 @@ export default function PillMorphTabs({
   const [value, setValue] = React.useState<string>(defaultValue ?? first);
   const listRef = React.useRef<HTMLDivElement | null>(null);
   const triggerRefs = React.useRef<Record<string, HTMLButtonElement | null>>({});
+  const onValueChangeRef = React.useRef(onValueChange);
+  const hasMountedRef = React.useRef(false);
   const [indicator, setIndicator] = React.useState<{ left: number; width: number } | null>(null);
   const [isExpanding, setIsExpanding] = React.useState(false);
 
@@ -55,7 +57,17 @@ export default function PillMorphTabs({
     return () => window.clearTimeout(id);
   }, [value]);
 
-  React.useEffect(() => { if (onValueChange) onValueChange(value); }, [value, onValueChange]);
+  React.useEffect(() => {
+    onValueChangeRef.current = onValueChange;
+  }, [onValueChange]);
+
+  React.useEffect(() => {
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true;
+      return;
+    }
+    onValueChangeRef.current?.(value);
+  }, [value]);
 
   return (
     <div className={cn("w-full", className)}>
@@ -74,13 +86,14 @@ export default function PillMorphTabs({
               transition={{ type: "spring", stiffness: 300, damping: 28 }}
               className="absolute pointer-events-none top-0 bottom-0 rounded-full"
               style={{
-                background: "rgba(242,134,149,0.08)",
+                background: "rgba(116,130,63,0.12)",
+                boxShadow: "inset 0 0 0 1.5px rgba(116,130,63,0.24)",
                 left: indicator.left,
                 width: indicator.width,
               }}
             />
           )}
-          <TabsList className="relative flex gap-2 bg-transparent p-0 h-auto">
+          <TabsList className="relative flex gap-1 bg-transparent p-0 h-auto">
             {items.map((it) => {
               const isActive = it.value === value;
               return (
@@ -88,11 +101,14 @@ export default function PillMorphTabs({
                   key={it.value}
                   value={it.value}
                   ref={(el: HTMLButtonElement | null) => { triggerRefs.current[it.value] = el }}
+                  onClick={() => {
+                    if (isActive) onValueChangeRef.current?.(it.value);
+                  }}
                   className={cn(
-                    "relative z-10 rounded-full text-sm font-medium transition-colors bg-transparent shadow-none border-none",
-                    isActive ? "text-[#F28695] opacity-100" : "text-[#F28695] opacity-50 hover:opacity-75"
+                    "relative z-10 rounded-full border-none bg-transparent text-sm font-semibold shadow-none transition-colors hover:text-[#74823F] focus-visible:outline-[#74823F] data-[state=active]:bg-transparent data-[state=active]:text-[#74823F] data-[state=active]:shadow-none",
+                    isActive ? "text-[#74823F] opacity-100" : "text-[#74823F] opacity-72 hover:opacity-90"
                   )}
-                  style={{ fontFamily: "inherit", padding: "8px 20px" }}
+                  style={{ fontFamily: "inherit", padding: "7px 17px" }}
                 >
                   {it.label}
                 </TabsTrigger>

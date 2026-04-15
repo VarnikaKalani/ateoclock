@@ -1,50 +1,137 @@
 'use client'
 import Image from 'next/image'
-import { motion } from 'framer-motion'
-import { useState, useEffect, useRef } from 'react'
+import { motion, useAnimationFrame, useMotionTemplate, useMotionValue, useMotionValueEvent, useReducedMotion, useScroll, useTransform, type MotionValue } from 'framer-motion'
+import { useState, useEffect, useRef, Fragment } from 'react'
 import { getSupabaseBrowserClient } from '@/lib/supabase'
 import PillMorphTabs from '@/components/ui/pill-morph-tabs'
 import Bucket from '@/components/ui/bucket'
 
-const RED   = '#F28695'
-const CREAM = '#F2E6B8'
-const RED2  = '#F2BFB4'
-const BG    = '#F2E6B8'
+const RED   = '#74823F'
+const CREAM = '#F1E8C7'
+const RED2  = '#A65F2D'
+const BROWN = '#6B3E1E'
+const BG    = '#F1E8C7'
 const WHITE = '#ffffff'
+const INTER_REGULAR = 'var(--font-inter), sans-serif'
 
 
-function useCounter(target: number, duration = 1600, trigger: boolean) {
-  const [val, setVal] = useState(0)
-  useEffect(() => {
-    if (!trigger) return
-    let start: number
-    const step = (ts: number) => {
-      if (!start) start = ts
-      const p = Math.min((ts - start) / duration, 1)
-      setVal(Math.floor(p * target))
-      if (p < 1) requestAnimationFrame(step)
-    }
-    requestAnimationFrame(step)
-  }, [trigger, target, duration])
-  return val
-}
-
-function useVisible(ref: React.RefObject<HTMLElement | null>) {
-  const [vis, setVis] = useState(false)
-  useEffect(() => {
-    if (!ref.current) return
-    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) setVis(true) }, { threshold: 0.25 })
-    obs.observe(ref.current)
-    return () => obs.disconnect()
-  }, [ref])
-  return vis
-}
-
-function Logo({ size = 20 }: { size?: number }) {
+function Logo({ size = 20, heroWord }: { size?: number; heroWord?: string }) {
   return (
-    <span style={{ fontSize: size, fontWeight: 800, letterSpacing: '-1px', lineHeight: 1 }}>
-      <span style={{ color: RED }}>Coook</span><span style={{ color: RED2 }}>d</span>
+    <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 1, lineHeight: 1 }}>
+      <span style={{ fontSize: size, fontWeight: 800, letterSpacing: '-1px' }}>
+        <span style={{ color: RED }}>ate</span><span style={{ color: BROWN }}>oclock</span>
+      </span>
+      {heroWord && (
+        <span style={{ fontSize: Math.round(size * 0.52), fontWeight: 700, letterSpacing: '-0.02em', color: BROWN, opacity: .55, marginLeft: 4, transition: 'opacity 0.3s' }}>
+          {heroWord}
+        </span>
+      )}
     </span>
+  )
+}
+
+function InstagramGlyph({ size = 17 }: { size?: number }) {
+  return (
+    <svg
+      aria-hidden="true"
+      fill="none"
+      height={size}
+      viewBox="0 0 24 24"
+      width={size}
+    >
+      <rect height="16" rx="5" stroke="currentColor" strokeWidth="2" width="16" x="4" y="4" />
+      <circle cx="12" cy="12" r="3.4" stroke="currentColor" strokeWidth="2" />
+      <circle cx="17" cy="7" fill="currentColor" r="1.1" />
+    </svg>
+  )
+}
+
+function SubstackGlyph({ size = 18 }: { size?: number }) {
+  return (
+    <svg aria-hidden="true" fill="none" height={size} viewBox="0 0 24 24" width={size}>
+      <path d="M5 5h14M5 9h14M6 13h12v7l-6-3.2L6 20v-7Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function YouTubeGlyph({ size = 20 }: { size?: number }) {
+  return (
+    <svg aria-hidden="true" fill="none" height={size} viewBox="0 0 24 24" width={size}>
+      <rect height="12" rx="3.2" stroke="currentColor" strokeWidth="2" width="18" x="3" y="6" />
+      <path d="M11 10.2v3.6l3.4-1.8L11 10.2Z" fill="currentColor" />
+    </svg>
+  )
+}
+
+function HeroGridPattern({ id, offsetX, offsetY }: { id: string; offsetX: MotionValue<number>; offsetY: MotionValue<number> }) {
+  return (
+    <svg className="hero-grid-svg" aria-hidden="true">
+      <defs>
+        <motion.pattern
+          id={id}
+          width="40"
+          height="40"
+          patternUnits="userSpaceOnUse"
+          x={offsetX}
+          y={offsetY}
+        >
+          <path
+            d="M 40 0 L 0 0 0 40"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1"
+          />
+        </motion.pattern>
+      </defs>
+      <rect width="100%" height="100%" fill={`url(#${id})`} />
+    </svg>
+  )
+}
+
+function HeroGridSection({ children }: { children: React.ReactNode }) {
+  const containerRef = useRef<HTMLElement | null>(null)
+  const shouldReduceMotion = useReducedMotion()
+  const mouseX = useMotionValue(0)
+  const mouseY = useMotionValue(0)
+  const gridOffsetX = useMotionValue(0)
+  const gridOffsetY = useMotionValue(0)
+
+  useEffect(() => {
+    const rect = containerRef.current?.getBoundingClientRect()
+    if (!rect) return
+    mouseX.set(rect.width * 0.62)
+    mouseY.set(rect.height * 0.44)
+  }, [mouseX, mouseY])
+
+  useAnimationFrame(() => {
+    if (shouldReduceMotion) return
+    gridOffsetX.set((gridOffsetX.get() + 0.34) % 40)
+    gridOffsetY.set((gridOffsetY.get() + 0.34) % 40)
+  })
+
+  const handleMouseMove = (event: React.MouseEvent<HTMLElement>) => {
+    const { left, top } = event.currentTarget.getBoundingClientRect()
+    mouseX.set(event.clientX - left)
+    mouseY.set(event.clientY - top)
+  }
+
+  const maskImage = useMotionTemplate`radial-gradient(420px circle at ${mouseX}px ${mouseY}px, black, transparent)`
+
+  return (
+    <section id="hero" ref={containerRef} className="hero-section" onMouseMove={handleMouseMove}>
+      <div className="hero-grid-layer hero-grid-layer-base">
+        <HeroGridPattern id="ateoclock-hero-grid-pattern-base" offsetX={gridOffsetX} offsetY={gridOffsetY} />
+      </div>
+      <motion.div
+        className="hero-grid-layer hero-grid-layer-reveal"
+        style={{ maskImage, WebkitMaskImage: maskImage }}
+      >
+        <HeroGridPattern id="ateoclock-hero-grid-pattern-reveal" offsetX={gridOffsetX} offsetY={gridOffsetY} />
+      </motion.div>
+      <div className="hero-shell">
+        {children}
+      </div>
+    </section>
   )
 }
 
@@ -59,252 +146,660 @@ const STORES = [
   { name: 'Zomato', logo: '/logos/zomato.png' },
 ]
 const STORE_MARQUEE_GROUPS = 3
-const HERO_TITLES = ['delivered', 'planned', 'sorted', 'ready', 'done']
+const HERO_TITLES = ['delivered', 'sorted', 'ordered']
+const FEATURE_STICKY_TOP = 92
 
-type RecipeIngredient = {
-  id: string
-  name: string
-  qty: string
-  defaultSelected: boolean
-}
-
-type RecipeCardData = {
-  id: string
-  name: string
-  by: string
-  time: string
-  tag: string
-  checkoutStores: string[]
-  ingredients: RecipeIngredient[]
-}
-
-
-const RECIPE_LIBRARY: RecipeCardData[] = [
+const FEATURE_STEPS = [
   {
-    id: 'acai-bowl',
-    name: 'Acai Bowl',
-    by: '@healthybowl',
-    time: '10 min',
-    tag: 'Healthy',
-    checkoutStores: ['Blinkit', 'Instamart'],
-    ingredients: [
-      { id: 'acai', name: 'Frozen acai', qty: '2 packs', defaultSelected: true },
-      { id: 'banana', name: 'Banana', qty: '2', defaultSelected: true },
-      { id: 'granola', name: 'Granola', qty: '1 pack', defaultSelected: true },
-      { id: 'berries', name: 'Mixed berries', qty: '150g', defaultSelected: true },
-      { id: 'chia', name: 'Chia seeds', qty: '2 tsp', defaultSelected: false },
-    ],
+    kicker: 'Capture',
+    title: 'Screenshot or paste a link',
+    highlight: 'from anywhere.',
+    body: 'Drop in a recipe screenshot, paste a link, or open a saved post. ateoclock starts from the places you already save food ideas.',
+    tags: ['Screenshots', 'Links', 'Saved posts'],
   },
   {
-    id: 'mango-lassi',
-    name: 'Mango Lassi',
-    by: '@spicelab',
-    time: '5 min',
-    tag: 'Drink',
-    checkoutStores: ['Zepto'],
-    ingredients: [
-      { id: 'mangoes', name: 'Mangoes', qty: '3', defaultSelected: true },
-      { id: 'yogurt', name: 'Yogurt', qty: '500g', defaultSelected: true },
-      { id: 'milk', name: 'Milk', qty: '150ml', defaultSelected: true },
-      { id: 'cardamom', name: 'Cardamom', qty: '1 tsp', defaultSelected: false },
-      { id: 'sugar', name: 'Sugar', qty: '2 tbsp', defaultSelected: false },
-    ],
+    kicker: 'Read',
+    title: 'ateoclock reads the recipe',
+    highlight: 'for you.',
+    body: 'The recipe gets parsed into ingredients, quantities, timing, and prep notes so the cart is structured before you touch it.',
+    tags: ['Ingredients', 'Quantities', 'Prep notes'],
+  },
+  {
+    kicker: 'Build',
+    title: 'Turn it into a cart',
+    highlight: 'without typing.',
+    body: 'Ingredients become an editable basket with quantities, swaps, and serving-size changes handled before checkout.',
+    tags: ['Auto ingredients', 'Editable basket', 'Serving scale'],
+  },
+  {
+    kicker: 'Choose',
+    title: 'Pick the store',
+    highlight: 'at the end.',
+    body: 'Blinkit, Zepto, Instamart, and Amazon Fresh stay optional until the cart is complete, so the shopper chooses what works.',
+    tags: ['Blinkit', 'Zepto', 'Instamart', 'Amazon Fresh'],
+  },
+  {
+    kicker: 'Cook',
+    title: 'Get dinner moving',
+    highlight: 'tonight.',
+    body: 'After checkout, ateoclock keeps the recipe flow clean: prep notes, timers, and what to do next.',
+    tags: ['Prep mode', 'Timers', 'Cook tonight'],
   },
 ]
 
-const DEFAULT_RECIPE_ID = 'acai-bowl'
-const DEFAULT_RECIPE = RECIPE_LIBRARY.find((recipe) => recipe.id === DEFAULT_RECIPE_ID) ?? RECIPE_LIBRARY[0]
-
-
-const SAVED_RECIPE_TILES = [
-  'Saved post',
-  'Recipe note',
-  'Dinner idea',
-  'Pasta reel',
-  'Acai Bowl',
-  'Grocery tip',
-  'Creator clip',
-  'Dessert post',
-  'Lunch plan',
-  'Soup reel',
-  'Pantry list',
-  'Cooking clip',
-  'Meal prep',
-  'Weekend cook',
-  'Sauce note',
+const CHECKOUT_DEMO_INGREDIENTS = [
+  {
+    id: 'acai-base',
+    name: 'Organic acai base',
+    note: 'Frozen, unsweetened',
+    unit: 'pack',
+    checkoutQty: '2 packs',
+    price: 1064.63,
+    defaultQty: 1,
+  },
+  {
+    id: 'kiwi',
+    name: 'Fresh kiwi',
+    note: 'Pack of 4',
+    unit: 'pack',
+    checkoutQty: '4',
+    price: 298.1,
+    defaultQty: 1,
+  },
+  {
+    id: 'blueberries',
+    name: 'Fresh blueberries',
+    note: 'Pint, seasonal',
+    unit: 'pint',
+    checkoutQty: '300g',
+    price: 340,
+    defaultQty: 0,
+  },
+  {
+    id: 'granola',
+    name: 'House granola',
+    note: 'Almond and cinnamon',
+    unit: 'bag',
+    checkoutQty: '1 bag',
+    price: 681.36,
+    defaultQty: 1,
+  },
+  {
+    id: 'strawberries',
+    name: 'Strawberries',
+    note: 'Fresh, 250g',
+    unit: 'box',
+    checkoutQty: '250g',
+    price: 220,
+    defaultQty: 0,
+  },
+  {
+    id: 'bananas',
+    name: 'Ripe bananas',
+    note: 'Bunch of 5',
+    unit: 'bunch',
+    checkoutQty: '4',
+    price: 68,
+    defaultQty: 0,
+  },
+  {
+    id: 'coconut',
+    name: 'Coconut shaves',
+    note: 'Toasted, 100g',
+    unit: 'pack',
+    checkoutQty: '100g',
+    price: 145,
+    defaultQty: 0,
+  },
 ]
 
-function UpcomingFeaturesSection() {
-  const [urlStep, setUrlStep] = useState<0 | 1 | 2 | 3>(0)
-  const [demoServings, setDemoServings] = useState(2)
+const CHECKOUT_DEMO_STORES = [
+  {
+    id: 'blinkit',
+    name: 'Blinkit',
+    eta: '10 min',
+    multiplier: 0.98,
+    logo: '/logos/blinkit.png',
+    availability: 'available',
+    detail: 'Complete cart, fastest delivery',
+  },
+  {
+    id: 'zepto',
+    name: 'Zepto',
+    eta: '14 min',
+    multiplier: 1.03,
+    logo: '/logos/zepto.png',
+    availability: 'available',
+    detail: 'Fast delivery, fresh produce',
+  },
+  {
+    id: 'amazon',
+    name: 'Amazon Fresh',
+    eta: 'Today',
+    multiplier: 0.95,
+    logo: '/logos/amazon-fresh.png',
+    availability: 'available',
+    detail: 'Lowest total, arrives today',
+  },
+  {
+    id: 'split',
+    name: 'Split cart',
+    eta: '10 min + today',
+    multiplier: 0.93,
+    availability: 'available',
+    detail: 'Amazon Fresh for kiwi and granola, Blinkit for berries',
+  },
+  {
+    id: 'instamart',
+    name: 'Instamart',
+    eta: '12 min',
+    multiplier: 1,
+    logo: '/logos/instamart.png',
+    availability: 'unavailable',
+    detail: 'Missing organic acai base',
+  },
+  {
+    id: 'bigbasket',
+    name: 'BigBasket',
+    eta: 'Tomorrow',
+    multiplier: 1.02,
+    logo: '/logos/big-basket.png',
+    availability: 'unavailable',
+    detail: 'Missing fresh kiwi',
+  },
+  {
+    id: 'swiggy',
+    name: 'Swiggy',
+    eta: '12 min',
+    multiplier: 1.01,
+    logo: '/logos/swiggy.png',
+    availability: 'unavailable',
+    detail: 'Missing house granola',
+  },
+  {
+    id: 'zomato',
+    name: 'Zomato',
+    eta: '15 min',
+    multiplier: 1.04,
+    logo: '/logos/zomato.png',
+    availability: 'unavailable',
+    detail: 'Full cart unavailable',
+  },
+  {
+    id: 'flipkart',
+    name: 'Flipkart Minutes',
+    eta: '18 min',
+    multiplier: 1.05,
+    logo: '/logos/flipkart-minutes.png',
+    availability: 'unavailable',
+    detail: 'Missing fresh blueberries',
+  },
+]
 
-  useEffect(() => {
-    const durations = [2000, 2200, 1800, 4000]
-    let step = 0
-    let t: ReturnType<typeof setTimeout>
-    const advance = () => {
-      step = ((step + 1) % 4) as 0 | 1 | 2 | 3
-      setUrlStep(step as 0 | 1 | 2 | 3)
-      t = setTimeout(advance, durations[step])
-    }
-    t = setTimeout(advance, durations[0])
-    return () => clearTimeout(t)
-  }, [])
+function formatRupees(amount: number) {
+  return `Rs ${amount.toLocaleString('en-IN', { maximumFractionDigits: 2 })}`
+}
 
-  const servingIngredients = [
-    { name: 'Organic Acai Base', base: 1, unit: 'pkg' },
-    { name: 'Fresh Blueberries', base: 0.5, unit: 'cup' },
-    { name: 'House Granola',     base: 0.25, unit: 'cup' },
-    { name: 'Manuka Honey',      base: 1, unit: 'tbsp' },
-  ]
+function RecipeCheckoutDemoSection() {
+  const [quantities, setQuantities] = useState<Record<string, number>>(() =>
+    Object.fromEntries(CHECKOUT_DEMO_INGREDIENTS.map((ingredient) => [ingredient.id, ingredient.defaultQty])),
+  )
+  const [selectedStoreId, setSelectedStoreId] = useState('')
+  const [checkoutStep, setCheckoutStep] = useState<'ingredients' | 'store'>('ingredients')
 
-  const mockupStyle: React.CSSProperties = {
-    background: BG, borderRadius: 14, padding: 16, marginBottom: 20, minHeight: 210,
-  }
-  const rowStyle: React.CSSProperties = {
-    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-    padding: '7px 0', borderBottom: `1px solid rgba(242,134,149,.07)`,
+  const selectedStore = CHECKOUT_DEMO_STORES.find((store) => store.id === selectedStoreId && store.availability === 'available')
+  const selectedItems = CHECKOUT_DEMO_INGREDIENTS.filter((ingredient) => (quantities[ingredient.id] ?? 0) > 0)
+  const subtotal = CHECKOUT_DEMO_INGREDIENTS.reduce((sum, ingredient) => {
+    return sum + ingredient.price * (quantities[ingredient.id] ?? 0)
+  }, 0)
+  const storeTotal = selectedStore ? subtotal * selectedStore.multiplier : null
+
+  function updateQuantity(id: string, delta: number) {
+    setQuantities((current) => ({
+      ...current,
+      [id]: Math.min(6, Math.max(0, (current[id] ?? 0) + delta)),
+    }))
   }
 
   return (
-    <section style={{ background: WHITE, padding: '80px 28px', borderTop: `1px solid rgba(242,134,149,.07)` }}>
-      <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', marginBottom: 56 }}>
-          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: RED, opacity: .4, marginBottom: 12 }}>Features</p>
-          <h2 style={{ fontSize: 'clamp(1.8rem,3vw,2.4rem)', fontWeight: 800, letterSpacing: '-1px', color: RED, marginBottom: 14, lineHeight: 1.2 }}>
-            More ways to cook smarter
-          </h2>
-          <p style={{ fontSize: 15, color: RED, opacity: .55, lineHeight: 1.7, maxWidth: 500, margin: '0 auto' }}>
-            These features are in development and will be available at launch.
-          </p>
+    <section id="about" className="recipe-demo-section" aria-labelledby="recipe-demo-title">
+      <div className="recipe-demo-shell">
+        <div className="recipe-demo-heading">
+          <p>How it works</p>
+          <h2 id="recipe-demo-title">Pick a recipe. We&apos;ll handle the rest.</h2>
+          <div>Select ingredients, choose a store, and check out in one tap.</div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, alignItems: 'start' }}>
+        <div className="recipe-demo-grid">
+          <div className="recipe-demo-image-card">
+            <Image src="/acaii.jpeg" alt="Heritage acai bowl with kiwi, banana, berries, and granola" fill sizes="320px" style={{ objectFit: 'cover', objectPosition: 'center' }} />
+            <div className="recipe-demo-image-caption">
+              <strong>Heritage Acai Bowl</strong>
+              <span>Acai, kiwi, berries, granola</span>
+            </div>
+          </div>
 
-          {/* Feature 1: URL import */}
-          <div style={{ background: BG, borderRadius: 20, overflow: 'hidden', border: `1px solid rgba(242,134,149,.1)`, padding: 28 }}>
-            <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.14em', color: RED, opacity: .38, marginBottom: 10 }}>Feature</p>
-            <h3 style={{ fontSize: 20, fontWeight: 800, color: RED, letterSpacing: '-0.5px', lineHeight: 1.3, marginBottom: 10 }}>
-              Paste a link. Get the full recipe.
-            </h3>
-            <p style={{ fontSize: 13, color: RED, opacity: .55, lineHeight: 1.7, marginBottom: 22 }}>
-              Drop in a YouTube or Instagram URL. Coookd reads the video, extracts every ingredient and kitchen tool mentioned, and builds a shoppable recipe — steps included.
-            </p>
+          <div className="recipe-demo-panel">
+            <div className="recipe-demo-panel-head">
+              <span>{checkoutStep === 'ingredients' ? 'Pick ingredients' : 'Pick store'}</span>
+              <strong>{selectedItems.length} selected</strong>
+            </div>
 
-            <div style={mockupStyle}>
-              {/* URL input row */}
-              <div style={{ background: WHITE, borderRadius: 10, padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14, border: `1px solid rgba(242,134,149,.12)` }}>
-                <span style={{ fontSize: 10, fontWeight: 700, color: RED, opacity: .35, flexShrink: 0, textTransform: 'uppercase', letterSpacing: '0.1em' }}>URL</span>
-                <span style={{ fontSize: 12, color: urlStep >= 1 ? RED : 'rgba(242,134,149,.25)', flex: 1, fontFamily: 'monospace', transition: 'color 0.4s', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
-                  {urlStep >= 1 ? 'youtube.com/watch?v=acai-bowl-recipe' : 'Paste a YouTube or Instagram link...'}
-                </span>
-                <div style={{ width: 26, height: 26, borderRadius: 7, background: urlStep === 1 ? RED : `rgba(242,134,149,.12)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, color: urlStep === 1 ? CREAM : RED, flexShrink: 0, transition: 'all 0.3s' }}>
-                  {urlStep === 2 ? '·' : '→'}
-                </div>
-              </div>
-
-              {urlStep === 2 && (
-                <div style={{ textAlign: 'center', padding: '24px 0', fontSize: 12, color: RED, opacity: .45 }}>
-                  Reading video — extracting ingredients and steps...
-                </div>
-              )}
-
-              {urlStep === 3 && (
-                <div style={{ animation: 'fadeUp 0.4s ease' }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: RED, marginBottom: 10, opacity: .7 }}>Heritage Acai Bowl — 4 ingredients · 2 tools · 3 steps</div>
-                  {[
-                    { name: 'Organic Acai Base', price: 'Rs 1,043', tag: null },
-                    { name: 'Manuka Honey',       price: 'Rs 1,577', tag: null },
-                    { name: 'High-Speed Blender', price: 'Rs 4,175', tag: 'tool' },
-                    { name: 'Mixing Bowl',        price: 'Rs 499',   tag: 'tool' },
-                  ].map((item, i) => (
-                    <div key={i} style={rowStyle}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <span style={{ fontSize: 12, fontWeight: 600, color: RED }}>{item.name}</span>
-                        {item.tag && (
-                          <span style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', background: `rgba(242,134,149,.1)`, color: RED, opacity: .7, padding: '2px 6px', borderRadius: 4 }}>
-                            {item.tag}
-                          </span>
-                        )}
+            {checkoutStep === 'ingredients' ? (
+              <>
+                <div className="recipe-demo-list">
+                  {CHECKOUT_DEMO_INGREDIENTS.map((ingredient) => {
+                    const qty = quantities[ingredient.id] ?? 0
+                    return (
+                      <div className={`recipe-demo-item${qty > 0 ? ' is-selected' : ''}`} key={ingredient.id}>
+                        <div>
+                          <strong>{ingredient.name}</strong>
+                          <span>{ingredient.note}</span>
+                        </div>
+                        <div className="recipe-demo-qty" aria-label={`${ingredient.name} quantity`}>
+                          <button type="button" onClick={() => updateQuantity(ingredient.id, -1)} aria-label={`Remove ${ingredient.name}`}>-</button>
+                          <span>{qty}</span>
+                          <button type="button" onClick={() => updateQuantity(ingredient.id, 1)} aria-label={`Add ${ingredient.name}`}>+</button>
+                        </div>
                       </div>
-                      <span style={{ fontSize: 11, color: RED, opacity: .5 }}>{item.price}</span>
-                    </div>
-                  ))}
-                  <button type="button" style={{ marginTop: 14, width: '100%', padding: '9px', background: RED, color: CREAM, border: 'none', borderRadius: 9, fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
-                    Add all to cart
+                    )
+                  })}
+                </div>
+
+                <div className="recipe-demo-actions">
+                  <span>{selectedItems.length > 0 ? `${selectedItems.length} items selected` : 'Select at least one item'}</span>
+                  <button
+                    type="button"
+                    className="recipe-demo-primary"
+                    onClick={() => setCheckoutStep('store')}
+                    disabled={selectedItems.length === 0}
+                  >
+                    Next
                   </button>
                 </div>
-              )}
-
-              {urlStep === 0 && (
-                <div style={{ textAlign: 'center', padding: '32px 0', fontSize: 12, color: RED, opacity: .25 }}>
-                  Waiting for a link...
+              </>
+            ) : (
+              <>
+                <div className="recipe-demo-list recipe-demo-summary-list" aria-label="Selected ingredients">
+                  {selectedItems.map((ingredient) => {
+                    const qty = quantities[ingredient.id] ?? 0
+                    return (
+                      <div className="recipe-demo-item is-selected" key={ingredient.id}>
+                        <div>
+                          <strong>{ingredient.name}</strong>
+                          <span>{ingredient.note}</span>
+                        </div>
+                        <strong className="recipe-demo-summary-qty">x{qty}</strong>
+                      </div>
+                    )
+                  })}
                 </div>
-              )}
-            </div>
 
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-              {['Works with YouTube', 'Works with Instagram', 'Ingredients + tools', 'Buy links included'].map(tag => (
-                <span key={tag} style={{ fontSize: 11, fontWeight: 600, color: RED, opacity: .55, background: `rgba(242,134,149,.07)`, padding: '4px 10px', borderRadius: 6 }}>{tag}</span>
-              ))}
-            </div>
-          </div>
-
-          {/* Feature 2: Scalable servings */}
-          <div style={{ background: BG, borderRadius: 20, overflow: 'hidden', border: `1px solid rgba(242,134,149,.1)`, padding: 28 }}>
-            <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.14em', color: RED, opacity: .38, marginBottom: 10 }}>Feature</p>
-            <h3 style={{ fontSize: 20, fontWeight: 800, color: RED, letterSpacing: '-0.5px', lineHeight: 1.3, marginBottom: 10 }}>
-              Cook for any crowd.
-            </h3>
-            <p style={{ fontSize: 13, color: RED, opacity: .55, lineHeight: 1.7, marginBottom: 22 }}>
-              Set the number of servings and every ingredient quantity scales instantly. The grocery list recalculates in real time — no manual math, no guessing.
-            </p>
-
-            <div style={mockupStyle}>
-              {/* Servings control */}
-              <div style={{ background: WHITE, borderRadius: 10, padding: '12px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14, border: `1px solid rgba(242,134,149,.12)` }}>
-                <span style={{ fontSize: 12, fontWeight: 600, color: RED }}>Servings</span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                  <button type="button" onClick={() => setDemoServings(s => Math.max(1, s - 1))}
-                    style={{ width: 28, height: 28, borderRadius: '50%', border: `1.5px solid rgba(242,134,149,.25)`, background: 'transparent', color: RED, fontWeight: 700, fontSize: 15, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>
-                    −
-                  </button>
-                  <span style={{ fontSize: 16, fontWeight: 800, color: RED, minWidth: 22, textAlign: 'center' }}>{demoServings}</span>
-                  <button type="button" onClick={() => setDemoServings(s => Math.min(12, s + 1))}
-                    style={{ width: 28, height: 28, borderRadius: '50%', border: `1.5px solid rgba(242,134,149,.25)`, background: 'transparent', color: RED, fontWeight: 700, fontSize: 15, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>
-                    +
-                  </button>
-                </div>
-              </div>
-
-              {/* Ingredient list */}
-              {servingIngredients.map((ing, i) => {
-                const qty = (ing.base * demoServings) / 2
-                const display = Number.isInteger(qty) ? qty.toString() : qty.toFixed(1)
-                return (
-                  <div key={i} style={rowStyle}>
-                    <span style={{ fontSize: 12, fontWeight: 600, color: RED }}>{ing.name}</span>
-                    <span style={{ fontSize: 12, color: RED, opacity: .55, transition: 'all 0.25s', fontVariantNumeric: 'tabular-nums' }}>
-                      {display} {ing.unit}
-                    </span>
+                <div className="recipe-demo-store-block">
+                  <div className="recipe-demo-select-label">Choose store</div>
+                  <div className="recipe-demo-select-wrap">
+                    <select
+                      className="recipe-demo-select"
+                      value={selectedStoreId}
+                      onChange={(event) => setSelectedStoreId(event.target.value)}
+                    >
+                      <option value="">Select a store</option>
+                      {CHECKOUT_DEMO_STORES.map((store) => {
+                        const isUnavailable = store.availability === 'unavailable'
+                        return (
+                          <option disabled={isUnavailable} key={store.id} value={store.id}>
+                            {isUnavailable
+                              ? `${store.name} - unavailable`
+                              : `${store.name} - ${store.eta}`}
+                          </option>
+                        )
+                      })}
+                    </select>
                   </div>
-                )
-              })}
+                  {selectedStore && (
+                    <div className="recipe-demo-store-insight is-selected">
+                      <span>{selectedStore.name}</span>
+                      <strong>{selectedStore.detail}</strong>
+                      <small>{selectedStore.eta} delivery estimate</small>
+                    </div>
+                  )}
+                </div>
 
-              <div style={{ marginTop: 16, padding: '10px 14px', background: WHITE, borderRadius: 10, border: `1px solid rgba(242,134,149,.08)`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: 11, color: RED, opacity: .5 }}>Estimated total</span>
-                <span style={{ fontSize: 14, fontWeight: 800, color: RED }}>${(34.99 * demoServings / 2).toFixed(2)}</span>
-              </div>
-            </div>
+                <div className="recipe-demo-checkout">
+                  <div>
+                    <span>{selectedStore ? `Total via ${selectedStore.name}` : 'Cart total'}</span>
+                    <strong className={!selectedStore ? 'recipe-demo-empty-total' : undefined}>
+                      {storeTotal ? formatRupees(storeTotal) : 'Select a store first'}
+                    </strong>
+                  </div>
+                  <div className="recipe-demo-checkout-actions">
+                    <button type="button" className="recipe-demo-secondary" onClick={() => setCheckoutStep('ingredients')}>
+                      Edit
+                    </button>
+                    {selectedStore ? (
+                      <a href="/waitlist">Checkout</a>
+                    ) : (
+                      <button type="button" className="recipe-demo-checkout-disabled" disabled>Checkout</button>
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
 
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-              {['Adjustable servings', 'Auto-scales quantities', 'Live price estimate', 'Works for any recipe'].map(tag => (
-                <span key={tag} style={{ fontSize: 11, fontWeight: 600, color: RED, opacity: .55, background: `rgba(242,134,149,.07)`, padding: '4px 10px', borderRadius: 6 }}>{tag}</span>
-              ))}
+function UpcomingFeaturesSection() {
+  const [activeFeature, setActiveFeature] = useState(0)
+  const [stageHeight, setStageHeight] = useState(620)
+  const scrollRef = useRef<HTMLDivElement | null>(null)
+  const shouldReduceMotion = useReducedMotion()
+  const features = FEATURE_STEPS
+  const featureCount = features.length
+  const lastFeatureIndex = Math.max(featureCount - 1, 1)
+  const { scrollYProgress } = useScroll({
+    target: scrollRef,
+    offset: [`start ${FEATURE_STICKY_TOP}px`, `end ${FEATURE_STICKY_TOP + stageHeight}px`],
+  })
+  const progress = scrollYProgress
+  const stops = features.map((_, index) => index / lastFeatureIndex)
+  const yValues = features.map((_, index) => -index * stageHeight)
+  const trackY = useTransform(progress, stops, yValues)
+
+  useEffect(() => {
+    const updateStageHeight = () => {
+      const nextHeight = Math.min(Math.max(window.innerHeight - 260, 500), 620)
+      setStageHeight(nextHeight)
+    }
+
+    updateStageHeight()
+    window.addEventListener('resize', updateStageHeight)
+    return () => window.removeEventListener('resize', updateStageHeight)
+  }, [])
+
+  useMotionValueEvent(progress, 'change', (latest) => {
+    const nextFeature = Math.min(featureCount - 1, Math.max(0, Math.round(latest * lastFeatureIndex)))
+    setActiveFeature((current) => (current === nextFeature ? current : nextFeature))
+  })
+
+  const trackStyle = {
+    '--feature-stage-height': `${stageHeight}px`,
+    '--feature-sticky-top': `${FEATURE_STICKY_TOP}px`,
+    minHeight: stageHeight * featureCount,
+  } as React.CSSProperties
+
+  const renderFeatureVisual = (index: number) => {
+    if (index === 0) {
+      return (
+        <div className="feature-source-stack visual-capture">
+          <div className="feature-source-input">
+            <span>Paste a link</span>
+            <strong>instagram.com/reel/acai-bowl</strong>
+          </div>
+          <div className="feature-source-card is-image">
+            <Image src="/acaii.jpeg" alt="" fill sizes="360px" style={{ objectFit: 'cover' }} />
+            <div className="feature-source-overlay">
+              <span>Saved post</span>
+              <strong>Acai Bowl</strong>
             </div>
           </div>
-
+          <div className="feature-floating-note note-one">Instagram reel</div>
+          <div className="feature-floating-note note-two">Recipe screenshot</div>
+          <div className="feature-capture-bar">
+            <span>Recipe found</span>
+            <strong>Screenshot or link accepted</strong>
+          </div>
         </div>
+      )
+    }
+
+    if (index === 1) {
+      return (
+        <div className="feature-read-card visual-read">
+          <div className="feature-scan-line" />
+          <div className="feature-card-header">
+            <span>Recipe detected</span>
+            <strong>Acai Bowl</strong>
+          </div>
+          <div className="feature-read-grid">
+            {[
+              ['Ingredients', '12 found'],
+              ['Servings', '4 people'],
+              ['Prep time', '10 min'],
+              ['Steps', '4 steps'],
+            ].map(([label, value], tileIndex) => (
+              <div className="feature-read-tile" key={label} style={{ animationDelay: `${tileIndex * 160}ms` }}>
+                <span>{label}</span>
+                <strong>{value}</strong>
+              </div>
+            ))}
+          </div>
+          <div className="feature-read-line">Reading creator notes and turning them into a clean shopping flow...</div>
+        </div>
+      )
+    }
+
+    if (index === 2) {
+      return (
+        <div className="feature-cart-card visual-cart visual-bucket">
+          <div className="feature-card-header">
+            <span>Editable grocery basket</span>
+            <strong>Serves 4</strong>
+          </div>
+          <div className="feature-bucket-wrap">
+            <Bucket />
+          </div>
+        </div>
+      )
+    }
+
+    if (index === 3) {
+      return (
+        <div className="feature-store-card visual-store">
+          <div className="feature-card-header">
+            <span>Choose store</span>
+            <strong>Cart built</strong>
+          </div>
+          {[
+            ['Blinkit', 'Rs 1,860', '/logos/blinkit.png'],
+            ['Zepto', 'Rs 1,905', '/logos/zepto.png'],
+            ['Instamart', 'Rs 1,890', '/logos/instamart.png'],
+            ['Amazon Fresh', 'Rs 1,940', '/logos/amazon-fresh.png'],
+          ].map(([store, price, logo], rowIndex) => (
+            <div className={`feature-store-row${rowIndex === 0 ? ' is-selected' : ''}`} key={store} style={{ animationDelay: `${rowIndex * 150}ms` }}>
+              <span className="feature-store-logo">
+                <Image src={logo} alt="" fill sizes="28px" style={{ objectFit: 'contain' }} />
+              </span>
+              <span>{store}</span>
+              <strong>{price}</strong>
+            </div>
+          ))}
+          <div className="feature-checkout-button">Checkout on Blinkit →</div>
+        </div>
+      )
+    }
+
+    return (
+      <div className="feature-cook-card visual-cook">
+        <div className="feature-card-header">
+          <span>Acai Bowl prep mode</span>
+          <strong>Step 2 of 4</strong>
+        </div>
+        <div className="feature-timer"><span>00:45</span></div>
+        <h3>Blend until thick</h3>
+        <p>Blend frozen acai, banana, and a splash of milk. Stop when the texture is scoopable, not drinkable.</p>
+        <div className="feature-cook-progress"><span /></div>
+        <div className="feature-next-step">Next step: Add toppings</div>
+      </div>
+    )
+  }
+
+  return (
+    <section id="features" className="sticky-feature-section">
+      <div className="sticky-feature-shell">
+        <div className="sticky-feature-heading">
+          <p>Features</p>
+          <h2>
+            Everything ateoclock can do
+          </h2>
+        </div>
+
+        <div ref={scrollRef} className="sticky-feature-scroll" style={trackStyle}>
+          <div className="sticky-feature-viewport">
+            <div className="feature-copy-window">
+              <motion.div
+                key={features[activeFeature].title}
+                className="sticky-feature-card is-active"
+                initial={shouldReduceMotion ? false : { opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: shouldReduceMotion ? 0 : 0.28, ease: 'easeOut' }}
+              >
+                <div className="sticky-feature-card-inner">
+                  <div className="sticky-feature-index">0{activeFeature + 1}</div>
+                  <p>{features[activeFeature].kicker}</p>
+                  <h3>
+                    {features[activeFeature].title}{' '}
+                    <span>{features[activeFeature].highlight}</span>
+                  </h3>
+                  <div>{features[activeFeature].body}</div>
+                  <div className="sticky-feature-tags">
+                    {features[activeFeature].tags.map((tag) => (
+                      <span key={tag}>{tag}</span>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+
+            <div className="feature-visual-window" aria-hidden="true">
+              <motion.div className="feature-visual-track" style={{ y: trackY }}>
+                {features.map((feature, index) => (
+                  <div className={`feature-visual-panel${activeFeature === index ? ' is-active' : ''}`} key={`visual-${feature.title}`}>
+                    <div className="sticky-feature-asset">
+                      <div className="sticky-feature-asset-top">
+                        <span>{feature.kicker}</span>
+                        <span>{String(index + 1).padStart(2, '0')} / {String(featureCount).padStart(2, '0')}</span>
+                      </div>
+                      <div className="sticky-visual-stage">
+                        {renderFeatureVisual(index)}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </motion.div>
+            </div>
+          </div>
+        </div>
+
+        <div className="feature-mobile-stack">
+          {features.map((feature, index) => (
+            <article className="feature-mobile-scene" key={`mobile-${feature.title}`}>
+              <div className="sticky-feature-card is-active">
+                <div className="sticky-feature-card-inner">
+                  <div className="sticky-feature-index">0{index + 1}</div>
+                  <p>{feature.kicker}</p>
+                  <h3>
+                    {feature.title}{' '}
+                    <span>{feature.highlight}</span>
+                  </h3>
+                  <div>{feature.body}</div>
+                  <div className="sticky-feature-tags">
+                    {feature.tags.map((tag) => (
+                      <span key={tag}>{tag}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="sticky-feature-asset" aria-hidden="true">
+                <div className="sticky-feature-asset-top">
+                  <span>{feature.kicker}</span>
+                  <span>{String(index + 1).padStart(2, '0')} / {String(featureCount).padStart(2, '0')}</span>
+                </div>
+                <div className="sticky-visual-stage">
+                  {renderFeatureVisual(index)}
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+
+          </div>
+    </section>
+  )
+}
+
+function CreatorsSection() {
+  return (
+    <section id="creators" className="creators-section" aria-labelledby="creators-title">
+      <div className="creators-shell">
+
+        {/* LEFT - copy */}
+        <div className="creators-copy">
+          <p>For creators</p>
+          <h2 id="creators-title">Earn when your audience shops your recipes.</h2>
+          <div>Share one ateoclock link. When followers buy groceries through your recipe, you earn from every eligible order.</div>
+
+          {/* Steps */}
+          <div className="creator-steps">
+            {[
+              { n: '01', label: 'Share', sub: 'Post your recipe link' },
+              { n: '02', label: 'Shop',  sub: 'Followers order groceries' },
+              { n: '03', label: 'Earn',  sub: 'Payout lands in your account' },
+            ].map(({ n, label, sub }, i, arr) => (
+              <Fragment key={n}>
+                <div className="creator-step">
+                  <div className="creator-step-num">{n}</div>
+                  <div>
+                    <strong>{label}</strong>
+                    <span>{sub}</span>
+                  </div>
+                </div>
+                {i < arr.length - 1 && <div className="creator-step-arrow">→</div>}
+              </Fragment>
+            ))}
+          </div>
+
+          <a href="/waitlist?role=creator">Get creator access</a>
+        </div>
+
+        {/* RIGHT - live earnings card */}
+        <div className="creator-earn-card" aria-label="Creator earnings demo">
+          <div className="creator-earn-header">
+            <div>
+              <div className="creator-earn-label">Last 7 days</div>
+              <div className="creator-earn-amount">Rs 4,096</div>
+            </div>
+            <div className="creator-earn-badge">↑ 18% this week</div>
+          </div>
+
+          <div className="creator-earn-rows">
+            {[
+              { recipe: 'Butter Chicken',  orders: '142 orders', pct: 86,  earn: 'Rs 1,340' },
+              { recipe: 'Pizza',           orders: '61 orders',  pct: 48,  earn: 'Rs 890' },
+              { recipe: 'Acai Bowl',       orders: '48 orders',  pct: 36,  earn: 'Rs 610' },
+            ].map(({ recipe, orders, pct, earn }) => (
+              <div className="creator-earn-row" key={recipe}>
+                <div className="creator-earn-row-top">
+                  <strong>{recipe}</strong>
+                  <span className="creator-earn-row-earn">{earn}</span>
+                </div>
+                <div className="creator-earn-row-meta">{orders}</div>
+                <div className="creator-earn-track">
+                  <div className="creator-earn-fill" style={{ width: `${pct}%` }} />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="creator-earn-footer">
+            <span>Eligible grocery payout</span>
+            <strong>Paid every Monday</strong>
+          </div>
+        </div>
+
       </div>
     </section>
   )
@@ -312,31 +807,27 @@ function UpcomingFeaturesSection() {
 
 const FAQS = [
   {
-    q: "What is Coookd?",
-    a: "Coookd is a platform that turns any recipe into a grocery order. Pick a recipe, select your ingredients, choose a delivery store like Blinkit or Zepto, and check out — all in one tap.",
+    q: "What is ateoclock?",
+    a: "ateoclock is a platform that turns any recipe into a grocery order. Pick a recipe, select your ingredients, choose a delivery store like Blinkit or Zepto, and check out - all in one tap.",
   },
   {
-    q: "Which grocery stores does Coookd support?",
+    q: "Which grocery stores does ateoclock support?",
     a: "We currently support Blinkit, Zepto, Amazon Fresh, BigBasket, and Instamart. More stores are being added before launch.",
   },
   {
-    q: "Is Coookd free to use?",
-    a: "Yes — Coookd is free for home cooks. You only pay for the groceries you order through the store of your choice.",
+    q: "Is ateoclock free to use?",
+    a: "Yes - ateoclock is free for home cooks. You only pay for the groceries you order through the store of your choice.",
   },
   {
-    q: "How does it work for creators?",
-    a: "If you're a food creator, you can link your recipes directly on Coookd. When your followers cook your recipe and order ingredients, you earn an affiliate commission — no brand deals needed.",
+    q: "When will ateoclock launch?",
+    a: "We're in early access right now. Join the waitlist and we'll notify you the moment we go live - early members get priority access.",
   },
   {
-    q: "When will Coookd launch?",
-    a: "We're in early access right now. Join the waitlist and we'll notify you the moment we go live — early members get priority access.",
+    q: "Does ateoclock adjust for servings?",
+    a: "Yes. Scale up or down the number of servings and the ingredient quantities - and the grocery list - update automatically.",
   },
   {
-    q: "Does Coookd adjust for servings?",
-    a: "Yes. Scale up or down the number of servings and the ingredient quantities — and the grocery list — update automatically.",
-  },
-  {
-    q: "What countries is Coookd available in?",
+    q: "What countries is ateoclock available in?",
     a: "Our launch focus is India, with global expansion planned shortly after. Prices are displayed in your local currency based on your location.",
   },
   {
@@ -348,35 +839,35 @@ const FAQS = [
 function FAQSection() {
   const [open, setOpen] = useState<number | null>(null)
   return (
-    <section id="faq" style={{ background: `rgba(242,134,149,.04)`, padding: '80px 28px' }}>
-      <div style={{ maxWidth: 720, margin: '0 auto' }}>
+    <section id="faq" style={{ background: BG, padding: '88px 28px', borderTop: `1px solid rgba(107,62,30,.08)` }}>
+      <div style={{ maxWidth: 680, margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: 12 }}>
-          <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: RED, opacity: .45, background: `rgba(242,134,149,.08)`, padding: '4px 14px', borderRadius: 999 }}>FAQs</span>
+          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: BROWN, opacity: .6 }}>FAQs</span>
         </div>
-        <h2 style={{ fontSize: 'clamp(1.8rem,3vw,2.2rem)', fontWeight: 800, letterSpacing: '-1px', color: RED, textAlign: 'center', marginBottom: 8, lineHeight: 1.2 }}>
+        <h2 style={{ fontFamily: INTER_REGULAR, fontSize: 'clamp(1.6rem,2.8vw,2.1rem)', fontWeight: 400, letterSpacing: '-0.03em', color: RED, textAlign: 'center', marginBottom: 48, lineHeight: 1.2 }}>
           Frequently Asked Questions
         </h2>
-        <p style={{ fontSize: 14, color: RED, opacity: .5, lineHeight: 1.7, textAlign: 'center', marginBottom: 40, maxWidth: 480, margin: '0 auto 40px' }}>
-          Everything you need to know about using Coookd. Still curious? Drop us a message and we&apos;ll get right back to you.
-        </p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-          {FAQS.map((faq, i) => (
-            <div key={i} style={{ borderTop: `1px solid rgba(242,134,149,.1)`, ...(i === FAQS.length - 1 ? { borderBottom: `1px solid rgba(242,134,149,.1)` } : {}) }}>
-              <button
-                type="button"
-                onClick={() => setOpen(open === i ? null : i)}
-                style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 0', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left', gap: 24, fontFamily: 'inherit' }}
-              >
-                <span style={{ fontSize: 15, fontWeight: 600, color: RED, lineHeight: 1.4 }}>{faq.q}</span>
-                <span style={{ width: 28, height: 28, borderRadius: '50%', border: `1.5px solid rgba(242,134,149,.25)`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 18, color: RED, transition: 'transform 0.2s', transform: open === i ? 'rotate(45deg)' : 'rotate(0deg)', lineHeight: 1 }}>+</span>
-              </button>
-              {open === i && (
-                <div style={{ paddingBottom: 20, fontSize: 14, color: RED, opacity: .6, lineHeight: 1.8 }}>
-                  {faq.a}
-                </div>
-              )}
-            </div>
-          ))}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {FAQS.map((faq, i) => {
+            const isOpen = open === i
+            return (
+              <div key={i} style={{ borderRadius: 14, overflow: 'hidden', border: isOpen ? `1.5px solid rgba(107,62,30,.18)` : `1.5px solid rgba(116,130,63,.12)`, background: isOpen ? '#FDF8EE' : WHITE, transition: 'background 0.2s, border-color 0.2s' }}>
+                <button
+                  type="button"
+                  onClick={() => setOpen(isOpen ? null : i)}
+                  style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 22px', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left', gap: 20, fontFamily: 'inherit' }}
+                >
+                  <span style={{ fontSize: 14, fontWeight: 700, color: isOpen ? BROWN : RED, lineHeight: 1.4, transition: 'color 0.2s' }}>{faq.q}</span>
+                  <span style={{ width: 26, height: 26, borderRadius: '50%', background: isOpen ? BROWN : `rgba(116,130,63,.1)`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 16, color: isOpen ? WHITE : RED, transition: 'all 0.2s', transform: isOpen ? 'rotate(45deg)' : 'rotate(0deg)', lineHeight: 1 }}>+</span>
+                </button>
+                {isOpen && (
+                  <div style={{ padding: '0 22px 20px', fontSize: 14, color: RED, lineHeight: 1.85, borderTop: `1px solid rgba(107,62,30,.08)`, paddingTop: 14 }}>
+                    {faq.a}
+                  </div>
+                )}
+              </div>
+            )
+          })}
         </div>
       </div>
     </section>
@@ -384,22 +875,10 @@ function FAQSection() {
 }
 
 export default function Home() {
-  const [tab, setTab]           = useState<'cook' | 'creator'>('cook')
   const [cartFill, setCartFill] = useState(0)
   const [heroTitleNumber, setHeroTitleNumber] = useState(0)
   const [waitlistCount, setWaitlistCount] = useState<number | null>(null)
-  const [dragOver, setDragOver] = useState(false)
-  const [uploadedFile, setUploadedFile] = useState<string | null>(null)
-  const [aboutPhase, setAboutPhase] = useState(0) // 0=camera roll, 1=selected, 2=cart
   const [navOpen, setNavOpen] = useState(false)
-
-  const statsRef                = useRef<HTMLDivElement>(null)
-  const statsVis                = useVisible(statsRef)
-  const c1 = useCounter(4200, 1800, statsVis)
-  const c2 = useCounter(38,   1400, statsVis)
-  const c3 = useCounter(96,   1600, statsVis)
-
-  const selectedRecipe = DEFAULT_RECIPE
 
   useEffect(() => {
     const t = setInterval(() => setCartFill(n => (n >= 4 ? 0 : n + 1)), 800)
@@ -413,19 +892,6 @@ export default function Home() {
 
     return () => clearTimeout(timeoutId)
   }, [heroTitleNumber])
-
-  useEffect(() => {
-    const durations = [2200, 2000, 2800]
-    let phase = 0
-    const tick = () => {
-      phase = (phase + 1) % 3
-      setAboutPhase(phase)
-    }
-    let timer: ReturnType<typeof setTimeout>
-    const schedule = () => { timer = setTimeout(() => { tick(); schedule() }, durations[phase]) }
-    schedule()
-    return () => clearTimeout(timer)
-  }, [])
 
   // Fetch initial count + subscribe to live inserts
   useEffect(() => {
@@ -447,205 +913,29 @@ export default function Home() {
     return () => { supabase.removeChannel(channel) }
   }, [])
 
-  function handleDrop(e: React.DragEvent) {
-    e.preventDefault()
-    setDragOver(false)
-    const file = e.dataTransfer.files[0]
-    if (file && file.type.startsWith('image/')) {
-      setUploadedFile(file.name)
-    }
-  }
-
-  function handleFileInput(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (file) setUploadedFile(file.name)
-  }
-
-  function scrollToSection(sectionId: string, nextTab?: 'cook' | 'creator') {
-    if (nextTab) {
-      setTab(nextTab)
-    }
+  function scrollToSection(sectionId: string) {
     document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     setNavOpen(false)
   }
 
-  const navItems: Array<{ label: string; sectionId: string; tab?: 'cook' | 'creator' }> = [
-    { label: 'About', sectionId: 'about' },
-    { label: 'Features', sectionId: 'how-it-works' },
+  const navItems: Array<{ label: string; sectionId: string; href?: string }> = [
+    { label: 'About', sectionId: 'about', href: '/team' },
+    { label: 'Features', sectionId: 'features' },
+    { label: 'For Creators', sectionId: 'creators' },
     { label: 'FAQs', sectionId: 'faq' },
   ]
 
 
-  const DEMO_INGREDIENTS = [
-    { id: 'acai',       name: 'Organic Acai Base',   description: 'Frozen, Unsweetened',  price: 12.50 },
-    { id: 'kiwi',       name: 'Fresh Kiwi',          description: 'Pack of 4',            price: 3.50  },
-    { id: 'blueberry',  name: 'Fresh Blueberries',   description: 'Pint, Seasonal',       price: 4.50  },
-    { id: 'granola',    name: 'House Granola',        description: 'Almond & Cinnamon',   price: 8.00  },
-    { id: 'strawberry', name: 'Strawberries',         description: 'Fresh, 250g',          price: 3.99  },
-    { id: 'banana',     name: 'Ripe Bananas',         description: 'Bunch of 5',           price: 1.99  },
-  ]
-  const STORE_MULTIPLIERS: Record<string, number> = {
-    'Blinkit': 1.00,
-    'Zepto': 0.97,
-    'Amazon Fresh': 1.05,
-    'BigBasket': 0.94,
-    'Instamart': 1.02,
-  }
-  const [demoQty, setDemoQty] = useState<Record<string, number>>({ acai: 1, kiwi: 0, blueberry: 0, granola: 1, strawberry: 0, banana: 0 })
-  const [demoPanelStep, setDemoPanelStep] = useState<'pick' | 'checkout'>('pick')
-  const [demoStore, setDemoStore] = useState('')
-  const [demoCurrency, setDemoCurrency] = useState<{ symbol: string; rate: number }>({ symbol: '$', rate: 1 })
-  useEffect(() => {
-    fetch('https://ipapi.co/json/')
-      .then(r => r.json())
-      .then(d => {
-        const map: Record<string, { symbol: string; rate: number }> = {
-          IN: { symbol: 'Rs ', rate: 83.5 },
-          GB: { symbol: '£', rate: 0.79 },
-          EU: { symbol: '€', rate: 0.92 },
-          DE: { symbol: '€', rate: 0.92 },
-          FR: { symbol: '€', rate: 0.92 },
-          AU: { symbol: 'A$', rate: 1.53 },
-          CA: { symbol: 'C$', rate: 1.36 },
-          SG: { symbol: 'S$', rate: 1.34 },
-          AE: { symbol: 'AED ', rate: 3.67 },
-        }
-        const match = map[d.country_code]
-        if (match) setDemoCurrency(match)
-      })
-      .catch(() => {})
-  }, [])
-  function demoAdjust(id: string, delta: number) {
-    setDemoQty(q => ({ ...q, [id]: Math.max(0, q[id] + delta) }))
-  }
-  const demoSelectedItems = DEMO_INGREDIENTS.filter(i => demoQty[i.id] > 0)
-  const demoBaseTotal = demoSelectedItems.reduce((sum, i) => sum + i.price * demoQty[i.id], 0)
-  const demoStoreTotal = demoStore ? demoBaseTotal * STORE_MULTIPLIERS[demoStore] : demoBaseTotal
-  function fmt(usd: number) {
-    const val = usd * demoCurrency.rate
-    return `${demoCurrency.symbol}${Math.round(val * 100) / 100}`
-  }
-
   const ingredients = ['Frozen acai', 'Banana', 'Granola', 'Mixed berries']
 
-  const focusedFlowPanel = (
-    <div style={{ display: 'grid', gridTemplateColumns: '2fr 3fr', gap: 32, alignItems: 'center', width: '100%' }}>
-      {/* Left: image */}
-      <div style={{ position: 'relative', borderRadius: 20, overflow: 'hidden', aspectRatio: '3 / 4', boxShadow: `0 8px 40px rgba(242,134,149,0.18)` }}>
-        <Image src="/acai.png" alt="Heritage Acai Bowl" fill style={{ objectFit: 'cover' }} />
-        <div style={{ position: 'absolute', bottom: 16, left: 16, right: 16, background: `rgba(253,248,238,0.92)`, backdropFilter: 'blur(8px)', borderRadius: 12, padding: '10px 14px' }}>
-          <div style={{ fontWeight: 800, fontSize: 15, color: RED, letterSpacing: '-0.02em' }}>Heritage Acai Bowl</div>
-          <div style={{ fontSize: 11, color: RED, opacity: 0.55, marginTop: 2 }}>Brazilian Berry Curation</div>
-        </div>
-      </div>
-
-      {/* Right: ingredient picker or checkout */}
-      <div style={{ fontFamily: "var(--font-inter), sans-serif" }}>
-
-        {demoPanelStep === 'pick' ? (
-          <>
-            <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.18em', color: RED, opacity: 0.45, marginBottom: 12 }}>Rapid Selection</div>
-            <div style={{ backgroundColor: WHITE, borderRadius: 18, border: `1px solid rgba(242,134,149,0.1)`, overflow: 'hidden', marginBottom: 14, boxShadow: '0 1px 6px rgba(0,0,0,0.04)' }}>
-              {DEMO_INGREDIENTS.map((item, idx) => {
-                const qty = demoQty[item.id]
-                const isLast = idx === DEMO_INGREDIENTS.length - 1
-                return (
-                  <div key={item.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', borderBottom: isLast ? 'none' : `1px solid rgba(242,134,149,0.07)` }}>
-                    <div>
-                      <div style={{ fontWeight: 700, fontSize: 13, color: RED }}>{item.name}</div>
-                      <div style={{ fontSize: 11, color: RED, opacity: 0.5, marginTop: 1 }}>{item.description}</div>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, backgroundColor: BG, borderRadius: 9999, padding: '3px', border: `1px solid rgba(242,134,149,0.1)` }}>
-                      <button type="button" onClick={() => demoAdjust(item.id, -1)}
-                        style={{ width: 26, height: 26, borderRadius: '50%', border: 'none', background: 'transparent', cursor: 'pointer', color: RED, fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
-                      <span style={{ width: 12, textAlign: 'center', fontSize: 12, fontWeight: 700, color: RED }}>{qty}</span>
-                      <button type="button" onClick={() => demoAdjust(item.id, 1)}
-                        style={{ width: 26, height: 26, borderRadius: '50%', border: qty > 0 ? 'none' : `1px solid rgba(242,134,149,0.25)`, background: qty > 0 ? RED : 'transparent', cursor: 'pointer', color: qty > 0 ? CREAM : RED, fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s' }}>+</button>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-            <div style={{ backgroundColor: BG, borderRadius: 18, padding: '14px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, border: `1px solid rgba(242,134,149,0.1)` }}>
-              <div>
-                <div style={{ fontSize: 10, fontWeight: 700, color: RED, opacity: 0.5, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 2 }}>
-                  {demoSelectedItems.length} item{demoSelectedItems.length !== 1 ? 's' : ''} selected
-                </div>
-                <div style={{ fontSize: 12, fontWeight: 700, color: RED, letterSpacing: '-0.01em' }}>
-                  {demoSelectedItems.length > 0 ? 'Pricing appears after store selection' : 'Add items to continue'}
-                </div>
-              </div>
-              <button type="button"
-                onClick={() => { if (demoSelectedItems.length > 0) setDemoPanelStep('checkout') }}
-                style={{ padding: '10px 18px', borderRadius: 9999, background: demoSelectedItems.length > 0 ? RED : `rgba(242,134,149,0.2)`, color: demoSelectedItems.length > 0 ? CREAM : RED, fontWeight: 700, fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', border: 'none', cursor: demoSelectedItems.length > 0 ? 'pointer' : 'not-allowed', transition: 'all 0.2s', whiteSpace: 'nowrap' }}>
-                Complete →
-              </button>
-            </div>
-          </>
-        ) : (
-          <>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-              <button type="button" onClick={() => { setDemoPanelStep('pick'); setDemoStore('') }}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: RED, opacity: 0.5, fontSize: 18, lineHeight: 1, padding: 0 }}>←</button>
-              <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.18em', color: RED, opacity: 0.45 }}>Checkout</div>
-            </div>
-
-            {/* Order summary */}
-            <div style={{ backgroundColor: WHITE, borderRadius: 18, border: `1px solid rgba(242,134,149,0.1)`, overflow: 'hidden', marginBottom: 14 }}>
-              {demoSelectedItems.map((item, idx) => {
-                const isLast = idx === demoSelectedItems.length - 1
-                const storePrice = demoStore ? item.price * STORE_MULTIPLIERS[demoStore] : null
-                return (
-                  <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 14px', borderBottom: isLast ? 'none' : `1px solid rgba(242,134,149,0.07)` }}>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: RED }}>{item.name} <span style={{ fontWeight: 400, opacity: 0.5 }}>×{demoQty[item.id]}</span></div>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: RED, opacity: demoStore ? 1 : 0.45, textTransform: demoStore ? 'none' : 'uppercase', letterSpacing: demoStore ? 'normal' : '0.08em' }}>
-                      {storePrice === null ? 'Hidden till store pick' : fmt(storePrice * demoQty[item.id])}
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-
-            {/* Store dropdown */}
-            <div style={{ marginBottom: 12 }}>
-              <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: RED, opacity: 0.45, marginBottom: 6 }}>Choose store</div>
-              <select
-                value={demoStore}
-                onChange={e => setDemoStore(e.target.value)}
-                style={{ width: '100%', padding: '10px 14px', borderRadius: 12, border: `1.5px solid rgba(242,134,149,0.2)`, background: WHITE, color: demoStore ? RED : `rgba(242,134,149,0.4)`, fontFamily: "var(--font-inter), sans-serif", fontSize: 13, fontWeight: 600, cursor: 'pointer', appearance: 'none', outline: 'none' }}
-              >
-                <option value="" disabled>Select a store…</option>
-                {Object.keys(STORE_MULTIPLIERS).map(s => (
-                  <option key={s} value={s}>{s}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Total + checkout button */}
-            <div style={{ backgroundColor: BG, borderRadius: 18, padding: '14px 16px', border: `1px solid rgba(242,134,149,0.1)` }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 12 }}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: RED, opacity: 0.5, textTransform: 'uppercase', letterSpacing: '0.12em' }}>Total{demoStore ? ` via ${demoStore}` : ''}</div>
-                <div style={{ fontSize: demoStore ? '1.3rem' : 11, fontWeight: 800, color: RED, letterSpacing: demoStore ? '-0.03em' : '0.08em', textTransform: demoStore ? 'none' : 'uppercase', opacity: demoStore ? 1 : 0.45 }}>
-                  {demoStore ? fmt(demoStoreTotal) : 'Hidden till store pick'}
-                </div>
-              </div>
-              <button type="button"
-                disabled={!demoStore}
-                style={{ width: '100%', padding: '11px', borderRadius: 9999, background: demoStore ? RED : `rgba(242,134,149,0.2)`, color: demoStore ? CREAM : RED, fontWeight: 700, fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', border: 'none', cursor: demoStore ? 'pointer' : 'not-allowed', transition: 'all 0.2s' }}>
-                {demoStore ? `Checkout on ${demoStore} →` : 'Select a store to checkout'}
-              </button>
-            </div>
-          </>
-        )}
-      </div>
-    </div>
-  )
-
   return (
-    <main style={{ background: BG, color: RED, fontFamily: "var(--font-inter), sans-serif", overflowX: 'hidden' }}>
+    <main style={{ background: BG, color: RED, fontFamily: "var(--font-inter), sans-serif", overflowX: 'clip' }}>
       <style>{`
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        html { scroll-behavior: smooth; }
+        html {
+          position: relative;
+          scroll-behavior: smooth;
+        }
 
         @keyframes floatUp   { 0%,100% { transform: translateY(0); }   50% { transform: translateY(-12px); } }
         @keyframes floatDown { 0%,100% { transform: translateY(0); }   50% { transform: translateY(10px); } }
@@ -658,30 +948,32 @@ export default function Home() {
         @keyframes splitSceneIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
         @keyframes splitCardIn { from { opacity:0; transform:translateY(10px) scale(.99); } to { opacity:1; transform:translateY(0) scale(1); } }
         @keyframes splitPulse { 0%,100% { transform:scale(.9); opacity:.45; } 50% { transform:scale(1.2); opacity:1; } }
-        @keyframes splitGlow { 0%,100% { box-shadow: inset 0 0 0 0 rgba(242,134,149,0); } 50% { box-shadow: inset 0 0 0 1px rgba(242,134,149,.16); } }
+        @keyframes splitGlow { 0%,100% { box-shadow: inset 0 0 0 0 rgba(116,130,63,0); } 50% { box-shadow: inset 0 0 0 1px rgba(116,130,63,.16); } }
+        @keyframes typeFill { 0%, 16% { max-width: 0; opacity: .42; } 46%, 100% { max-width: 100%; opacity: 1; } }
+        @keyframes scanDown { 0% { transform: translateY(-18px); opacity: 0; } 18%, 72% { opacity: 1; } 100% { transform: translateY(178px); opacity: 0; } }
+        @keyframes rowCheck { 0% { opacity: 0; transform: translateX(-14px); } 28%, 100% { opacity: 1; transform: translateX(0); } }
+        @keyframes storeSelect { 0%, 100% { box-shadow: 0 0 0 rgba(116,130,63,0); } 50% { box-shadow: 0 12px 24px rgba(116,130,63,.14); } }
+        @keyframes timerSweep { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes statusPulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .72; transform: scale(.97); } }
+        @keyframes floatCardIn { 0%, 18% { opacity: 0; transform: translateY(18px) rotate(-2deg); } 42%, 100% { opacity: 1; transform: translateY(0) rotate(0deg); } }
+        @keyframes progressFill { 0%, 14% { transform: scaleX(.18); } 68%, 100% { transform: scaleX(.72); } }
+        @keyframes nextStepSlide { 0%, 100% { transform: translateY(0); opacity: 1; } 50% { transform: translateY(-5px); opacity: .82; } }
 
         .float-a { animation: floatUp   5s ease-in-out infinite; }
         .float-b { animation: floatDown 6s ease-in-out infinite 1s; }
         .fade-up { animation: fadeUp .65s ease both; }
         .card-hover { transition: transform .2s, box-shadow .2s; cursor: pointer; }
-        .card-hover:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(242,134,149,.14); }
+        .card-hover:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(116,130,63,.14); }
 
-        .grid-bg {
-          background-image:
-            linear-gradient(rgba(242,134,149,.05) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(242,134,149,.05) 1px, transparent 1px);
-          background-size: 36px 36px;
-        }
-
-        input:focus { outline:none; box-shadow: 0 0 0 3px rgba(242,134,149,.18); }
+        input:focus { outline:none; box-shadow: 0 0 0 3px rgba(116,130,63,.18); }
         ::-webkit-scrollbar { width:6px; }
-        ::-webkit-scrollbar-thumb { background: rgba(242,134,149,.2); border-radius:3px; }
+        ::-webkit-scrollbar-thumb { background: rgba(116,130,63,.2); border-radius:3px; }
 
         .store-pill {
           display: inline-block;
           padding: 6px 14px;
           border-radius: 999px;
-          border: 1.5px solid rgba(242,134,149,.18);
+          border: 1.5px solid rgba(116,130,63,.18);
           font-size: 12px;
           font-weight: 600;
           color: ${RED};
@@ -692,7 +984,7 @@ export default function Home() {
         .store-pill:hover { background: ${RED}; color: ${CREAM}; border-color: ${RED}; }
 
         .drop-zone {
-          border: 2px dashed rgba(242,134,149,.25);
+          border: 2px dashed rgba(116,130,63,.25);
           border-radius: 16px;
           padding: 32px;
           text-align: center;
@@ -702,16 +994,27 @@ export default function Home() {
         }
         .drop-zone.over {
           border-color: ${RED};
-          background: rgba(242,134,149,.04);
+          background: rgba(116,130,63,.04);
         }
         .drop-zone:hover {
-          border-color: rgba(242,134,149,.45);
+          border-color: rgba(116,130,63,.45);
         }
 
         .nav-desktop {
           display: flex;
-          gap: 28px;
+          gap: 18px;
           align-items: center;
+        }
+        .nav-logo-link {
+          display: inline-flex;
+          align-items: center;
+          color: inherit;
+          text-decoration: none;
+          border-radius: 8px;
+          outline-offset: 6px;
+        }
+        .nav-logo-link:focus-visible {
+          outline: 2px solid rgba(116,130,63,.45);
         }
         .nav-toggle {
           display: none;
@@ -720,7 +1023,7 @@ export default function Home() {
           height: 38px;
           padding: 0 14px;
           border-radius: 8px;
-          border: 1px solid rgba(242,134,149,.2);
+          border: 1px solid rgba(116,130,63,.2);
           background: ${WHITE};
           color: ${RED};
           font-size: 12px;
@@ -743,11 +1046,1908 @@ export default function Home() {
           cursor: pointer;
         }
 
+        .hero-section {
+          position: relative;
+          min-height: calc(100svh - 138px);
+          display: flex;
+          align-items: center;
+          overflow: hidden;
+          padding: 92px 28px 88px;
+          background: ${BG};
+          border-bottom: 1px solid rgba(116,130,63,.08);
+        }
+        .hero-grid-layer {
+          position: absolute;
+          inset: 0;
+          z-index: 0;
+          color: ${RED};
+          pointer-events: none;
+        }
+        .hero-grid-layer-base {
+          opacity: .08;
+        }
+        .hero-grid-layer-reveal {
+          opacity: .46;
+        }
+        .hero-grid-svg {
+          width: 100%;
+          height: 100%;
+          display: block;
+        }
+        .hero-shell {
+          position: relative;
+          z-index: 1;
+          max-width: 1180px;
+          width: 100%;
+          margin: 0 auto;
+        }
         .hero-grid {
           display: grid;
-          grid-template-columns: 1fr 1fr;
+          grid-template-columns: minmax(320px, .9fr) minmax(420px, 1.1fr);
+          gap: 88px;
+          align-items: center;
+        }
+        .hero-copy {
+          max-width: 470px;
+        }
+        .hero-eyebrow {
+          display: inline-flex;
+          align-items: center;
+          min-height: 28px;
+          padding: 0 12px;
+          margin-bottom: 18px;
+          border-radius: 8px;
+          border: 1px solid rgba(107,62,30,.16);
+          background: rgba(255,255,255,.46);
+          color: ${BROWN};
+          font-size: 11px;
+          font-weight: 800;
+          letter-spacing: .12em;
+          text-transform: uppercase;
+        }
+        .hero-title {
+          color: ${RED};
+          font-family: ${INTER_REGULAR};
+          font-size: clamp(2.25rem, 3.45vw, 3.55rem);
+          font-weight: 400;
+          line-height: 1.06;
+          letter-spacing: -0.04em;
+          margin-bottom: 22px;
+        }
+        .hero-title-word {
+          display: inline-flex;
+          min-width: 7.9ch;
+          align-items: baseline;
+          vertical-align: baseline;
+          color: ${RED2};
+        }
+        .hero-title-word span {
+          display: inline-block;
+          color: ${RED2};
+        }
+        .hero-title-nowrap {
+          display: inline-flex;
+          align-items: baseline;
+          gap: .34ch;
+          white-space: nowrap;
+        }
+        .hero-body {
+          max-width: 420px;
+          margin-bottom: 34px;
+          color: rgba(116,130,63,.72);
+          font-size: 17px;
+          line-height: 1.72;
+        }
+        .hero-actions {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          align-items: flex-start;
+        }
+        .hero-primary-link {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 52px;
+          padding: 0 30px;
+          border-radius: 8px;
+          background: ${RED};
+          color: ${CREAM};
+          font-size: 15px;
+          font-weight: 800;
+          letter-spacing: 0;
+          text-decoration: none;
+          transition: opacity .18s ease, transform .18s ease;
+        }
+        .hero-primary-link:hover {
+          opacity: .9;
+          transform: translateY(-1px);
+        }
+        .hero-waitlist-count {
+          color: rgba(116,130,63,.55);
+          font-size: 13px;
+        }
+        .hero-waitlist-count span {
+          color: ${RED};
+          font-weight: 800;
+        }
+        .hero-visual {
+          position: relative;
+          min-height: 500px;
+        }
+        .hero-card {
+          position: absolute;
+          border: 1px solid rgba(116,130,63,.11);
+          background: rgba(255,255,255,.82);
+          backdrop-filter: blur(14px);
+          box-shadow: 0 30px 90px rgba(116,130,63,.13);
+          color: ${RED};
+        }
+        .hero-recipe-card {
+          top: 36px;
+          left: 4px;
+          width: min(48%, 300px);
+          border-radius: 18px;
+          padding: 24px;
+        }
+        .hero-cart-card {
+          right: 0;
+          bottom: 28px;
+          width: min(50%, 310px);
+          border-radius: 18px;
+          padding: 22px;
+        }
+        .hero-card-label {
+          margin-bottom: 12px;
+          color: rgba(116,130,63,.45);
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: .1em;
+          text-transform: uppercase;
+        }
+        .hero-recipe-title {
+          margin-bottom: 6px;
+          color: ${RED};
+          font-size: 20px;
+          font-weight: 800;
+          line-height: 1.1;
+        }
+        .hero-recipe-byline {
+          margin-bottom: 18px;
+          color: rgba(116,130,63,.52);
+          font-size: 13px;
+        }
+        .hero-chip-row {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+        }
+        .hero-chip-row span {
+          padding: 5px 10px;
+          border-radius: 8px;
+          background: rgba(116,130,63,.08);
+          color: ${RED};
+          font-size: 11px;
+          font-weight: 700;
+        }
+        .hero-cart-list {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+        .hero-cart-row {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          transition: opacity .3s ease;
+        }
+        .hero-cart-check {
+          width: 18px;
+          height: 18px;
+          border-radius: 50%;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+          transition: background .3s ease;
+        }
+        .hero-cart-row span:last-child {
+          color: ${RED};
+          font-size: 13px;
+        }
+        .hero-order-button {
+          margin-top: 16px;
+          padding: 12px 0;
+          border-radius: 8px;
+          background: ${RED};
+          color: ${CREAM};
+          font-size: 13px;
+          font-weight: 800;
+          text-align: center;
+        }
+        .hero-pulse {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%,-50%);
+          border-radius: 999px;
+          background: ${BROWN};
+          padding: 11px 20px;
+          box-shadow: 0 18px 48px rgba(107,62,30,.2);
+          animation: pulse 2.4s ease-in-out infinite;
+        }
+        .hero-pulse span {
+          color: ${CREAM};
+          font-size: 12px;
+          font-weight: 800;
+          white-space: nowrap;
+        }
+        .store-strip-section {
+          background: linear-gradient(0deg, rgba(255,255,255,.38), rgba(255,255,255,.38)), ${BG};
+          padding: 30px 0 34px;
+          border-top: 1px solid rgba(116,130,63,.07);
+          border-bottom: 1px solid rgba(116,130,63,.07);
+          overflow: hidden;
+        }
+        .store-strip-label {
+          margin-bottom: 22px;
+          color: rgba(116,130,63,.42);
+          font-size: 11px;
+          font-weight: 800;
+          letter-spacing: .12em;
+          text-align: center;
+          text-transform: uppercase;
+        }
+        .store-marquee-window {
+          position: relative;
+          width: 100%;
+          overflow: hidden;
+        }
+        .store-marquee-edge {
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          width: 88px;
+          z-index: 2;
+          pointer-events: none;
+        }
+        .store-marquee-edge-left {
+          left: 0;
+          background: linear-gradient(to right, ${BG}, transparent);
+        }
+        .store-marquee-edge-right {
+          right: 0;
+          background: linear-gradient(to left, ${BG}, transparent);
+        }
+        .store-marquee-group {
+          display: flex;
+          flex-shrink: 0;
+          gap: 20px;
+          padding-right: 20px;
+        }
+        .store-chip {
+          display: inline-flex;
+          align-items: center;
+          gap: 14px;
+          min-height: 48px;
+          padding: 0 22px;
+          border-radius: 8px;
+          border: 1.5px solid rgba(116,130,63,.12);
+          background: rgba(255,255,255,.78);
+          color: ${RED};
+          font-size: 13px;
+          font-weight: 800;
+          white-space: nowrap;
+        }
+        .recipe-demo-section {
+          background:
+            linear-gradient(180deg, rgba(255,255,255,.7), rgba(255,255,255,.28)),
+            ${BG};
+          padding: 62px 24px 64px;
+          border-bottom: 1px solid rgba(116,130,63,.08);
+        }
+        .recipe-demo-shell {
+          max-width: 980px;
+          margin: 0 auto;
+        }
+        .recipe-demo-heading {
+          max-width: 640px;
+          margin: 0 auto 28px;
+          text-align: center;
+        }
+        .recipe-demo-heading p,
+        .recipe-demo-panel-head span {
+          color: rgba(107,62,30,.58);
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: .14em;
+          text-transform: uppercase;
+        }
+        .recipe-demo-heading h2 {
+          margin: 10px 0 10px;
+          color: ${RED};
+          font-family: ${INTER_REGULAR};
+          font-size: 36px;
+          font-weight: 700;
+          line-height: 1.08;
+          letter-spacing: 0;
+        }
+        .recipe-demo-heading > div {
+          color: rgba(116,130,63,.72);
+          font-size: 14px;
+          font-weight: 700;
+          line-height: 1.45;
+        }
+        .recipe-demo-grid {
+          display: grid;
+          grid-template-columns: 320px minmax(0, 540px);
+          justify-content: center;
+          gap: 24px;
+          align-items: start;
+        }
+        .recipe-demo-image-card {
+          position: relative;
+          width: 320px;
+          height: 486px;
+          overflow: hidden;
+          border: 1px solid rgba(116,130,63,.14);
+          border-radius: 8px;
+          background: ${BG};
+          box-shadow: 0 20px 54px rgba(116,130,63,.12);
+        }
+        .recipe-demo-image-card::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(180deg, transparent 52%, rgba(47,30,16,.24));
+          pointer-events: none;
+        }
+        .recipe-demo-image-card img {
+          object-position: center;
+        }
+        .recipe-demo-image-caption {
+          position: absolute;
+          left: 10px;
+          right: 10px;
+          bottom: 10px;
+          z-index: 2;
+          border: 1px solid rgba(241,232,199,.56);
+          border-radius: 8px;
+          background: rgba(241,232,199,.9);
+          color: ${RED};
+          padding: 10px 12px;
+          backdrop-filter: blur(10px);
+        }
+        .recipe-demo-image-caption strong,
+        .recipe-demo-image-caption span {
+          display: block;
+        }
+        .recipe-demo-image-caption strong {
+          color: ${RED};
+          font-size: 15px;
+          line-height: 1.1;
+        }
+        .recipe-demo-image-caption span {
+          margin-top: 5px;
+          color: rgba(116,130,63,.66);
+          font-size: 11px;
+          font-weight: 700;
+        }
+        .recipe-demo-panel {
+          display: flex;
+          flex-direction: column;
+          border: 1px solid rgba(116,130,63,.13);
+          border-radius: 8px;
+          background: rgba(255,255,255,.76);
+          box-shadow: 0 20px 58px rgba(116,130,63,.1);
+          overflow: hidden;
+        }
+        .recipe-demo-panel-head {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          padding: 12px 14px;
+        }
+        .recipe-demo-panel-head strong {
+          color: ${BROWN};
+          font-size: 11px;
+          font-weight: 800;
+          letter-spacing: .08em;
+          text-transform: uppercase;
+          white-space: nowrap;
+        }
+        .recipe-demo-list {
+          border-top: 1px solid rgba(116,130,63,.08);
+          border-bottom: 1px solid rgba(116,130,63,.08);
+          max-height: 382px;
+          overflow-y: auto;
+        }
+        .recipe-demo-item {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) auto;
+          gap: 12px;
+          align-items: center;
+          min-height: 54px;
+          padding: 8px 14px;
+          background: rgba(255,255,255,.56);
+          transition: background .18s ease;
+        }
+        .recipe-demo-item + .recipe-demo-item {
+          border-top: 1px solid rgba(116,130,63,.07);
+        }
+        .recipe-demo-item.is-selected {
+          background: rgba(116,130,63,.045);
+        }
+        .recipe-demo-item strong,
+        .recipe-demo-item span {
+          display: block;
+        }
+        .recipe-demo-item strong {
+          color: ${RED};
+          font-size: 13px;
+          line-height: 1.2;
+        }
+        .recipe-demo-item span {
+          margin-top: 4px;
+          color: rgba(116,130,63,.58);
+          font-size: 11px;
+          font-weight: 700;
+        }
+        .recipe-demo-qty {
+          display: inline-grid;
+          grid-template-columns: 28px 24px 28px;
+          align-items: center;
+          min-height: 32px;
+          border-radius: 8px;
+          border: 1px solid rgba(107,62,30,.11);
+          background: rgba(241,232,199,.75);
+          overflow: hidden;
+        }
+        .recipe-demo-qty button {
+          width: 28px;
+          height: 32px;
+          border: 0;
+          background: transparent;
+          color: ${BROWN};
+          cursor: pointer;
+          font-family: inherit;
+          font-size: 14px;
+          font-weight: 800;
+          transition: background .18s ease, color .18s ease;
+        }
+        .recipe-demo-qty button:hover {
+          background: ${RED};
+          color: ${CREAM};
+        }
+        .recipe-demo-qty span {
+          margin: 0;
+          color: ${RED};
+          font-size: 12px;
+          font-weight: 800;
+          text-align: center;
+        }
+        .recipe-demo-actions {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          padding: 12px 14px;
+          background: rgba(241,232,199,.48);
+        }
+        .recipe-demo-actions span {
+          color: rgba(107,62,30,.6);
+          font-size: 12px;
+          font-weight: 800;
+        }
+        .recipe-demo-primary,
+        .recipe-demo-secondary {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 36px;
+          border: 1px solid rgba(107,62,30,.14);
+          border-radius: 8px;
+          cursor: pointer;
+          font-family: inherit;
+          font-size: 12px;
+          font-weight: 800;
+          letter-spacing: .04em;
+          transition: opacity .18s ease, transform .18s ease, background .18s ease;
+        }
+        .recipe-demo-primary {
+          padding: 0 22px;
+          background: ${RED};
+          color: ${CREAM};
+        }
+        .recipe-demo-primary:disabled {
+          cursor: not-allowed;
+          opacity: .45;
+        }
+        .recipe-demo-secondary {
+          padding: 0 16px;
+          background: rgba(255,255,255,.66);
+          color: ${BROWN};
+        }
+        .recipe-demo-primary:not(:disabled):hover,
+        .recipe-demo-secondary:hover,
+        .recipe-demo-checkout a:hover {
+          transform: translateY(-1px);
+        }
+        .recipe-demo-store-block {
+          padding: 14px;
+          border-top: 1px solid rgba(116,130,63,.08);
+        }
+        .recipe-demo-select-label {
+          display: block;
+          margin-bottom: 8px;
+          color: rgba(107,62,30,.58);
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: .14em;
+          text-transform: uppercase;
+        }
+        .recipe-demo-select {
+          width: 100%;
+          min-height: 42px;
+          border: 1px solid rgba(116,130,63,.16);
+          border-radius: 8px;
+          background: rgba(255,255,255,.82);
+          color: ${RED};
+          appearance: none;
+          font-family: inherit;
+          font-size: 14px;
+          font-weight: 800;
+          padding: 0 44px 0 12px;
+        }
+        .recipe-demo-select-wrap {
+          position: relative;
+        }
+        .recipe-demo-select-wrap::after {
+          content: '';
+          position: absolute;
+          top: 50%;
+          right: 16px;
+          width: 9px;
+          height: 9px;
+          border-right: 2px solid rgba(107,62,30,.62);
+          border-bottom: 2px solid rgba(107,62,30,.62);
+          pointer-events: none;
+          transform: translateY(-64%) rotate(45deg);
+        }
+        .recipe-demo-store-insight {
+          margin-top: 10px;
+          min-height: 72px;
+          border: 1px solid rgba(116,130,63,.1);
+          border-radius: 8px;
+          background: rgba(241,232,199,.42);
+          padding: 12px;
+        }
+        .recipe-demo-store-insight.is-selected {
+          background: rgba(116,130,63,.06);
+          border-color: rgba(116,130,63,.16);
+        }
+        .recipe-demo-store-insight span,
+        .recipe-demo-store-insight strong,
+        .recipe-demo-store-insight small {
+          display: block;
+        }
+        .recipe-demo-store-insight span {
+          color: rgba(107,62,30,.55);
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: .12em;
+          text-transform: uppercase;
+        }
+        .recipe-demo-store-insight strong {
+          margin-top: 5px;
+          color: ${RED};
+          font-size: 13px;
+          line-height: 1.35;
+        }
+        .recipe-demo-store-insight small {
+          margin-top: 4px;
+          color: rgba(116,130,63,.58);
+          font-size: 11px;
+          font-weight: 700;
+        }
+        .recipe-demo-store-grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 8px;
+        }
+        .recipe-demo-store-option {
+          width: 100%;
+          display: grid;
+          grid-template-columns: 34px minmax(0, 1fr) auto;
+          align-items: center;
+          gap: 11px;
+          min-height: 62px;
+          border: 1px solid rgba(116,130,63,.11);
+          border-radius: 8px;
+          background: rgba(255,255,255,.72);
+          padding: 9px 10px;
+          cursor: pointer;
+          text-align: left;
+          font-family: inherit;
+          transition: background .18s ease, border-color .18s ease, box-shadow .18s ease, opacity .18s ease;
+        }
+        .recipe-demo-store-option:hover,
+        .recipe-demo-store-option.is-active {
+          background: rgba(255,255,255,.96);
+          border-color: rgba(107,62,30,.22);
+          box-shadow: 0 8px 20px rgba(116,130,63,.08);
+        }
+        .recipe-demo-store-option.is-unavailable {
+          cursor: not-allowed;
+          opacity: .42;
+          filter: saturate(.7);
+        }
+        .recipe-demo-store-logo {
+          position: relative;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 30px;
+          height: 30px;
+          border-radius: 8px;
+          background: rgba(241,232,199,.78);
+          overflow: hidden;
+          color: ${BROWN};
+          font-size: 12px;
+          font-weight: 800;
+        }
+        .recipe-demo-store-copy strong,
+        .recipe-demo-store-copy small,
+        .recipe-demo-store-price strong,
+        .recipe-demo-store-price small {
+          display: block;
+        }
+        .recipe-demo-store-copy strong {
+          color: ${RED};
+          font-size: 13px;
+          line-height: 1.2;
+        }
+        .recipe-demo-store-copy small {
+          margin-top: 3px;
+          color: rgba(116,130,63,.58);
+          font-size: 10.5px;
+          font-weight: 700;
+          line-height: 1.25;
+        }
+        .recipe-demo-store-price {
+          text-align: right;
+        }
+        .recipe-demo-store-price strong {
+          color: ${BROWN};
+          font-size: 12px;
+          line-height: 1.2;
+          white-space: nowrap;
+        }
+        .recipe-demo-store-price small {
+          margin-top: 4px;
+          color: rgba(116,130,63,.55);
+          font-size: 10px;
+          font-weight: 800;
+          white-space: nowrap;
+        }
+        .recipe-demo-summary {
+          display: grid;
+          gap: 8px;
+          padding: 14px;
+        }
+        .recipe-demo-summary-list {
+          max-height: none;
+        }
+        .recipe-demo-summary-list .recipe-demo-item {
+          min-height: 50px;
+        }
+        .recipe-demo-summary-qty {
+          color: ${BROWN};
+          font-size: 12px;
+          white-space: nowrap;
+        }
+        .recipe-demo-summary div {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          min-height: 34px;
+          border: 1px solid rgba(116,130,63,.09);
+          border-radius: 8px;
+          background: rgba(255,255,255,.58);
+          padding: 0 12px;
+        }
+        .recipe-demo-summary span,
+        .recipe-demo-summary strong {
+          color: ${RED};
+          font-size: 12px;
+          font-weight: 800;
+        }
+        .recipe-demo-checkout {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 14px;
+          border-top: 1px solid rgba(116,130,63,.1);
+          background: rgba(241,232,199,.7);
+          padding: 14px;
+        }
+        .recipe-demo-checkout span,
+        .recipe-demo-checkout strong {
+          display: block;
+        }
+        .recipe-demo-checkout span {
+          margin-bottom: 5px;
+          color: rgba(107,62,30,.55);
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: .12em;
+          text-transform: uppercase;
+        }
+        .recipe-demo-checkout strong {
+          color: ${BROWN};
+          font-family: ${INTER_REGULAR};
+          font-size: 28px;
+          line-height: 1;
+        }
+        .recipe-demo-checkout .recipe-demo-empty-total {
+          color: rgba(107,62,30,.58);
+          font-family: inherit;
+          font-size: 13px;
+          font-weight: 800;
+          line-height: 1.35;
+        }
+        .recipe-demo-checkout-actions {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        .recipe-demo-checkout a {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 36px;
+          padding: 0 18px;
+          border-radius: 8px;
+          background: ${RED};
+          color: ${CREAM};
+          font-size: 12px;
+          font-weight: 800;
+          letter-spacing: .08em;
+          text-decoration: none;
+          text-transform: uppercase;
+          white-space: nowrap;
+        }
+        .recipe-demo-checkout-disabled {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 36px;
+          padding: 0 18px;
+          border: 0;
+          border-radius: 8px;
+          background: rgba(116,130,63,.14);
+          color: rgba(107,62,30,.46);
+          cursor: not-allowed;
+          font-family: inherit;
+          font-size: 12px;
+          font-weight: 800;
+          letter-spacing: .08em;
+          text-transform: uppercase;
+          white-space: nowrap;
+        }
+        .features-section {
+          position: relative;
+          background:
+            linear-gradient(180deg, rgba(255,255,255,.46), rgba(255,255,255,.2)),
+            ${BG};
+          border-top: 1px solid rgba(116,130,63,.08);
+          padding: 64px 28px 68px;
+        }
+        .features-shell {
+          max-width: 1180px;
+          margin: 0 auto;
+        }
+        .features-heading {
+          display: grid;
+          grid-template-columns: minmax(240px, 460px) minmax(220px, 360px);
+          align-items: end;
+          justify-content: space-between;
+          gap: 28px;
+          margin-bottom: 26px;
+        }
+        .features-heading p {
+          grid-column: 1 / -1;
+          margin-bottom: -12px;
+          color: ${BROWN};
+          font-size: 11px;
+          font-weight: 800;
+          letter-spacing: .16em;
+          text-transform: uppercase;
+          opacity: .58;
+        }
+        .features-heading h2 {
+          color: ${RED};
+          font-family: ${INTER_REGULAR};
+          font-size: clamp(1.75rem, 3vw, 2.55rem);
+          font-weight: 400;
+          letter-spacing: -0.03em;
+          line-height: 1.08;
+        }
+        .features-heading span {
+          color: rgba(116,130,63,.66);
+          font-size: 14px;
+          font-weight: 700;
+          line-height: 1.6;
+        }
+        .features-board {
+          display: grid;
+          grid-template-columns: minmax(320px, .86fr) minmax(420px, 1.14fr);
+          gap: 34px;
+          align-items: stretch;
+        }
+        .features-list {
+          display: grid;
+          gap: 10px;
+          align-content: start;
+        }
+        .feature-choice {
+          display: grid;
+          grid-template-columns: 42px minmax(0, 1fr);
+          gap: 14px;
+          width: 100%;
+          min-height: 98px;
+          border: 1px solid rgba(116,130,63,.12);
+          border-radius: 8px;
+          background: rgba(255,255,255,.68);
+          color: ${RED};
+          cursor: pointer;
+          font-family: inherit;
+          padding: 14px;
+          text-align: left;
+          transition: background .18s ease, border-color .18s ease, transform .18s ease, box-shadow .18s ease;
+        }
+        .feature-choice:hover,
+        .feature-choice.is-active {
+          background: rgba(255,255,255,.96);
+          border-color: rgba(107,62,30,.2);
+          box-shadow: 0 14px 28px rgba(116,130,63,.08);
+          transform: translateY(-1px);
+        }
+        .feature-choice-index {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 42px;
+          height: 42px;
+          border-radius: 8px;
+          background: rgba(116,130,63,.08);
+          color: rgba(107,62,30,.62);
+          font-size: 12px;
+          font-weight: 800;
+          letter-spacing: .08em;
+        }
+        .feature-choice.is-active .feature-choice-index {
+          background: ${BROWN};
+          color: ${CREAM};
+        }
+        .feature-choice-copy > span {
+          display: block;
+          margin-bottom: 5px;
+          color: rgba(107,62,30,.58);
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: .12em;
+          text-transform: uppercase;
+        }
+        .feature-choice h3 {
+          margin-bottom: 5px;
+          color: ${RED};
+          font-family: ${INTER_REGULAR};
+          font-size: clamp(1.05rem, 1.8vw, 1.45rem);
+          font-weight: 700;
+          line-height: 1.12;
+          letter-spacing: 0;
+        }
+        .feature-choice h3 span {
+          color: ${RED2};
+        }
+        .feature-choice small {
+          display: block;
+          color: rgba(116,130,63,.64);
+          font-size: 12px;
+          font-weight: 700;
+          line-height: 1.5;
+        }
+        .feature-showcase-card {
+          display: flex;
+          flex-direction: column;
+          min-height: 574px;
+          border: 1px solid rgba(116,130,63,.12);
+          border-radius: 8px;
+          background:
+            linear-gradient(rgba(116,130,63,.035) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(116,130,63,.035) 1px, transparent 1px),
+            rgba(255,255,255,.72);
+          background-size: 18px 18px, 18px 18px, auto;
+          box-shadow: 0 28px 70px rgba(116,130,63,.11);
+          padding: 22px;
+          overflow: hidden;
+        }
+        .feature-showcase-top {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          color: rgba(107,62,30,.54);
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: .14em;
+          text-transform: uppercase;
+        }
+        .feature-showcase-top strong {
+          color: ${BROWN};
+        }
+        .feature-showcase-visual {
+          flex: 1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          height: auto;
+          min-height: 0;
+          padding: 8px 0;
+          opacity: 1;
+          transform: none;
+          filter: none;
+        }
+        .feature-showcase-tags {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          padding-top: 12px;
+          border-top: 1px solid rgba(116,130,63,.08);
+        }
+        .feature-showcase-tags span {
+          padding: 7px 10px;
+          border-radius: 8px;
+          border: 1px solid rgba(116,130,63,.14);
+          background: rgba(255,255,255,.62);
+          color: ${RED};
+          font-size: 11px;
+          font-weight: 700;
+        }
+        .sticky-feature-section {
+          position: relative;
+          background: ${BG};
+          border-top: 1px solid rgba(116,130,63,.08);
+          padding: 78px 28px 70px;
+          overflow: visible;
+        }
+        .sticky-feature-shell {
+          max-width: 1180px;
+          margin: 0 auto;
+        }
+        .sticky-feature-heading {
+          max-width: none;
+          margin: 0 0 8px;
+          text-align: center;
+        }
+        .sticky-feature-heading p {
+          margin-bottom: 12px;
+          color: ${RED};
+          font-size: 11px;
+          font-weight: 800;
+          letter-spacing: .16em;
+          text-transform: uppercase;
+          opacity: .45;
+        }
+        .sticky-feature-heading h2 {
+          max-width: 620px;
+          margin: 0 auto;
+          color: ${RED};
+          font-family: ${INTER_REGULAR};
+          font-size: clamp(1.8rem,3vw,2.6rem);
+          font-weight: 400;
+          letter-spacing: -0.03em;
+        }
+        .sticky-feature-scroll {
+          position: relative;
+          display: block;
+        }
+        .sticky-feature-viewport {
+          position: sticky;
+          top: var(--feature-sticky-top, 104px);
+          height: var(--feature-stage-height, 620px);
+          display: grid;
+          grid-template-columns: minmax(360px, .85fr) minmax(430px, 1.15fr);
+          gap: 72px;
+          align-items: stretch;
+          overflow: hidden;
+        }
+        .feature-copy-window,
+        .feature-visual-window {
+          height: var(--feature-stage-height, 620px);
+          overflow: hidden;
+        }
+        .feature-copy-track,
+        .feature-visual-track {
+          will-change: transform;
+        }
+        .feature-copy-panel,
+        .feature-visual-panel {
+          height: var(--feature-stage-height, 620px);
+          display: flex;
+          align-items: center;
+        }
+        .feature-visual-panel {
+          padding: 10px 0;
+          opacity: .28;
+          transform: scale(.94);
+          filter: saturate(.78);
+          transition: opacity .28s ease, transform .28s ease, filter .28s ease;
+        }
+        .feature-visual-panel.is-active {
+          opacity: 1;
+          transform: scale(1);
+          filter: saturate(1);
+        }
+        .feature-showcase-card .feature-showcase-visual {
+          height: auto;
+          min-height: 0;
+          padding: 8px 0;
+          opacity: 1;
+          transform: none;
+          filter: none;
+        }
+        .feature-visual-panel:not(.is-active) {
+          pointer-events: none;
+        }
+        .feature-mobile-stack {
+          display: none;
+        }
+        .sticky-feature-asset {
+          position: relative;
+          width: 100%;
+          height: calc(var(--feature-stage-height, 620px) - 36px);
+          min-height: 440px;
+          padding: 0;
+          overflow: visible;
+          border: none;
+          background: transparent;
+          box-shadow: none;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+        }
+        .sticky-feature-orbit {
+          display: none;
+        }
+        .sticky-feature-orbit-a {
+          width: 360px;
+          height: 360px;
+          top: -140px;
+          right: -120px;
+        }
+        .sticky-feature-orbit-b {
+          width: 260px;
+          height: 260px;
+          left: -90px;
+          bottom: -84px;
+          border-color: rgba(166,95,45,.13);
+        }
+        .sticky-feature-asset-top {
+          position: relative;
+          z-index: 2;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 16px;
+          width: min(100%, 430px);
+          margin: 0 auto 18px;
+          color: rgba(116,130,63,.52);
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: .14em;
+          text-transform: uppercase;
+        }
+        .sticky-visual-stage {
+          position: relative;
+          z-index: 2;
+          width: 100%;
+          min-height: 440px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .sticky-feature-card {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          align-items: center;
+        }
+        .sticky-feature-card-inner {
+          position: relative;
+          width: 100%;
+          max-width: 560px;
+          padding: 0;
+          border: none;
+          background: transparent;
+          box-shadow: none;
+          opacity: .2;
+          transform: translateY(18px);
+          transition: opacity .28s ease, transform .28s ease;
+        }
+        .sticky-feature-card.is-active .sticky-feature-card-inner {
+          opacity: 1;
+          transform: translateY(0);
+        }
+        .sticky-feature-index {
+          position: static;
+          margin-bottom: 12px;
+          color: rgba(116,130,63,.32);
+          font-size: 13px;
+          font-weight: 800;
+          line-height: 1;
+          letter-spacing: .16em;
+        }
+        .sticky-feature-card p {
+          margin-bottom: 10px;
+          color: ${BROWN};
+          font-size: 11px;
+          font-weight: 800;
+          letter-spacing: .14em;
+          text-transform: uppercase;
+          opacity: .62;
+        }
+        .sticky-feature-card h3 {
+          position: relative;
+          max-width: 500px;
+          margin-bottom: 14px;
+          color: ${RED};
+          font-family: ${INTER_REGULAR};
+          font-size: clamp(2rem, 3.3vw, 3.25rem);
+          font-weight: 700;
+          line-height: 1.08;
+          letter-spacing: 0;
+        }
+        .sticky-feature-card h3 span {
+          color: ${RED2};
+        }
+        .sticky-feature-card-inner > div:not(.sticky-feature-index):not(.sticky-feature-tags) {
+          max-width: 500px;
+          color: rgba(116,130,63,.68);
+          font-size: 16px;
+          line-height: 1.6;
+        }
+        .feature-bucket-wrap {
+          width: min(100%, 560px);
+          margin-top: 0;
+        }
+        .visual-bucket {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          width: min(100%, 560px);
+          min-height: 382px;
+          padding: 24px;
+        }
+        .visual-bucket .feature-card-header {
+          margin-bottom: 10px;
+        }
+        .sticky-feature-tags {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          margin-top: 28px;
+        }
+        .sticky-feature-tags span {
+          padding: 7px 10px;
+          border-radius: 8px;
+          border: 1px solid rgba(116,130,63,.14);
+          background: rgba(255,255,255,.62);
+          color: ${RED};
+          font-size: 11px;
+          font-weight: 700;
+        }
+        .feature-source-stack {
+          position: relative;
+          width: min(100%, 430px);
+          min-height: 500px;
+        }
+        .feature-source-input,
+        .feature-capture-bar,
+        .feature-floating-note {
+          position: absolute;
+          z-index: 3;
+          border: 1px solid rgba(116,130,63,.14);
+          background: rgba(255,255,255,.86);
+          backdrop-filter: blur(12px);
+          box-shadow: 0 24px 60px rgba(116,130,63,.12);
+        }
+        .feature-source-input {
+          top: 8px;
+          left: 8px;
+          right: 8px;
+          border-radius: 16px;
+          padding: 12px 14px;
+        }
+        .feature-source-input span,
+        .feature-capture-bar span {
+          display: block;
+          color: rgba(116,130,63,.48);
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: .1em;
+          text-transform: uppercase;
+        }
+        .feature-source-input strong,
+        .feature-capture-bar strong {
+          display: block;
+          margin-top: 4px;
+          color: ${RED};
+          font-size: 13px;
+          letter-spacing: 0;
+        }
+        .feature-source-card {
+          position: absolute;
+          inset: 76px 34px 54px;
+          overflow: hidden;
+          border-radius: 32px;
+          border: 1px solid rgba(116,130,63,.14);
+          background: ${BG};
+          box-shadow: 0 36px 90px rgba(116,130,63,.18);
+        }
+        .feature-source-overlay {
+          position: absolute;
+          left: 16px;
+          right: 16px;
+          bottom: 16px;
+          border-radius: 8px;
+          padding: 12px 14px;
+          background: rgba(241,232,199,.9);
+          color: ${RED};
+          backdrop-filter: blur(10px);
+        }
+        .feature-source-overlay span {
+          display: block;
+          margin-bottom: 3px;
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: .1em;
+          text-transform: uppercase;
+          opacity: .54;
+        }
+        .feature-floating-note {
+          padding: 9px 12px;
+          border-radius: 8px;
+          color: ${RED};
+          font-size: 11px;
+          font-weight: 800;
+        }
+        .note-one {
+          top: 122px;
+          right: -8px;
+          transform: rotate(5deg);
+        }
+        .note-two {
+          left: -10px;
+          bottom: 108px;
+          transform: rotate(-6deg);
+        }
+        .feature-capture-bar {
+          left: 18px;
+          right: 18px;
+          bottom: 0;
+          border-radius: 18px;
+          padding: 14px 16px;
+        }
+        .feature-visual-panel.is-active .visual-capture .feature-source-input strong,
+        .feature-mobile-stack .visual-capture .feature-source-input strong {
+          width: fit-content;
+          max-width: 100%;
+          overflow: hidden;
+          white-space: nowrap;
+          animation: typeFill 3.8s ease-in-out infinite;
+        }
+        .feature-visual-panel.is-active .visual-capture .feature-source-card,
+        .feature-mobile-stack .visual-capture .feature-source-card {
+          animation: floatCardIn 3.8s ease-in-out infinite;
+        }
+        .feature-visual-panel.is-active .visual-capture .feature-capture-bar,
+        .feature-mobile-stack .visual-capture .feature-capture-bar {
+          animation: statusPulse 2.6s ease-in-out infinite;
+        }
+        .feature-visual-panel.is-active .visual-capture .note-one,
+        .feature-mobile-stack .visual-capture .note-one {
+          animation: floatUp 4.2s ease-in-out infinite;
+        }
+        .feature-visual-panel.is-active .visual-capture .note-two,
+        .feature-mobile-stack .visual-capture .note-two {
+          animation: floatDown 4.8s ease-in-out infinite;
+        }
+        .feature-read-card,
+        .feature-cart-card,
+        .feature-store-card,
+        .feature-cook-card {
+          width: min(100%, 430px);
+          min-height: 500px;
+          border-radius: 34px;
+          border: 1px solid rgba(116,130,63,.14);
+          background:
+            linear-gradient(rgba(116,130,63,.045) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(116,130,63,.045) 1px, transparent 1px),
+            linear-gradient(155deg, rgba(255,255,255,.86), rgba(241,232,199,.7));
+          background-size: 18px 18px, 18px 18px, auto;
+          box-shadow: 0 38px 100px rgba(116,130,63,.16);
+          padding: 34px;
+          color: ${RED};
+        }
+        .feature-cart-card.visual-bucket {
+          min-height: 430px;
+          padding: 24px 28px 30px;
+          justify-content: flex-start;
+          align-items: center;
+        }
+        .feature-cart-card.visual-bucket .feature-card-header {
+          width: 100%;
+          margin-bottom: 18px;
+        }
+        .feature-cart-card.visual-bucket .feature-bucket-wrap {
+          width: min(100%, 390px);
+          flex: 1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin: 0 auto;
+          transform: scale(.92);
+          transform-origin: top center;
+        }
+        .visual-read {
+          position: relative;
+          overflow: hidden;
+        }
+        .feature-scan-line {
+          position: absolute;
+          left: 22px;
+          right: 22px;
+          top: 72px;
+          height: 2px;
+          z-index: 4;
+          border-radius: 999px;
+          background: linear-gradient(90deg, transparent, rgba(166,95,45,.75), rgba(116,130,63,.72), transparent);
+          box-shadow: 0 0 18px rgba(166,95,45,.18);
+        }
+        .feature-visual-panel.is-active .visual-read .feature-scan-line,
+        .feature-mobile-stack .visual-read .feature-scan-line {
+          animation: scanDown 2.8s ease-in-out infinite;
+        }
+        .feature-card-header {
+          display: flex;
+          justify-content: space-between;
+          gap: 16px;
+          margin-bottom: 24px;
+          color: rgba(116,130,63,.52);
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: .1em;
+          text-transform: uppercase;
+        }
+        .feature-card-header strong {
+          color: ${BROWN};
+        }
+        .feature-read-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 10px;
+        }
+        .feature-read-tile {
+          border-radius: 8px;
+          border: 1px solid rgba(116,130,63,.12);
+          background: rgba(116,130,63,.045);
+          padding: 14px;
+        }
+        .feature-visual-panel.is-active .visual-read .feature-read-tile,
+        .feature-mobile-stack .visual-read .feature-read-tile {
+          animation: rowCheck 3s ease-in-out infinite both;
+        }
+        .feature-read-tile span {
+          display: block;
+          color: rgba(116,130,63,.5);
+          font-size: 10px;
+          font-weight: 700;
+          margin-bottom: 8px;
+        }
+        .feature-read-tile strong {
+          color: ${RED};
+          font-size: 16px;
+        }
+        .feature-read-line {
+          margin-top: 14px;
+          border-radius: 8px;
+          background: rgba(255,255,255,.68);
+          color: rgba(116,130,63,.66);
+          font-size: 12px;
+          line-height: 1.55;
+          padding: 12px 14px;
+        }
+        .feature-cart-row,
+        .feature-store-row {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          min-height: 46px;
+          padding: 11px 12px;
+          border-radius: 8px;
+          border: 1px solid rgba(116,130,63,.12);
+          background: rgba(255,255,255,.64);
+          color: ${RED};
+          font-size: 12px;
+          font-weight: 700;
+        }
+        .feature-visual-panel.is-active .visual-cart .feature-cart-row,
+        .feature-visual-panel.is-active .visual-store .feature-store-row,
+        .feature-mobile-stack .visual-cart .feature-cart-row,
+        .feature-mobile-stack .visual-store .feature-store-row {
+          animation: rowCheck 3.4s ease-in-out infinite both;
+        }
+        .feature-cart-row + .feature-cart-row,
+        .feature-store-row + .feature-store-row {
+          margin-top: 8px;
+        }
+        .feature-cart-row strong,
+        .feature-store-row strong {
+          margin-left: auto;
+          color: rgba(116,130,63,.55);
+          font-size: 11px;
+        }
+        .feature-visual-panel.is-active .visual-cart .feature-cart-row strong,
+        .feature-mobile-stack .visual-cart .feature-cart-row strong {
+          animation: statusPulse 2.8s ease-in-out infinite;
+        }
+        .feature-check {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 18px;
+          height: 18px;
+          border-radius: 8px;
+          background: ${RED};
+          flex-shrink: 0;
+        }
+        .feature-store-row {
+          background: rgba(255,255,255,.64);
+          border: 1px solid rgba(116,130,63,.12);
+        }
+        .feature-store-row.is-selected {
+          background: rgba(116,130,63,.09);
+          border-color: rgba(116,130,63,.26);
+        }
+        .feature-visual-panel.is-active .visual-store .feature-store-row.is-selected,
+        .feature-mobile-stack .visual-store .feature-store-row.is-selected {
+          animation: rowCheck 3.4s ease-in-out infinite both, storeSelect 2.8s ease-in-out infinite;
+        }
+        .feature-store-logo {
+          position: relative;
+          width: 28px;
+          height: 28px;
+          flex-shrink: 0;
+          border-radius: 8px;
+          overflow: hidden;
+          background: ${WHITE};
+        }
+        .feature-checkout-button,
+        .feature-next-step {
+          margin-top: 14px;
+          border-radius: 8px;
+          background: ${RED};
+          color: ${CREAM};
+          text-align: center;
+          padding: 12px 14px;
+          font-size: 12px;
+          font-weight: 800;
+        }
+        .feature-visual-panel.is-active .visual-store .feature-checkout-button,
+        .feature-mobile-stack .visual-store .feature-checkout-button {
+          animation: statusPulse 2.4s ease-in-out infinite;
+        }
+        .feature-timer {
+          position: relative;
+          overflow: hidden;
+          width: 112px;
+          height: 112px;
+          margin: 12px auto 20px;
+          border-radius: 999px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: ${RED};
+          color: ${CREAM};
+          font-size: 24px;
+          font-weight: 800;
+          box-shadow: 0 20px 60px rgba(116,130,63,.2);
+        }
+        .feature-timer::before {
+          content: '';
+          position: absolute;
+          inset: 8px;
+          border-radius: inherit;
+          border: 2px solid rgba(241,232,199,.28);
+          border-top-color: ${CREAM};
+        }
+        .feature-visual-panel.is-active .visual-cook .feature-timer::before,
+        .feature-mobile-stack .visual-cook .feature-timer::before {
+          animation: timerSweep 2.4s linear infinite;
+        }
+        .feature-timer span {
+          position: relative;
+          z-index: 1;
+        }
+        .feature-cook-card h3 {
+          color: ${RED};
+          font-family: ${INTER_REGULAR};
+          font-size: 28px;
+          font-weight: 400;
+          letter-spacing: 0;
+          line-height: 1.05;
+          margin-bottom: 12px;
+          text-align: center;
+        }
+        .feature-cook-card p {
+          color: rgba(116,130,63,.66);
+          font-size: 13px;
+          line-height: 1.65;
+          text-align: center;
+        }
+        .feature-cook-progress {
+          height: 8px;
+          margin-top: 16px;
+          border-radius: 8px;
+          overflow: hidden;
+          background: rgba(116,130,63,.09);
+        }
+        .feature-cook-progress span {
+          display: block;
+          width: 100%;
+          height: 100%;
+          border-radius: inherit;
+          background: ${RED2};
+          transform-origin: left center;
+          transform: scaleX(.72);
+        }
+        .feature-visual-panel.is-active .visual-cook .feature-cook-progress span,
+        .feature-mobile-stack .visual-cook .feature-cook-progress span {
+          animation: progressFill 3s ease-in-out infinite;
+        }
+        .feature-visual-panel.is-active .visual-cook .feature-next-step,
+        .feature-mobile-stack .visual-cook .feature-next-step {
+          animation: nextStepSlide 2.8s ease-in-out infinite;
+        }
+        .creators-section {
+          background: ${BROWN};
+          border-top: 1px solid rgba(116,130,63,.08);
+          padding: 96px 28px;
+        }
+        .creators-shell {
+          max-width: 1100px;
+          margin: 0 auto;
+          display: grid;
+          grid-template-columns: minmax(300px, 420px) 1fr;
           gap: 72px;
           align-items: center;
+        }
+
+        /* Copy */
+        .creators-copy p {
+          margin-bottom: 14px;
+          color: rgba(241,232,199,.52);
+          font-size: 11px;
+          font-weight: 800;
+          letter-spacing: .18em;
+          text-transform: uppercase;
+        }
+        .creators-copy h2 {
+          margin-bottom: 18px;
+          color: ${CREAM};
+          font-family: ${INTER_REGULAR};
+          font-size: clamp(1.9rem, 3.4vw, 2.8rem);
+          font-weight: 400;
+          letter-spacing: -0.03em;
+          line-height: 1.08;
+        }
+        .creators-copy > div {
+          max-width: 380px;
+          color: rgba(241,232,199,.62);
+          font-size: 15px;
+          line-height: 1.7;
+        }
+        .creators-copy a {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 46px;
+          margin-top: 32px;
+          padding: 0 24px;
+          border-radius: 999px;
+          background: ${CREAM};
+          color: ${BROWN};
+          font-size: 13px;
+          font-weight: 800;
+          text-decoration: none;
+          transition: opacity .18s;
+        }
+        .creators-copy a:hover { opacity: .86; }
+
+        /* Steps */
+        .creator-steps {
+          display: flex;
+          align-items: flex-start;
+          gap: 10px;
+          margin-top: 36px;
+          flex-wrap: wrap;
+        }
+        .creator-step {
+          display: flex;
+          align-items: flex-start;
+          gap: 12px;
+        }
+        .creator-step-num {
+          width: 28px;
+          height: 28px;
+          border-radius: 50%;
+          border: 1.5px solid rgba(241,232,199,.22);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: rgba(241,232,199,.5);
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: .06em;
+          flex-shrink: 0;
+          margin-top: 2px;
+        }
+        .creator-step strong {
+          display: block;
+          color: ${CREAM};
+          font-size: 13px;
+          font-weight: 700;
+          line-height: 1.3;
+        }
+        .creator-step span {
+          display: block;
+          color: rgba(241,232,199,.46);
+          font-size: 11px;
+          font-weight: 500;
+          line-height: 1.4;
+          margin-top: 2px;
+        }
+        .creator-step-arrow {
+          color: rgba(241,232,199,.22);
+          font-size: 18px;
+          padding-top: 4px;
+          flex-shrink: 0;
+        }
+
+        /* Earn card */
+        .creator-earn-card {
+          border-radius: 20px;
+          background: rgba(255,255,255,.06);
+          border: 1px solid rgba(241,232,199,.1);
+          backdrop-filter: blur(12px);
+          padding: 32px 32px 28px;
+          box-shadow:
+            0 0 0 1px rgba(241,232,199,.04) inset,
+            0 40px 80px rgba(0,0,0,.18);
+        }
+        .creator-earn-header {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 16px;
+          margin-bottom: 32px;
+        }
+        .creator-earn-label {
+          color: rgba(241,232,199,.44);
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: .12em;
+          text-transform: uppercase;
+          margin-bottom: 6px;
+        }
+        .creator-earn-amount {
+          color: ${CREAM};
+          font-family: ${INTER_REGULAR};
+          font-size: clamp(2rem, 4vw, 3rem);
+          font-weight: 400;
+          letter-spacing: -.02em;
+          line-height: 1;
+        }
+        .creator-earn-badge {
+          display: inline-flex;
+          align-items: center;
+          height: 28px;
+          padding: 0 12px;
+          border-radius: 999px;
+          background: rgba(116,130,63,.28);
+          color: rgba(241,232,199,.82);
+          font-size: 12px;
+          font-weight: 700;
+          white-space: nowrap;
+          flex-shrink: 0;
+        }
+        .creator-earn-rows {
+          display: flex;
+          flex-direction: column;
+          gap: 22px;
+        }
+        .creator-earn-row-top {
+          display: flex;
+          align-items: baseline;
+          justify-content: space-between;
+          gap: 12px;
+          margin-bottom: 4px;
+        }
+        .creator-earn-row strong {
+          color: ${CREAM};
+          font-size: 14px;
+          font-weight: 700;
+        }
+        .creator-earn-row-earn {
+          color: rgba(241,232,199,.7);
+          font-size: 13px;
+          font-weight: 700;
+        }
+        .creator-earn-row-meta {
+          color: rgba(241,232,199,.36);
+          font-size: 11px;
+          font-weight: 600;
+          margin-bottom: 8px;
+        }
+        .creator-earn-track {
+          height: 6px;
+          border-radius: 999px;
+          background: rgba(241,232,199,.08);
+          overflow: hidden;
+        }
+        .creator-earn-fill {
+          height: 100%;
+          border-radius: 999px;
+          background: linear-gradient(90deg, rgba(241,232,199,.38), rgba(241,232,199,.7));
+        }
+        .creator-earn-footer {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 16px;
+          margin-top: 28px;
+          padding-top: 22px;
+          border-top: 1px solid rgba(241,232,199,.08);
+        }
+        .creator-earn-footer span {
+          color: rgba(241,232,199,.38);
+          font-size: 12px;
+          font-weight: 600;
+        }
+        .creator-earn-footer strong {
+          color: rgba(241,232,199,.62);
+          font-size: 12px;
+          font-weight: 700;
+        }
+        .site-footer {
+          background: ${BROWN};
+          color: ${CREAM};
+          padding: 104px 28px 54px;
+        }
+        .site-footer-shell {
+          max-width: 1180px;
+          margin: 0 auto;
+        }
+        .site-footer-main {
+          display: grid;
+          grid-template-columns: minmax(280px, 1fr) minmax(420px, .9fr);
+          gap: 120px;
+          align-items: start;
+          margin-bottom: 54px;
+        }
+        .site-footer-logo {
+          display: inline-flex;
+          align-items: baseline;
+          gap: 1px;
+          margin-bottom: 42px;
+          color: ${CREAM};
+          font-size: 34px;
+          font-weight: 800;
+          letter-spacing: .18em;
+          line-height: 1;
+          text-transform: uppercase;
+        }
+        .site-footer-logo span:last-child {
+          color: rgba(241,232,199,.72);
+        }
+        .site-footer-brand p {
+          max-width: 360px;
+          color: rgba(241,232,199,.72);
+          font-size: 18px;
+          line-height: 1.55;
+        }
+        .site-footer-brand .site-footer-socials {
+          margin-top: 28px;
+        }
+        .site-footer-links {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(160px, 1fr));
+          gap: 72px;
+        }
+        .site-footer-link-group {
+          display: grid;
+          gap: 18px;
+          align-content: start;
+        }
+        .site-footer-link-group + .site-footer-link-group {
+          margin-top: 42px;
+        }
+        .site-footer h3 {
+          color: ${CREAM};
+          font-family: ${INTER_REGULAR};
+          font-size: 22px;
+          font-weight: 400;
+          letter-spacing: 0;
+          margin-bottom: 4px;
+        }
+        .site-footer a {
+          color: rgba(241,232,199,.72);
+          text-decoration: none;
+          transition: color .18s ease, opacity .18s ease;
+        }
+        .site-footer a:hover {
+          color: ${CREAM};
+        }
+        .site-footer-socials {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 22px;
+        }
+        .site-footer-socials a {
+          display: flex;
+          align-items: center;
+          gap: 9px;
+          min-height: auto;
+          padding: 0;
+          color: ${CREAM};
+          font-size: 14px;
+          font-weight: 800;
+        }
+        .site-footer-socials a:hover {
+          opacity: .82;
+        }
+        .site-footer-waitlist-btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          margin-top: 18px;
+          min-height: 42px;
+          padding: 0 20px;
+          border-radius: 8px;
+          background: ${CREAM};
+          color: ${BROWN} !important;
+          font-size: 13px;
+          font-weight: 800;
+          white-space: nowrap;
+          text-decoration: none;
+        }
+        .site-footer-waitlist-btn:hover {
+          color: ${BROWN} !important;
+          opacity: .86;
+        }
+        .site-footer-bottom {
+          display: grid;
+          gap: 18px;
+          justify-items: center;
+          color: rgba(241,232,199,.62);
+          font-size: 14px;
+          line-height: 1.6;
+          text-align: center;
         }
         .how-demo-shell {
           display: flex;
@@ -762,9 +2962,9 @@ export default function Home() {
           max-width: 620px;
           padding: 28px;
           border-radius: 24px;
-          border: 1px solid rgba(242,134,149,.1);
+          border: 1px solid rgba(116,130,63,.1);
           background: linear-gradient(180deg, #fffefb 0%, #fffaf4 100%);
-          box-shadow: 0 18px 40px rgba(242,134,149,.06);
+          box-shadow: 0 18px 40px rgba(116,130,63,.06);
         }
         .demo-panel-topbar {
           display: flex;
@@ -785,7 +2985,7 @@ export default function Home() {
           gap: 10px;
           padding: 11px 12px;
           border-radius: 16px;
-          border: 1px solid rgba(242,134,149,.12);
+          border: 1px solid rgba(116,130,63,.12);
           background: rgba(255,255,255,.78);
           color: ${RED};
           text-align: left;
@@ -793,14 +2993,14 @@ export default function Home() {
           transition: all .22s ease;
         }
         .demo-progress-step:hover {
-          border-color: rgba(242,134,149,.24);
+          border-color: rgba(116,130,63,.24);
           transform: translateY(-1px);
         }
         .demo-progress-step.active {
           background: ${RED};
           border-color: ${RED};
           color: ${CREAM};
-          box-shadow: 0 8px 20px rgba(242,134,149,.16);
+          box-shadow: 0 8px 20px rgba(116,130,63,.16);
         }
         .demo-progress-index {
           display: inline-flex;
@@ -809,15 +3009,15 @@ export default function Home() {
           width: 32px;
           height: 32px;
           border-radius: 999px;
-          background: rgba(242,134,149,.08);
-          color: rgba(242,134,149,.76);
+          background: rgba(116,130,63,.08);
+          color: rgba(116,130,63,.76);
           font-size: 11px;
           font-weight: 800;
           letter-spacing: .04em;
           flex-shrink: 0;
         }
         .demo-progress-step.active .demo-progress-index {
-          background: rgba(243,234,195,.18);
+          background: rgba(241,232,199,.18);
           color: ${CREAM};
         }
         .demo-progress-label {
@@ -828,7 +3028,7 @@ export default function Home() {
         .demo-step-chip {
           padding: 7px 12px;
           border-radius: 999px;
-          background: rgba(242,134,149,.06);
+          background: rgba(116,130,63,.06);
           color: ${RED};
           font-size: 10px;
           font-weight: 800;
@@ -858,14 +3058,14 @@ export default function Home() {
           margin-top: 4px;
           font-size: 11px;
           line-height: 1.4;
-          color: rgba(242,134,149,.56);
+          color: rgba(116,130,63,.56);
         }
         .demo-counter-pill {
           flex-shrink: 0;
           padding: 8px 11px;
           border-radius: 999px;
-          background: rgba(242,134,149,.05);
-          border: 1px solid rgba(242,134,149,.08);
+          background: rgba(116,130,63,.05);
+          border: 1px solid rgba(116,130,63,.08);
           color: ${RED};
           font-size: 11px;
           font-weight: 700;
@@ -877,7 +3077,7 @@ export default function Home() {
           gap: 12px;
           padding: 16px 18px;
           border-radius: 18px;
-          border: 1px solid rgba(242,134,149,.1);
+          border: 1px solid rgba(116,130,63,.1);
           background: rgba(255,255,255,.92);
           text-align: left;
         }
@@ -886,8 +3086,8 @@ export default function Home() {
           height: 64px;
           flex-shrink: 0;
           border-radius: 16px;
-          background: radial-gradient(circle at 30% 25%, rgba(255,255,255,.9), rgba(255,255,255,.2) 34%, rgba(242,134,149,.18) 35%, rgba(242,134,149,.08) 100%);
-          border: 1px solid rgba(242,134,149,.08);
+          background: radial-gradient(circle at 30% 25%, rgba(255,255,255,.9), rgba(255,255,255,.2) 34%, rgba(116,130,63,.18) 35%, rgba(116,130,63,.08) 100%);
+          border: 1px solid rgba(116,130,63,.08);
           position: relative;
           overflow: hidden;
         }
@@ -902,7 +3102,7 @@ export default function Home() {
           inset: 17px;
           border-radius: 999px;
           background: linear-gradient(180deg, #733120 0%, #9f4a2d 100%);
-          box-shadow: inset 0 -6px 10px rgba(242,134,149,.18);
+          box-shadow: inset 0 -6px 10px rgba(116,130,63,.18);
         }
         .demo-thumb-swirl {
           position: absolute;
@@ -911,14 +3111,14 @@ export default function Home() {
           right: 14px;
           top: 12px;
           border-radius: 999px;
-          background: rgba(242,230,184,.9);
-          box-shadow: 0 0 0 5px rgba(242,230,184,.2);
+          background: rgba(241,232,199,.9);
+          box-shadow: 0 0 0 5px rgba(241,232,199,.2);
         }
         .demo-tag {
           flex-shrink: 0;
           padding: 7px 10px;
           border-radius: 999px;
-          background: rgba(242,134,149,.05);
+          background: rgba(116,130,63,.05);
           color: ${RED};
           font-size: 10px;
           font-weight: 700;
@@ -939,8 +3139,8 @@ export default function Home() {
           min-height: 46px;
           padding: 12px 14px;
           border-radius: 13px;
-          border: 1px solid rgba(242,134,149,.08);
-          background: rgba(242,134,149,.03);
+          border: 1px solid rgba(116,130,63,.08);
+          background: rgba(116,130,63,.03);
           text-align: left;
           transition: border-color .18s ease, background .18s ease, opacity .18s ease;
         }
@@ -952,20 +3152,20 @@ export default function Home() {
           cursor: pointer;
         }
         .demo-ingredient-pill.is-interactive:hover {
-          border-color: rgba(242,134,149,.14);
+          border-color: rgba(116,130,63,.14);
         }
         .demo-ingredient-pill.is-selected {
-          background: rgba(242,134,149,.06);
-          border-color: rgba(242,134,149,.12);
+          background: rgba(116,130,63,.06);
+          border-color: rgba(116,130,63,.12);
         }
         .demo-ingredient-pill.is-muted {
-          background: rgba(242,134,149,.02);
+          background: rgba(116,130,63,.02);
         }
         .demo-ingredient-marker {
           width: 18px;
           height: 18px;
           border-radius: 999px;
-          border: 1px solid rgba(242,134,149,.18);
+          border: 1px solid rgba(116,130,63,.18);
           background: rgba(255,255,255,.9);
           display: inline-flex;
           align-items: center;
@@ -974,7 +3174,7 @@ export default function Home() {
           transition: all .18s ease;
         }
         .demo-ingredient-marker.is-neutral {
-          border-color: rgba(242,134,149,.12);
+          border-color: rgba(116,130,63,.12);
           background: rgba(255,255,255,.72);
         }
         .demo-ingredient-marker.is-selected {
@@ -994,8 +3194,8 @@ export default function Home() {
           margin-left: auto;
           padding: 5px 8px;
           border-radius: 999px;
-          background: rgba(242,134,149,.04);
-          color: rgba(242,134,149,.55);
+          background: rgba(116,130,63,.04);
+          color: rgba(116,130,63,.55);
           font-size: 9px;
           font-weight: 700;
           white-space: nowrap;
@@ -1006,15 +3206,15 @@ export default function Home() {
           background: transparent;
           font-size: 11px;
           font-weight: 600;
-          color: rgba(242,134,149,.5);
+          color: rgba(116,130,63,.5);
         }
         .demo-ingredient-meta.is-strong {
-          background: rgba(242,134,149,.08);
+          background: rgba(116,130,63,.08);
           color: ${RED};
         }
         .demo-result-card {
           border-radius: 18px;
-          border: 1px solid rgba(242,134,149,.08);
+          border: 1px solid rgba(116,130,63,.08);
           background: rgba(255,255,255,.88);
           padding: 16px 18px;
         }
@@ -1030,7 +3230,7 @@ export default function Home() {
           font-weight: 700;
           letter-spacing: .08em;
           text-transform: uppercase;
-          color: rgba(242,134,149,.5);
+          color: rgba(116,130,63,.5);
         }
         .demo-result-groups {
           margin-top: 14px;
@@ -1051,24 +3251,24 @@ export default function Home() {
         .demo-result-items {
           font-size: 12px;
           line-height: 1.5;
-          color: rgba(242,134,149,.7);
+          color: rgba(116,130,63,.7);
         }
         .demo-result-placeholder {
           margin-top: 14px;
           font-size: 12px;
           line-height: 1.5;
-          color: rgba(242,134,149,.5);
+          color: rgba(116,130,63,.5);
         }
         .demo-result-summary {
           margin-top: 16px;
           padding-top: 12px;
-          border-top: 1px solid rgba(242,134,149,.08);
+          border-top: 1px solid rgba(116,130,63,.08);
           display: flex;
           align-items: center;
           justify-content: space-between;
           gap: 12px;
           font-size: 11px;
-          color: rgba(242,134,149,.55);
+          color: rgba(116,130,63,.55);
         }
         .demo-result-summary strong {
           font-size: 14px;
@@ -1076,11 +3276,11 @@ export default function Home() {
         }
         .demo-result-summary.subtle strong {
           font-size: 12px;
-          color: rgba(242,134,149,.62);
+          color: rgba(116,130,63,.62);
         }
         .demo-footer-note {
           font-size: 11px;
-          color: rgba(242,134,149,.56);
+          color: rgba(116,130,63,.56);
         }
         .demo-compact-footer {
           display: flex;
@@ -1102,7 +3302,7 @@ export default function Home() {
         }
         .demo-primary-button:hover {
           transform: translateY(-1px);
-          box-shadow: 0 12px 24px rgba(242,134,149,.14);
+          box-shadow: 0 12px 24px rgba(116,130,63,.14);
         }
         .demo-primary-button:disabled {
           cursor: not-allowed;
@@ -1122,8 +3322,8 @@ export default function Home() {
           margin-top: 14px;
           padding: 12px;
           border-radius: 14px;
-          border: 1px solid rgba(242,134,149,.1);
-          background: rgba(242,134,149,.03);
+          border: 1px solid rgba(116,130,63,.1);
+          background: rgba(116,130,63,.03);
           display: flex;
           flex-direction: column;
           gap: 8px;
@@ -1138,16 +3338,17 @@ export default function Home() {
         .compare-cell {
           padding: 10px 8px;
           border-radius: 12px;
-          border: 1px solid rgba(242,134,149,.08);
+          border: 1px solid rgba(116,130,63,.08);
           background: ${WHITE};
           text-align: center;
         }
         .compare-cell.selected {
-          background: rgba(242,134,149,.1);
-          border-color: rgba(242,134,149,.24);
-          box-shadow: inset 0 0 0 1px rgba(242,134,149,.08);
+          background: rgba(116,130,63,.1);
+          border-color: rgba(116,130,63,.24);
+          box-shadow: inset 0 0 0 1px rgba(116,130,63,.08);
         }
         .store-logo {
+          position: relative;
           width: 32px;
           height: 28px;
           flex-shrink: 0;
@@ -1158,10 +3359,21 @@ export default function Home() {
           justify-content: center;
         }
         .store-logo img {
-          width: 100%;
-          height: 100%;
-          object-fit: contain;
+          max-width: 100%;
+          max-height: 100%;
           display: block;
+        }
+        .about-section-grid {
+          display: grid;
+          grid-template-columns: minmax(280px, 360px) minmax(320px, 460px);
+          align-items: center;
+          justify-content: space-between;
+          gap: 56px;
+        }
+        .about-bucket-wrap {
+          width: 100%;
+          max-width: 460px;
+          justify-self: end;
         }
         .saved-shot-grid {
           padding: 8px;
@@ -1174,8 +3386,8 @@ export default function Home() {
           aspect-ratio: 1;
           border-radius: 8px;
           padding: 10px 8px;
-          background: rgba(242,134,149,.05);
-          border: 1px solid rgba(242,134,149,.06);
+          background: rgba(116,130,63,.05);
+          border: 1px solid rgba(116,130,63,.06);
           display: flex;
           align-items: end;
           justify-content: start;
@@ -1183,7 +3395,7 @@ export default function Home() {
           font-size: 9px;
           line-height: 1.3;
           white-space: pre-line;
-          color: rgba(242,134,149,.62);
+          color: rgba(116,130,63,.62);
         }
         .saved-shot-tile.focused {
           background: ${BG};
@@ -1207,7 +3419,7 @@ export default function Home() {
           gap: 10px;
         }
         .split-card {
-          border: 1px solid rgba(242,134,149,.12);
+          border: 1px solid rgba(116,130,63,.12);
           border-radius: 12px;
           padding: 12px;
           background: ${WHITE};
@@ -1226,13 +3438,13 @@ export default function Home() {
           gap: 8px;
           font-size: 10px;
           font-weight: 700;
-          color: rgba(242,134,149,.72);
+          color: rgba(116,130,63,.72);
         }
         .split-flow-dot {
           width: 8px;
           height: 8px;
           border-radius: 50%;
-          background: rgba(242,134,149,.55);
+          background: rgba(116,130,63,.55);
           animation: splitPulse 1.4s ease-in-out infinite;
         }
         .split-flow-end {
@@ -1240,27 +3452,107 @@ export default function Home() {
           font-size: 10px;
           font-weight: 700;
           color: ${RED};
-          background: rgba(242,134,149,.07);
-          border: 1px solid rgba(242,134,149,.14);
+          background: rgba(116,130,63,.07);
+          border: 1px solid rgba(116,130,63,.14);
           border-radius: 999px;
           padding: 4px 10px;
         }
         .split-summary {
           margin-top: 12px;
           padding: 11px 12px;
-          border: 1px solid rgba(242,134,149,.14);
+          border: 1px solid rgba(116,130,63,.14);
           border-radius: 10px;
-          background: rgba(242,134,149,.03);
+          background: rgba(116,130,63,.03);
           animation: splitGlow 2.8s ease-in-out infinite;
         }
 
         @media (max-width: 980px) {
+          .hero-section {
+            min-height: auto;
+            padding: 78px 22px 72px;
+          }
           .hero-grid {
             grid-template-columns: 1fr;
-            gap: 28px;
+            gap: 46px;
+          }
+          .hero-copy {
+            max-width: 620px;
+          }
+          .hero-visual {
+            min-height: 420px;
+          }
+          .hero-recipe-card,
+          .hero-cart-card {
+            width: min(58%, 320px);
+          }
+          .sticky-feature-section {
+            padding: 82px 22px 68px;
+          }
+          .features-section {
+            padding: 62px 22px 64px;
+          }
+          .features-heading,
+          .features-board,
+          .creators-shell {
+            grid-template-columns: 1fr;
+          }
+          .feature-showcase-card {
+            min-height: auto;
+          }
+          .creators-shell {
+            gap: 32px;
+          }
+          .sticky-feature-scroll {
+            display: none;
+          }
+          .feature-mobile-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+          }
+          .feature-mobile-scene {
+            display: grid;
+            gap: 18px;
+          }
+          .recipe-demo-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
+          }
+          .recipe-demo-image-card {
+            justify-self: center;
+            width: min(320px, 100%);
+            height: 486px;
+          }
+          .site-footer-main {
+            grid-template-columns: 1fr;
+            gap: 54px;
+            margin-bottom: 54px;
+          }
+          .site-footer-links {
+            gap: 36px;
+          }
+          .feature-mobile-scene .sticky-feature-asset {
+            height: auto;
+            min-height: 500px;
+          }
+          .sticky-feature-card {
+            min-height: auto;
+            height: auto;
+          }
+          .sticky-feature-card-inner {
+            opacity: 1;
+            transform: none;
           }
           .product-demo-card {
             max-width: 100%;
+          }
+          .about-section-grid {
+            grid-template-columns: 1fr;
+            gap: 40px;
+          }
+          .about-bucket-wrap {
+            justify-self: start;
+            max-width: 460px;
           }
         }
 
@@ -1280,6 +3572,177 @@ export default function Home() {
         }
 
         @media (max-width: 640px) {
+          .hero-section {
+            padding: 58px 18px 56px;
+          }
+          .hero-title {
+            font-size: clamp(2.15rem, 12vw, 3rem);
+          }
+          .hero-body {
+            font-size: 15px;
+            margin-bottom: 28px;
+          }
+          .hero-primary-link {
+            width: 100%;
+          }
+          .hero-actions {
+            align-items: stretch;
+          }
+          .hero-visual {
+            min-height: 470px;
+          }
+          .hero-recipe-card {
+            top: 0;
+            left: 0;
+            width: 82%;
+          }
+          .hero-cart-card {
+            right: 0;
+            bottom: 0;
+            width: 82%;
+          }
+          .hero-pulse {
+            top: 47%;
+          }
+          .store-chip {
+            min-height: 44px;
+            padding: 0 16px;
+          }
+          .recipe-demo-section {
+            padding: 52px 18px 54px;
+          }
+          .recipe-demo-heading {
+            margin-bottom: 24px;
+            text-align: left;
+          }
+          .recipe-demo-heading h2 {
+            font-size: 30px;
+          }
+          .recipe-demo-heading > div {
+            font-size: 14px;
+          }
+          .recipe-demo-image-card {
+            width: min(280px, 100%);
+            height: 426px;
+          }
+          .recipe-demo-panel-head,
+          .recipe-demo-item,
+          .recipe-demo-checkout {
+            padding-left: 14px;
+            padding-right: 14px;
+          }
+          .recipe-demo-item {
+            grid-template-columns: 1fr;
+            gap: 12px;
+          }
+          .recipe-demo-qty {
+            justify-self: start;
+          }
+          .recipe-demo-checkout {
+            align-items: stretch;
+            flex-direction: column;
+          }
+          .recipe-demo-checkout-actions {
+            width: 100%;
+          }
+          .recipe-demo-checkout a {
+            flex: 1;
+          }
+          .recipe-demo-checkout-disabled {
+            flex: 1;
+          }
+          .recipe-demo-store-option {
+            grid-template-columns: 30px minmax(0,1fr);
+          }
+          .recipe-demo-store-price {
+            grid-column: 2;
+            text-align: left;
+          }
+          .sticky-feature-heading {
+            margin-bottom: 18px;
+          }
+          .features-heading {
+            gap: 14px;
+            margin-bottom: 22px;
+          }
+          .features-heading p {
+            margin-bottom: 0;
+          }
+          .feature-choice {
+            grid-template-columns: 36px minmax(0, 1fr);
+            min-height: auto;
+            padding: 12px;
+          }
+          .feature-choice-index {
+            width: 36px;
+            height: 36px;
+            font-size: 11px;
+          }
+          .feature-showcase-card {
+            padding: 16px;
+          }
+          .creator-earn-card {
+            padding: 22px;
+          }
+          .creator-earn-header {
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 24px;
+          }
+          .creator-earn-amount {
+            font-size: 2rem;
+          }
+          .creator-steps {
+            gap: 8px;
+          }
+          .feature-mobile-scene .sticky-feature-asset {
+            min-height: 430px;
+            padding: 18px;
+            border-radius: 26px;
+          }
+          .sticky-visual-stage {
+            min-height: 340px;
+          }
+          .sticky-feature-card-inner {
+            padding: 22px;
+            border-radius: 22px;
+          }
+          .sticky-feature-index {
+            top: 18px;
+            right: 20px;
+          }
+          .sticky-feature-card h3 {
+            max-width: 320px;
+          }
+          .feature-source-stack,
+          .feature-read-card,
+          .feature-cart-card,
+          .feature-store-card,
+          .feature-cook-card {
+            width: 100%;
+          }
+          .feature-source-card {
+            inset: 72px 22px 42px;
+          }
+          .feature-floating-note {
+            display: none;
+          }
+          .feature-read-grid {
+            grid-template-columns: 1fr;
+          }
+          .site-footer {
+            padding: 72px 18px 42px;
+          }
+          .site-footer-logo {
+            margin-bottom: 28px;
+            font-size: 28px;
+          }
+          .site-footer-links {
+            grid-template-columns: 1fr;
+          }
+          .site-footer-socials a {
+            min-height: auto;
+          }
           .product-demo-card {
             padding: 20px;
             border-radius: 22px;
@@ -1318,6 +3781,77 @@ export default function Home() {
           }
         }
 
+        @media (max-width: 640px) {
+          /* Nav */
+          div[style*="padding: 8px 20px"] {
+            padding: 6px 12px;
+          }
+
+          /* Creators section */
+          .creators-section {
+            padding: 64px 20px;
+          }
+          .creators-shell {
+            grid-template-columns: 1fr;
+            gap: 40px;
+          }
+          .creators-copy h2 {
+            font-size: 1.85rem;
+          }
+          .creators-copy > div {
+            max-width: 100%;
+          }
+          .creator-steps {
+            flex-direction: column;
+            gap: 14px;
+          }
+          .creator-step-arrow {
+            display: none;
+          }
+          .creator-earn-card {
+            padding: 22px 18px;
+          }
+          .creator-earn-header {
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 22px;
+          }
+          .creator-earn-amount {
+            font-size: 2.2rem;
+          }
+
+          /* FAQ */
+          #faq {
+            padding: 64px 18px !important;
+          }
+
+          /* Store marquee */
+          .store-marquee-track {
+            gap: 28px;
+          }
+
+          /* Works with section */
+          .works-with-section {
+            padding: 48px 18px;
+          }
+
+          /* Site footer */
+          .site-footer {
+            padding: 72px 18px 40px;
+          }
+          .site-footer-main {
+            grid-template-columns: 1fr;
+            gap: 40px;
+          }
+          .site-footer-links {
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+          }
+          .site-footer-logo {
+            font-size: 26px;
+          }
+        }
+
         @media (prefers-reduced-motion: reduce) {
           html {
             scroll-behavior: auto !important;
@@ -1331,18 +3865,31 @@ export default function Home() {
           .split-scene,
           .split-card,
           .split-flow-dot,
-          .split-summary {
+          .split-summary,
+          .sticky-visual-stage,
+          .feature-cart-row,
+          .feature-read-tile {
             animation: none !important;
           }
         }
       `}</style>
 
       {/* NAV */}
-      <div style={{ position: 'sticky', top: 0, zIndex: 100, padding: '10px 20px' }}>
-        <nav style={{ maxWidth: 1100, margin: '0 auto', background: 'rgba(255,255,255,0.5)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)', borderRadius: 12, boxShadow: 'rgba(0,0,0,0.18) 0px 0.6px 0.6px -1.25px, rgba(0,0,0,0.16) 0px 2.3px 2.3px -2.5px, rgba(0,0,0,0.06) 0px 10px 10px -3.75px' }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-          <div style={{ height: 54, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px' }}>
-            <Logo size={22} />
+      <div style={{ position: 'sticky', top: 0, zIndex: 100, padding: '8px 20px' }}>
+        <nav style={{ maxWidth: 1180, margin: '0 auto', background: 'rgba(255,255,255,0.68)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', border: '1px solid rgba(116,130,63,.08)', borderRadius: 12, boxShadow: 'rgba(0,0,0,0.14) 0px 0.6px 0.6px -1.25px, rgba(0,0,0,0.1) 0px 2.3px 2.3px -2.5px, rgba(0,0,0,0.04) 0px 10px 10px -3.75px' }}>
+        <div style={{ maxWidth: 1180, margin: '0 auto' }}>
+          <div style={{ height: 48, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 18px' }}>
+            <a
+              href="#hero"
+              className="nav-logo-link"
+              aria-label="Go to the first section"
+              onClick={(event) => {
+                event.preventDefault()
+                scrollToSection('hero')
+              }}
+            >
+              <Logo size={21} />
+            </a>
             <div className="nav-desktop" style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)' }}>
               <PillMorphTabs
                 items={navItems.map(({ label, sectionId }) => ({
@@ -1350,18 +3897,23 @@ export default function Home() {
                   label,
                   panel: null,
                 }))}
-                defaultValue={navItems[0].sectionId}
+                defaultValue=""
                 onValueChange={(sectionId) => {
                   const item = navItems.find(n => n.sectionId === sectionId)
-                  if (item) scrollToSection(item.sectionId, item.tab)
+                  if (!item) return
+                  if (item.href) {
+                    window.location.assign(item.href)
+                    return
+                  }
+                  scrollToSection(item.sectionId)
                 }}
               />
             </div>
             <a href="/waitlist"
-              style={{ padding: '9px 22px', borderRadius: 999, background: RED, color: CREAM, fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer', transition: 'opacity .15s', textDecoration: 'none', flexShrink: 0 }}
+              style={{ padding: '8px 18px', borderRadius: 999, background: BROWN, color: CREAM, fontSize: 12, fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'opacity .15s', textDecoration: 'none', flexShrink: 0 }}
               onMouseEnter={e => (e.currentTarget.style.opacity = '.85')}
               onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
-            >Join waitlist</a>
+            >Get Started</a>
             <div className="nav-desktop" style={{ display: 'none' }} />
 
             <button
@@ -1377,20 +3929,27 @@ export default function Home() {
 
           {navOpen && (
             <div id="mobile-menu" className="nav-mobile">
-              {navItems.map(({ label, sectionId, tab: nextTab }) => (
+              {navItems.map(({ label, sectionId }) => (
                 <button
                   key={`mobile-${label}`}
                   type="button"
                   className="nav-mobile-link"
-                  onClick={() => scrollToSection(sectionId, nextTab)}
+                  onClick={() => {
+                    const item = navItems.find(n => n.sectionId === sectionId)
+                    if (item?.href) {
+                      window.location.assign(item.href)
+                      return
+                    }
+                    scrollToSection(sectionId)
+                  }}
                 >
                   {label}
                 </button>
               ))}
               <a href="/waitlist"
-                style={{ marginTop: 2, display: 'block', width: '100%', padding: '10px 14px', borderRadius: 8, background: RED, color: CREAM, fontSize: 13, fontWeight: 700, textDecoration: 'none', textAlign: 'center', boxSizing: 'border-box' }}
+                style={{ marginTop: 2, display: 'block', width: '100%', padding: '10px 14px', borderRadius: 8, background: BROWN, color: CREAM, fontSize: 13, fontWeight: 700, textDecoration: 'none', textAlign: 'center', boxSizing: 'border-box' }}
               >
-                Join waitlist
+                Get Started
               </a>
             </div>
           )}
@@ -1399,108 +3958,99 @@ export default function Home() {
       </div>
 
       {/* HERO */}
-      <section id="hero" className="grid-bg" style={{ display: 'flex', alignItems: 'center', padding: '72px 28px' }}>
-        <div className="hero-grid" style={{ maxWidth: 1100, margin: '0 auto', width: '100%' }}>
-
-          <div>
-            <div className="fade-up" style={{ display: 'inline-block', fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: RED, opacity: .5, marginBottom: 14 }}>
+      <HeroGridSection>
+        <div className="hero-grid">
+          <div className="hero-copy">
+            <div className="hero-eyebrow fade-up">
               Early access
             </div>
-            <h1 className="fade-up" style={{ fontSize: 'clamp(1.8rem,3vw,2.6rem)', fontWeight: 800, lineHeight: 1.15, letterSpacing: '-1px', color: RED, marginBottom: 16 }}>
-              From saved recipe to groceries{' '}
-              <span style={{ position: 'relative', display: 'inline-block', minWidth: '8ch', height: '1.1em', verticalAlign: 'bottom', overflow: 'hidden' }}>
-                {HERO_TITLES.map((title, index) => (
+            <h1 className="hero-title fade-up">
+              From saved recipe to{' '}
+              <span className="hero-title-nowrap">
+                groceries
+                <span className="hero-title-word">
                   <motion.span
-                    key={title}
-                    style={{ position: 'absolute', left: 0, whiteSpace: 'nowrap' }}
-                    initial={{ opacity: 0, y: '-100%' }}
-                    transition={{ type: 'spring', stiffness: 50 }}
-                    animate={
-                      heroTitleNumber === index
-                        ? { y: 0, opacity: 1 }
-                        : { y: heroTitleNumber > index ? '-150%' : '150%', opacity: 0 }
-                    }
+                    key={HERO_TITLES[heroTitleNumber]}
+                    initial={false}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.28, ease: 'easeOut' }}
                   >
-                    {title}
+                    {HERO_TITLES[heroTitleNumber]}
                   </motion.span>
-                ))}
+                </span>
               </span>
             </h1>
-            <p className="fade-up" style={{ fontSize: 16, color: RED, opacity: .65, lineHeight: 1.75, maxWidth: 400, marginBottom: 36 }}>
-              Coookd turns any recipe into a ready-to-checkout cart across any grocery store.
+            <p className="hero-body fade-up">
+              ateoclock turns any recipe into an editable cart across any grocery store.
             </p>
-            <div id="waitlist-form" className="fade-up" style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'flex-start' }}>
-              <a href="/waitlist"
-                style={{ display: 'inline-block', padding: '14px 32px', background: RED, color: CREAM, borderRadius: 10, fontWeight: 700, fontSize: 15, textDecoration: 'none', letterSpacing: '-0.01em', transition: 'opacity 0.2s' }}
-                onMouseEnter={e => (e.currentTarget.style.opacity = '.85')}
-                onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
-              >
-                Get early access →
+            <div id="waitlist-form" className="hero-actions fade-up">
+              <a href="/waitlist" className="hero-primary-link">
+                Get early access
               </a>
               {waitlistCount !== null && waitlistCount > 0 && (
-                <p style={{ fontSize: 13, color: RED, opacity: .5 }}>
-                  <span style={{ fontWeight: 700, opacity: 1, color: RED }}>{waitlistCount.toLocaleString()}</span> people already on the list
+                <p className="hero-waitlist-count">
+                  <span>{waitlistCount.toLocaleString()}</span> people already on the list
                 </p>
               )}
             </div>
           </div>
 
           {/* Animated mockup */}
-          <div style={{ position: 'relative', height: 440 }}>
-            <div className="card-hover float-a" style={{ position: 'absolute', top: 16, left: 0, width: 250, background: WHITE, borderRadius: 18, padding: 22, boxShadow: '0 8px 36px rgba(242,134,149,.1)', border: '1px solid rgba(242,134,149,.07)' }}>
-              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: RED, opacity: .4, marginBottom: 10 }}>Saved recipe</div>
-              <div style={{ fontWeight: 700, fontSize: 17, color: RED, marginBottom: 4 }}>Acai Bowl</div>
-              <div style={{ fontSize: 12, color: RED, opacity: .5, marginBottom: 14 }}>by @healthybowl</div>
-              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          <div className="hero-visual">
+            <div className="hero-card hero-recipe-card card-hover float-a">
+              <div className="hero-card-label">Saved recipe</div>
+              <div className="hero-recipe-title">Acai Bowl</div>
+              <div className="hero-recipe-byline">by @healthybowl</div>
+              <div className="hero-chip-row">
                 {['10 min', 'Serves 1', 'Healthy'].map(t => (
-                  <span key={t} style={{ fontSize: 11, padding: '3px 10px', borderRadius: 999, background: `rgba(242,134,149,.07)`, color: RED, fontWeight: 500 }}>{t}</span>
+                  <span key={t}>{t}</span>
                 ))}
               </div>
             </div>
 
-            <div className="card-hover float-b" style={{ position: 'absolute', bottom: 16, right: 0, width: 230, background: WHITE, borderRadius: 18, padding: 20, boxShadow: '0 8px 36px rgba(242,134,149,.1)', border: '1px solid rgba(242,134,149,.07)' }}>
-              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: RED, opacity: .4, marginBottom: 12 }}>Cart ready</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
+            <div className="hero-card hero-cart-card card-hover float-b">
+              <div className="hero-card-label">Cart built</div>
+              <div className="hero-cart-list">
                 {ingredients.map((item, i) => (
-                  <div key={item} style={{ display: 'flex', alignItems: 'center', gap: 10, opacity: i < cartFill ? 1 : .2, transition: 'opacity .3s' }}>
-                    <div style={{ width: 18, height: 18, borderRadius: '50%', background: i < cartFill ? RED : `rgba(242,134,149,.12)`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'background .3s' }}>
+                  <div key={item} className="hero-cart-row" style={{ opacity: i < cartFill ? 1 : .56 }}>
+                    <span className="hero-cart-check" style={{ background: i < cartFill ? RED : `rgba(116,130,63,.12)` }}>
                       {i < cartFill && <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke={CREAM} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>}
-                    </div>
-                    <span style={{ fontSize: 13, color: RED, fontWeight: i < cartFill ? 500 : 400 }}>{item}</span>
+                    </span>
+                    <span style={{ fontWeight: i < cartFill ? 700 : 500 }}>{item}</span>
                   </div>
                 ))}
               </div>
               {cartFill >= 4 && (
-                <div style={{ marginTop: 14, padding: '10px 0', background: RED, borderRadius: 8, textAlign: 'center', fontSize: 12, fontWeight: 700, color: CREAM, animation: 'fadeUp .3s ease' }}>
+                <div className="hero-order-button" style={{ animation: 'fadeUp .3s ease' }}>
                   Order on Blinkit
                 </div>
               )}
             </div>
 
-            <div className="hero-pulse" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', background: RED, borderRadius: 999, padding: '10px 20px', boxShadow: '0 4px 20px rgba(242,134,149,.3)', animation: 'pulse 2.4s ease-in-out infinite' }}>
-              <span style={{ fontSize: 12, fontWeight: 700, color: CREAM, whiteSpace: 'nowrap' }}>1 tap</span>
+            <div className="hero-pulse">
+              <span>1 tap</span>
             </div>
           </div>
         </div>
-      </section>
+      </HeroGridSection>
 
-      {/* WORKS WITH — scrolling marquee */}
-      <section style={{ background: WHITE, padding: '32px 0', borderTop: `1px solid rgba(242,134,149,.07)`, overflow: 'hidden' }}>
-        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: RED, opacity: .4, marginBottom: 24, textAlign: 'center' }}>Works with</p>
-        <div style={{ position: 'relative', width: '100%', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 80, background: `linear-gradient(to right, ${WHITE}, transparent)`, zIndex: 2 }} />
-          <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 80, background: `linear-gradient(to left, ${WHITE}, transparent)`, zIndex: 2 }} />
+      {/* WORKS WITH - scrolling marquee */}
+      <section className="store-strip-section">
+        <p className="store-strip-label">Works with</p>
+        <div className="store-marquee-window">
+          <div className="store-marquee-edge store-marquee-edge-left" />
+          <div className="store-marquee-edge store-marquee-edge-right" />
           <div className="marquee-track" style={{ display: 'flex', animation: 'marquee 24s linear infinite', width: 'max-content', willChange: 'transform' }}>
             {Array.from({ length: STORE_MARQUEE_GROUPS }).map((_, groupIndex) => (
               <div
                 key={groupIndex}
-                style={{ display: 'flex', flexShrink: 0, gap: 12 }}
+                className="store-marquee-group"
                 aria-hidden={groupIndex === 0 ? undefined : true}
               >
                 {STORES.map((s) => (
-                  <span key={`${groupIndex}-${s.name}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '8px 20px', borderRadius: 999, border: `1.5px solid rgba(242,134,149,.15)`, fontSize: 13, fontWeight: 600, color: RED, whiteSpace: 'nowrap', background: WHITE }}>
+                  <span key={`${groupIndex}-${s.name}`} className="store-chip">
                     <span className="store-logo" aria-hidden="true">
-                      <Image src={s.logo} alt="" width={32} height={28} />
+                      <Image src={s.logo} alt="" fill sizes="32px" style={{ objectFit: 'contain' }} />
                     </span>
                     {s.name}
                   </span>
@@ -1511,375 +4061,69 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ABOUT */}
-      <section id="about" style={{ background: WHITE, padding: '72px 28px 60px', borderTop: `1px solid rgba(242,134,149,.07)` }}>
-        <div style={{ maxWidth: 1080, margin: '0 auto' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 28, alignItems: 'end', marginBottom: 18 }}>
-            <div>
-              <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: RED, opacity: .4, marginBottom: 12 }}>About Coookd</p>
-              <h2 style={{ fontSize: 'clamp(1.9rem,3vw,2.7rem)', fontWeight: 800, letterSpacing: '-1.2px', color: RED, marginBottom: 10, lineHeight: 1.08 }}>
-                See a recipe. Build the cart. Cook tonight.
-              </h2>
-            </div>
+      <RecipeCheckoutDemoSection />
 
-            <div style={{ justifySelf: 'end', width: '100%', maxWidth: 420, background: BG, borderRadius: 20, padding: '18px 20px', border: `1px solid rgba(242,134,149,.1)` }}>
-              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: RED, opacity: .45, marginBottom: 8 }}>
-                What it is
-              </div>
-              <div style={{ fontSize: 15, lineHeight: 1.65, color: RED, opacity: .72 }}>
-                A shoppable recipe layer that turns saved inspiration into an editable grocery basket, then lets the shopper choose the store at the end.
-              </div>
-            </div>
-          </div>
-
-          <Bucket />
-        </div>
-      </section>
-
-      {/* SCREENSHOT FLOW */}
-      <section style={{ background: `radial-gradient(ellipse at 65% 40%, rgba(242,134,149,.07) 0%, transparent 55%), ${BG}`, padding: '64px 28px' }}>
-        <div style={{ maxWidth: 1080, margin: '0 auto', display: 'flex', alignItems: 'center', gap: 72, flexWrap: 'wrap' }}>
-
-          {/* Left: text + upload */}
-          <div style={{ flex: '1 1 340px', minWidth: 280 }}>
-            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: RED, opacity: .4, marginBottom: 12 }}>How it starts</p>
-            <h2 style={{ fontSize: 'clamp(1.6rem,2.4vw,2.2rem)', fontWeight: 800, letterSpacing: '-1px', color: RED, marginBottom: 20, lineHeight: 1.2 }}>
-              You screenshot recipes.<br />They disappear into your camera roll.
-            </h2>
-            <p style={{ fontSize: 16, color: RED, opacity: .6, lineHeight: 1.8, marginBottom: 24 }}>
-              You saw it on social media. You saved it. But three weeks later it is buried under 400 other screenshots and you are ordering takeout again.
-            </p>
-            <p style={{ fontSize: 16, color: RED, opacity: .6, lineHeight: 1.8, marginBottom: 28 }}>
-              Coookd fixes that. Find a recipe, tap once, and every ingredient lands in your cart. No searching, no copying, no forgetting.
-            </p>
-            {/* Upload zone */}
-            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: RED, opacity: .4, marginBottom: 10 }}>Start here</p>
-            <label htmlFor="screenshot-input" style={{ display: 'block' }}>
-              <div
-                className={`drop-zone${dragOver ? ' over' : ''}`}
-                onDragOver={e => { e.preventDefault(); setDragOver(true) }}
-                onDragLeave={() => setDragOver(false)}
-                onDrop={handleDrop}
-              >
-                {uploadedFile ? (
-                  <div>
-                    <div style={{ width: 40, height: 40, borderRadius: '50%', background: `rgba(242,134,149,.1)`, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17L4 12" stroke={RED} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                    </div>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: RED, marginBottom: 4 }}>{uploadedFile}</div>
-                    <div style={{ fontSize: 11, color: RED, opacity: .45 }}>We have got it. We will build your list on launch.</div>
-                  </div>
-                ) : (
-                  <div>
-                    <div style={{ width: 40, height: 40, borderRadius: '50%', background: `rgba(242,134,149,.07)`, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke={RED} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                    </div>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: RED, marginBottom: 4 }}>Drop your screenshot here</div>
-                    <div style={{ fontSize: 11, color: RED, opacity: .45 }}>or click to browse</div>
-                  </div>
-                )}
-              </div>
-            </label>
-            <input id="screenshot-input" type="file" accept="image/*" onChange={handleFileInput} style={{ display: 'none' }} />
-          </div>
-
-          {/* Right: animated phone mockup */}
-          <div style={{ flex: '0 0 300px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            {/* iPhone shell */}
-            <div style={{ position: 'relative', width: 248, background: 'linear-gradient(145deg, #2a2a2a 0%, #1a1a1a 40%, #111 100%)', borderRadius: 52, padding: '12px 7px', boxShadow: '0 40px 100px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.08), inset 0 0 0 1px rgba(255,255,255,.04)' }}>
-              {/* Side button - right */}
-              <div style={{ position: 'absolute', right: -3, top: 100, width: 3, height: 60, background: '#333', borderRadius: '0 2px 2px 0' }} />
-              {/* Volume buttons - left */}
-              <div style={{ position: 'absolute', left: -3, top: 80, width: 3, height: 32, background: '#333', borderRadius: '2px 0 0 2px' }} />
-              <div style={{ position: 'absolute', left: -3, top: 122, width: 3, height: 32, background: '#333', borderRadius: '2px 0 0 2px' }} />
-              <div style={{ position: 'absolute', left: -3, top: 164, width: 3, height: 32, background: '#333', borderRadius: '2px 0 0 2px' }} />
-              {/* Screen bezel */}
-              <div style={{ background: '#000', borderRadius: 44, overflow: 'hidden', position: 'relative' }}>
-                {/* Dynamic Island */}
-                <div style={{ position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)', width: 88, height: 26, background: '#000', borderRadius: 20, zIndex: 10 }} />
-                {/* Status bar spacer */}
-                <div style={{ height: 48 }} />
-              {/* Screen */}
-              <div style={{ background: WHITE, borderRadius: 0, overflow: 'hidden', minHeight: 380, position: 'relative' }}>
-
-                {/* Phase label bar */}
-                <div style={{ padding: '10px 14px', background: BG, borderBottom: `1px solid rgba(242,134,149,.1)`, display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: RED, opacity: .5 }} />
-                  <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '.08em', color: RED, opacity: .5, textTransform: 'uppercase' }}>
-                    {aboutPhase === 0 ? 'Camera Roll' : aboutPhase === 1 ? 'Recipe found' : 'Adding to cart'}
-                  </span>
-                </div>
-
-                {/* Phase 0: cluttered camera roll */}
-                {aboutPhase === 0 && (
-                  <div className="saved-shot-grid">
-                    {SAVED_RECIPE_TILES.map((label, i) => (
-                      <div
-                        key={label}
-                        className="saved-shot-tile"
-                        style={{
-                          background: [
-                            'rgba(242,134,149,.06)',
-                            'rgba(242,134,149,.08)',
-                            'rgba(243,234,195,.82)',
-                            'rgba(242,134,149,.05)',
-                            'rgba(243,234,195,.65)',
-                          ][i % 5],
-                        }}
-                      >
-                        {label}
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Phase 1: one recipe highlighted */}
-                {aboutPhase === 1 && (
-                  <div className="saved-shot-grid">
-                    {SAVED_RECIPE_TILES.map((label, i) => {
-                      const focused = i === 4
-                      return (
-                        <div
-                          key={`${label}-${i}`}
-                          className={`saved-shot-tile${focused ? ' focused' : ''}`}
-                          style={{ opacity: focused ? 1 : 0.28 }}
-                        >
-                          {focused ? `${selectedRecipe.name}\nTap to build cart` : label}
-                        </div>
-                      )
-                    })}
-                  </div>
-                )}
-
-                {/* Phase 2: cart being built */}
-                {aboutPhase === 2 && (
-                  <div style={{ padding: '14px', animation: 'fadeUp .35s ease both' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
-                      <div>
-                        <div style={{ fontSize: 11, fontWeight: 700, color: RED }}>{selectedRecipe.name}</div>
-                        <div style={{ fontSize: 9, color: RED, opacity: .5 }}>Adding ingredients to cart...</div>
-                      </div>
-                    </div>
-                    {[
-                      ...selectedRecipe.ingredients
-                        .filter((ingredient) => ingredient.defaultSelected)
-                        .slice(0, 4)
-                        .map((ingredient, index) => ({
-                          label: ingredient.name,
-                          qty: ingredient.qty,
-                          delay: index * 150,
-                        })),
-                    ].map((item) => (
-                      <div key={item.label} style={{
-                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                        padding: '7px 10px', marginBottom: 4, borderRadius: 8,
-                        background: `rgba(242,134,149,.05)`,
-                        animation: `fadeUp .4s ease ${item.delay}ms both`
-                      }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                          <div style={{ width: 14, height: 14, borderRadius: '50%', background: RED, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <svg width="8" height="6" viewBox="0 0 10 8" fill="none">
-                              <path d="M1 4L3.5 6.5L9 1" stroke={WHITE} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-                          </div>
-                          <span style={{ fontSize: 11, color: RED, fontWeight: 500 }}>{item.label}</span>
-                        </div>
-                        <span style={{ fontSize: 10, color: RED, opacity: .45 }}>{item.qty}</span>
-                      </div>
-                    ))}
-                    <div style={{ marginTop: 12, padding: '9px 14px', borderRadius: 10, background: RED, textAlign: 'center' }}>
-                      <span style={{ fontSize: 11, color: WHITE, fontWeight: 700 }}>Added to Blinkit cart</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-              </div>{/* /screen bezel */}
-            </div>{/* /iPhone shell */}
-
-            {/* Phase dots */}
-            <div style={{ display: 'flex', gap: 6, marginTop: 20 }}>
-              {[0,1,2].map(i => (
-                <div key={i} style={{ width: i === aboutPhase ? 20 : 6, height: 6, borderRadius: 3, background: RED, opacity: i === aboutPhase ? 1 : .2, transition: 'all .4s ease' }} />
-              ))}
-            </div>
-          </div>
-
-        </div>
-      </section>
-
-      {/* HOW IT WORKS */}
-      <section id="how-it-works" style={{ background: WHITE, padding: '64px 28px' }}>
-        <div style={{ maxWidth: 860, margin: '0 auto' }}>
-          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: RED, opacity: .4, marginBottom: 12, textAlign: 'center' }}>How it works</p>
-          <h2 style={{ fontSize: 'clamp(1.8rem,3vw,2.4rem)', fontWeight: 800, letterSpacing: '-1px', color: RED, textAlign: 'center', marginBottom: 14 }}>
-            Pick a recipe. We&apos;ll handle the rest.
-          </h2>
-          <p style={{ marginBottom: 36, textAlign: 'center', fontSize: 15, color: RED, opacity: .52 }}>
-            Select your ingredients, choose a store, and check out in one tap.
-          </p>
-
-          <div className="how-demo-shell">
-            {focusedFlowPanel}
-          </div>
-        </div>
-      </section>
-
-      {/* FOR COOK / CREATOR TABS */}
-      <section id="for-creators" style={{ background: BG, padding: '64px 28px' }}>
-        <div style={{ maxWidth: 900, margin: '0 auto' }}>
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 52 }}>
-            <div style={{ display: 'flex', background: WHITE, borderRadius: 12, padding: 4, border: `1px solid rgba(242,134,149,.1)` }}>
-              {(['cook', 'creator'] as const).map(t => (
-                <button key={t} onClick={() => setTab(t)}
-                  style={{ padding: '10px 28px', borderRadius: 9, fontSize: 14, fontWeight: 600, border: 'none', cursor: 'pointer', transition: 'all .2s', background: tab === t ? RED : 'transparent', color: tab === t ? CREAM : RED, opacity: tab === t ? 1 : .55 }}
-                >{t === 'cook' ? 'I want to cook' : 'I create content'}</button>
-              ))}
-            </div>
-          </div>
-
-          {tab === 'cook' && (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 40, alignItems: 'center', animation: 'fadeUp .4s ease' }}>
-              <div>
-                <h2 style={{ fontSize: 'clamp(1.8rem,3vw,2.4rem)', fontWeight: 800, letterSpacing: '-1px', color: RED, marginBottom: 16, lineHeight: 1.2 }}>
-                  Your cart, filled in one tap. Delivered tonight.
-                </h2>
-                <p style={{ fontSize: 15, color: RED, opacity: .6, lineHeight: 1.8, marginBottom: 28 }}>
-                  Pick a recipe, choose your store, and checkout. Every ingredient arrives the same evening, nothing to copy, nothing to type.
-                </p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  {['Free to use, always', 'Works with Blinkit, Zepto, Amazon Fresh and more', 'Scale servings and the list updates automatically'].map(pt => (
-                    <div key={pt} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-                      <div style={{ width: 18, height: 18, borderRadius: '50%', background: RED, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
-                        <svg width="9" height="7" viewBox="0 0 9 7" fill="none"><path d="M1 3.5L3 5.5L8 1" stroke={CREAM} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                      </div>
-                      <span style={{ fontSize: 14, color: RED, opacity: .7, lineHeight: 1.5 }}>{pt}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div style={{ background: WHITE, borderRadius: 20, padding: 28, border: `1px solid rgba(242,134,149,.08)` }}>
-                <div style={{ fontWeight: 700, fontSize: 15, color: RED, marginBottom: 18 }}>Acai Bowl prep mode</div>
-                <div style={{ fontSize: 11, color: RED, opacity: .4, marginBottom: 8 }}>Step 2 of 4</div>
-                <div style={{ fontSize: 16, fontWeight: 700, color: RED, marginBottom: 10 }}>Blend until thick</div>
-                <div style={{ fontSize: 13, color: RED, opacity: .6, lineHeight: 1.65, marginBottom: 20 }}>
-                  Blend frozen acai, banana, and a splash of milk for 45 seconds. Stop when the texture is scoopable, not drinkable.
-                </div>
-                <div style={{ display: 'flex', gap: 10 }}>
-                  <div style={{ flex: 1, padding: '11px 0', background: RED, borderRadius: 8, textAlign: 'center', fontSize: 13, fontWeight: 700, color: CREAM }}>00:45</div>
-                  <div style={{ flex: 1, padding: '11px 0', background: `rgba(242,134,149,.08)`, borderRadius: 8, textAlign: 'center', fontSize: 13, fontWeight: 600, color: RED }}>Next step</div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {tab === 'creator' && (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 40, alignItems: 'center', animation: 'fadeUp .4s ease' }}>
-              <div>
-                <h2 style={{ fontSize: 'clamp(1.8rem,3vw,2.4rem)', fontWeight: 800, letterSpacing: '-1px', color: RED, marginBottom: 16, lineHeight: 1.2 }}>
-                  Your recipes already drive purchases. Start earning from them.
-                </h2>
-                <p style={{ fontSize: 15, color: RED, opacity: .6, lineHeight: 1.8, marginBottom: 28 }}>
-                  Every ingredient you list comes with an affiliate link. When your followers order, you earn. No brand deals or sponsorships required.
-                </p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  {['Earn on every grocery order your recipe drives', 'See exactly which recipes get cooked, not just watched', 'One link works across all your social media channels', 'No upfront cost. Coookd takes a cut only when you earn'].map(pt => (
-                    <div key={pt} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-                      <div style={{ width: 18, height: 18, borderRadius: '50%', background: RED, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
-                        <svg width="9" height="7" viewBox="0 0 9 7" fill="none"><path d="M1 3.5L3 5.5L8 1" stroke={CREAM} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                      </div>
-                      <span style={{ fontSize: 14, color: RED, opacity: .7, lineHeight: 1.5 }}>{pt}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div style={{ background: WHITE, borderRadius: 20, padding: 28, border: `1px solid rgba(242,134,149,.08)` }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: RED, opacity: .4, marginBottom: 20 }}>Last 7 days</div>
-                {[
-                  { name: 'Acai Bowl', carts: 142, pct: 85 },
-                  { name: 'Mango Lassi', carts: 61, pct: 37 },
-                  { name: 'Berry Smoothie', carts: 48, pct: 29 },
-                ].map(r => (
-                  <div key={r.name} style={{ marginBottom: 18 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 7 }}>
-                      <span style={{ fontSize: 13, fontWeight: 600, color: RED }}>{r.name}</span>
-                      <span style={{ fontSize: 12, color: RED, opacity: .5 }}>{r.carts} grocery lists made</span>
-                    </div>
-                    <div style={{ height: 7, borderRadius: 4, background: `rgba(242,134,149,.08)`, overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: `${r.pct}%`, borderRadius: 4, background: RED, animation: 'barGrow 1s ease both' }} />
-                    </div>
-                  </div>
-                ))}
-                <div style={{ padding: '14px 18px', background: `rgba(242,134,149,.06)`, borderRadius: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
-                  <span style={{ fontSize: 13, color: RED, opacity: .6 }}>This week</span>
-                  <span style={{ fontSize: 18, fontWeight: 800, color: RED }}>Rs 2,840</span>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* UPCOMING FEATURES */}
+      {/* FEATURES */}
       <UpcomingFeaturesSection />
 
-      {/* STATS */}
-      <div ref={statsRef} style={{ background: RED, padding: '52px 28px' }}>
-        <div style={{ maxWidth: 900, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 32, textAlign: 'center' }}>
-          {[
-            { val: c1, suffix: '',  label: 'Recipes ready to cook on day one' },
-            { val: c2, suffix: '+', label: 'Food creators signed up and waiting' },
-            { val: c3, suffix: '%', label: 'Of early users said they would cook more' },
-          ].map(s => (
-            <div key={s.label}>
-              <div style={{ fontSize: 'clamp(2.4rem,5vw,3.6rem)', fontWeight: 800, letterSpacing: '-2px', color: CREAM, lineHeight: 1 }}>
-                {s.val.toLocaleString()}{s.suffix}
-              </div>
-              <div style={{ fontSize: 13, color: CREAM, opacity: .6, marginTop: 8 }}>{s.label}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* FINAL CTA */}
-      <section style={{ background: BG, padding: '80px 28px', textAlign: 'center' }}>
-        <div style={{ maxWidth: 520, margin: '0 auto' }}>
-          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: RED, opacity: .4, marginBottom: 14 }}>Get early access</p>
-          <h2 style={{ fontSize: 'clamp(1.8rem,3vw,2.4rem)', fontWeight: 800, letterSpacing: '-1px', color: RED, marginBottom: 14, lineHeight: 1.2 }}>
-            Ready to cook tonight?
-          </h2>
-          <p style={{ fontSize: 15, color: RED, opacity: .55, lineHeight: 1.7, marginBottom: 32 }}>
-            Join the waitlist and be the first to know when Coookd launches.
-          </p>
-          <a href="/waitlist"
-            style={{ display: 'inline-block', padding: '14px 36px', background: RED, color: CREAM, borderRadius: 10, fontWeight: 700, fontSize: 15, textDecoration: 'none', letterSpacing: '-0.01em', transition: 'opacity 0.2s' }}
-            onMouseEnter={e => (e.currentTarget.style.opacity = '.85')}
-            onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
-          >
-            Join the waitlist →
-          </a>
-          {waitlistCount !== null && waitlistCount > 0 && (
-            <p style={{ fontSize: 13, color: RED, opacity: .5, marginTop: 14 }}>
-              <span style={{ fontWeight: 700, opacity: 1, color: RED }}>{waitlistCount.toLocaleString()}</span> people already on the list
-            </p>
-          )}
-        </div>
-      </section>
+      {/* CREATORS */}
+      <CreatorsSection />
 
       {/* FAQ */}
       <FAQSection />
 
       {/* FOOTER */}
-      <footer style={{ background: BG, borderTop: `1px solid rgba(242,134,149,.08)`, padding: '24px 28px' }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, padding: '0' }}>
-          <Logo size={18} />
-          <div style={{ display: 'flex', gap: 24 }}>
-            {['Privacy', 'Terms', 'Contact'].map(l => (
-              <a key={l} href="#" style={{ fontSize: 12, color: RED, opacity: .45, textDecoration: 'none', transition: 'opacity .15s' }}
-                onMouseEnter={e => (e.currentTarget.style.opacity = '.8')} onMouseLeave={e => (e.currentTarget.style.opacity = '.45')}
-              >{l}</a>
-            ))}
+      <footer className="site-footer">
+        <div className="site-footer-shell">
+          <div className="site-footer-main">
+            <div className="site-footer-brand">
+              <div className="site-footer-logo" aria-label="ateoclock">
+                <span>ate</span><span>oclock</span>
+              </div>
+              <p>Saved recipes, grocery carts, and creator earnings in one place.</p>
+              <div className="site-footer-socials" aria-label="Social links">
+                <a href="#" aria-label="Instagram">
+                  <InstagramGlyph size={17} />
+                  <span>Instagram</span>
+                </a>
+                <a href="#" aria-label="Substack">
+                  <SubstackGlyph size={18} />
+                  <span>Substack</span>
+                </a>
+                <a href="#" aria-label="YouTube">
+                  <YouTubeGlyph size={19} />
+                  <span>YouTube</span>
+                </a>
+              </div>
+              <a href="/waitlist" className="site-footer-waitlist-btn">Join waitlist</a>
+            </div>
+
+            <div className="site-footer-links" aria-label="Footer navigation">
+              <div className="site-footer-link-group">
+                <h3>Product</h3>
+                <a href="#features">Features</a>
+                <a href="#creators">For Creators</a>
+                <a href="#faq">FAQs</a>
+              </div>
+
+              <div>
+                <div className="site-footer-link-group">
+                  <h3>Legal</h3>
+                  <a href="#">Terms of Use</a>
+                  <a href="#">Privacy Policy</a>
+                </div>
+                <div className="site-footer-link-group">
+                  <h3>About</h3>
+                  <a href="/team">Meet the Team</a>
+                </div>
+              </div>
+            </div>
           </div>
-          <span style={{ fontSize: 12, color: RED, opacity: .3 }}>&#169; 2026 Coookd</span>
+
+          <div className="site-footer-bottom">
+            <p>&#169; 2026 ateoclock. All rights reserved.</p>
+            <p>hello@ateoclock.app</p>
+          </div>
         </div>
       </footer>
     </main>

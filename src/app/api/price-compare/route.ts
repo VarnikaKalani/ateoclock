@@ -33,7 +33,7 @@ const SAMPLE_PRICE_BOOK: Record<string, Record<Store, number>> = {
   bread: { Blinkit: 44, Zepto: 47, Amazon: 46, BigBasket: 40 },
   milk: { Blinkit: 58, Zepto: 60, Amazon: 55, BigBasket: 57 },
   egg: { Blinkit: 76, Zepto: 72, Amazon: 79, BigBasket: 75 },
-  potato: { Blinkit: 30, Zepto: 32, Amazon: 33, BigBasket: 29 },
+  carrot: { Blinkit: 30, Zepto: 32, Amazon: 33, BigBasket: 29 },
   apple: { Blinkit: 88, Zepto: 92, Amazon: 90, BigBasket: 95 },
   banana: { Blinkit: 46, Zepto: 45, Amazon: 44, BigBasket: 48 },
   chicken: { Blinkit: 198, Zepto: 205, Amazon: 201, BigBasket: 194 },
@@ -42,7 +42,7 @@ const SAMPLE_PRICE_BOOK: Record<string, Record<Store, number>> = {
 const ITEM_ALIASES: Record<string, string> = {
   tomatoes: "tomato",
   onions: "onion",
-  potatoes: "potato",
+  carrots: "carrot",
   eggs: "egg",
   apples: "apple",
   bananas: "banana",

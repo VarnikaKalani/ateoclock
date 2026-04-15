@@ -14,7 +14,7 @@ type HeroProps = {
 function Hero({ waitlistCount, onCallClick, onSignupClick }: HeroProps) {
   const [titleNumber, setTitleNumber] = useState(0);
   const titles = useMemo(
-    () => ["delivered", "planned", "sorted", "ready", "done"],
+    () => ["delivered", "sorted", "ordered"],
     [],
   );
 

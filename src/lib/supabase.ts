@@ -9,9 +9,20 @@ type Database = {
         Update: { id?: string; email?: string; created_at?: string; role?: string; country?: string; instagram_url?: string | null }
         Relationships: []
       }
+      site_counters: {
+        Row: { key: string; value: number; updated_at: string }
+        Insert: { key: string; value?: number; updated_at?: string }
+        Update: { key?: string; value?: number; updated_at?: string }
+        Relationships: []
+      }
     }
     Views: Record<string, never>
-    Functions: Record<string, never>
+    Functions: {
+      increment_love_this_idea: {
+        Args: Record<string, never>
+        Returns: number
+      }
+    }
     Enums: Record<string, never>
     CompositeTypes: Record<string, never>
   }

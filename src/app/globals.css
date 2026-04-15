@@ -5,74 +5,74 @@
 @theme {
   /* Fonts */
   --font-headline: var(--font-inter), sans-serif;
-  --font-body: var(--font-inter), sans-serif;
-  --font-label: var(--font-inter), sans-serif;
+  --font-body: var(--font-inter-tight), sans-serif;
+  --font-label: var(--font-inter-tight), sans-serif;
 
   /* Recipe page color tokens */
-  --color-primary: #f28695;
+  --color-primary: #74823f;
   --color-primary-foreground: #ffffff;
-  --color-primary-container: #f2bfb4;
-  --color-primary-fixed: #f2bfb4;
-  --color-primary-fixed-dim: #f28695;
+  --color-primary-container: #74823f;
+  --color-primary-fixed: #74823f;
+  --color-primary-fixed-dim: #74823f;
   --color-on-primary: #ffffff;
-  --color-on-primary-fixed: #f28695;
-  --color-on-primary-fixed-variant: #f28695;
+  --color-on-primary-fixed: #74823f;
+  --color-on-primary-fixed-variant: #74823f;
   --color-on-primary-container: #ffffff;
-  --color-inverse-primary: #f2bfb4;
+  --color-inverse-primary: #74823f;
 
-  --color-secondary: #f2bfb4;
+  --color-secondary: #74823f;
   --color-secondary-foreground: #ffffff;
-  --color-secondary-container: #f1cca6;
-  --color-secondary-fixed: #f1cca6;
-  --color-secondary-fixed-dim: #f2bfb4;
+  --color-secondary-container: #74823f;
+  --color-secondary-fixed: #74823f;
+  --color-secondary-fixed-dim: #74823f;
   --color-on-secondary: #ffffff;
   --color-on-secondary-container: #ffffff;
-  --color-on-secondary-fixed: #f28695;
-  --color-on-secondary-fixed-variant: #f28695;
+  --color-on-secondary-fixed: #74823f;
+  --color-on-secondary-fixed-variant: #74823f;
 
-  --color-tertiary: #f1cca6;
-  --color-tertiary-container: #f2e6b8;
-  --color-tertiary-fixed: #f2e6b8;
-  --color-tertiary-fixed-dim: #f1cca6;
+  --color-tertiary: #74823f;
+  --color-tertiary-container: #f1e8c7;
+  --color-tertiary-fixed: #f1e8c7;
+  --color-tertiary-fixed-dim: #74823f;
   --color-on-tertiary: #ffffff;
-  --color-on-tertiary-container: #f28695;
-  --color-on-tertiary-fixed: #f28695;
-  --color-on-tertiary-fixed-variant: #f28695;
+  --color-on-tertiary-container: #74823f;
+  --color-on-tertiary-fixed: #74823f;
+  --color-on-tertiary-fixed-variant: #74823f;
 
-  --color-surface: #f2e6b8;
-  --color-surface-dim: #f1cca6;
-  --color-surface-bright: #f2e6b8;
-  --color-surface-variant: #f2bfb4;
-  --color-surface-tint: #f28695;
+  --color-surface: #f1e8c7;
+  --color-surface-dim: #74823f;
+  --color-surface-bright: #f1e8c7;
+  --color-surface-variant: #74823f;
+  --color-surface-tint: #74823f;
   --color-surface-container-lowest: #ffffff;
-  --color-surface-container-low: #f2e6b8;
-  --color-surface-container: #f2e6b8;
-  --color-surface-container-high: #f1cca6;
-  --color-surface-container-highest: #f2bfb4;
+  --color-surface-container-low: #f1e8c7;
+  --color-surface-container: #f1e8c7;
+  --color-surface-container-high: #74823f;
+  --color-surface-container-highest: #74823f;
 
-  --color-background: #f2e6b8;
-  --color-foreground: #f28695;
-  --color-muted-foreground: #f28695;
-  --color-accent: #f2e6b8;
-  --color-accent-foreground: #f28695;
-  --color-destructive: #f28695;
+  --color-background: #f1e8c7;
+  --color-foreground: #74823f;
+  --color-muted-foreground: #74823f;
+  --color-accent: #f1e8c7;
+  --color-accent-foreground: #74823f;
+  --color-destructive: #74823f;
   --color-destructive-foreground: #ffffff;
-  --color-input: #f2bfb4;
-  --color-ring: #f28695;
-  --color-spektr-cyan-50: #f28695;
-  --color-on-background: #f28695;
-  --color-on-surface: #f28695;
-  --color-on-surface-variant: #f28695;
-  --color-inverse-surface: #f28695;
+  --color-input: #74823f;
+  --color-ring: #74823f;
+  --color-spektr-cyan-50: #74823f;
+  --color-on-background: #74823f;
+  --color-on-surface: #74823f;
+  --color-on-surface-variant: #74823f;
+  --color-inverse-surface: #74823f;
   --color-inverse-on-surface: #ffffff;
 
-  --color-outline: #f2bfb4;
-  --color-outline-variant: #f2e6b8;
+  --color-outline: #74823f;
+  --color-outline-variant: #f1e8c7;
 
-  --color-error: #f28695;
-  --color-error-container: #f2bfb4;
+  --color-error: #74823f;
+  --color-error-container: #74823f;
   --color-on-error: #ffffff;
-  --color-on-error-container: #f28695;
+  --color-on-error-container: #74823f;
 
   /* Border radius */
   --radius-DEFAULT: 0.25rem;
@@ -82,38 +82,38 @@
 }
 
 .dark {
-  --color-background: #f28695;
+  --color-background: #74823f;
   --color-foreground: #ffffff;
-  --color-primary: #f2e6b8;
-  --color-primary-foreground: #f28695;
-  --color-secondary: #f2bfb4;
+  --color-primary: #f1e8c7;
+  --color-primary-foreground: #74823f;
+  --color-secondary: #74823f;
   --color-secondary-foreground: #ffffff;
-  --color-muted-foreground: #f2e6b8;
-  --color-accent: #f1cca6;
+  --color-muted-foreground: #f1e8c7;
+  --color-accent: #74823f;
   --color-accent-foreground: #ffffff;
-  --color-destructive: #f2bfb4;
+  --color-destructive: #74823f;
   --color-destructive-foreground: #ffffff;
-  --color-input: rgba(242, 230, 184, 0.4);
-  --color-ring: #f2e6b8;
+  --color-input: rgba(241, 232, 199, 0.4);
+  --color-ring: #f1e8c7;
   --color-spektr-cyan-50: #ffffff;
 }
 
 :root {
   /* Dialog / shadcn bare CSS vars */
-  --background: #f2e6b8;
-  --foreground: #f28695;
-  --border: rgba(242, 134, 149, 0.18);
-  --input: rgba(242, 191, 180, 0.38);
-  --ring: #f28695;
-  --muted-foreground: rgba(242, 134, 149, 0.62);
+  --background: #f1e8c7;
+  --foreground: #74823f;
+  --border: rgba(116, 130, 63, 0.18);
+  --input: rgba(116, 130, 63, 0.38);
+  --ring: #74823f;
+  --muted-foreground: rgba(116, 130, 63, 0.62);
 
-  --color-orange: #f28695;
-  --color-orange-dark: #f28695;
-  --color-sand-dark: rgba(242, 191, 180, 0.72);
+  --color-orange: #74823f;
+  --color-orange-dark: #74823f;
+  --color-sand-dark: rgba(116, 130, 63, 0.72);
   --color-warm-white: #ffffff;
-  --color-text: #f28695;
-  --color-green-light: #f1cca6;
-  --font-sans: var(--font-inter), sans-serif;
+  --color-text: #74823f;
+  --color-green-light: #74823f;
+  --font-sans: var(--font-inter-tight), sans-serif;
 }
 
 * {
@@ -127,15 +127,15 @@ html {
 }
 
 body {
-  background: #f2e6b8;
+  background: #f1e8c7;
   font-family: var(--font-inter), sans-serif;
 }
 
 input::placeholder {
-  color: rgba(242, 134, 149, 0.4);
+  color: rgba(116, 130, 63, 0.4);
 }
 
 input:focus {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(242, 134, 149, 0.15);
+  box-shadow: 0 0 0 3px rgba(116, 130, 63, 0.15);
 }

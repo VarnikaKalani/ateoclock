@@ -37,7 +37,7 @@ const STYLES = `
     position:absolute; left:var(--love-left); bottom:-42px;
     color:rgba(107,62,30,.72);
     filter:drop-shadow(0 10px 18px rgba(107,62,30,.14));
-    animation:loveBurstFloat 4.2s cubic-bezier(.16,.72,.22,1) both;
+    animation:loveBurstFloat 8s cubic-bezier(.16,.72,.22,1) both;
     animation-delay:var(--love-delay);
   }
 
@@ -100,10 +100,10 @@ const STYLES = `
     margin-bottom:20px;
   }
   .role-toggle button {
-    height:36px; padding:0 26px;
+    height:36px; padding:0 26px; min-width:90px;
     border:0; border-radius:999px; background:transparent;
     color:rgba(116,130,63,.58); cursor:pointer; font-family:inherit;
-    font-size:14px; font-weight:600;
+    font-size:14px; font-weight:600; text-align:center;
     transition:background .2s, color .2s, box-shadow .2s; white-space:nowrap;
   }
   .role-toggle button.is-active {
@@ -305,7 +305,7 @@ export default function WaitlistPage() {
               size={18 + (i % 4) * 5}
               strokeWidth={2.2}
               style={{
-                "--love-delay": `${i * 78}ms`,
+                "--love-delay": `${i * 160}ms`,
                 "--love-left":  `${6 + ((i * 17) % 88)}%`,
                 "--love-scale": 0.72 + (i % 6) * 0.1,
                 "--love-x":     `${i % 2 === 0 ? 10 + i * 1.4 : -8 - i}vw`,

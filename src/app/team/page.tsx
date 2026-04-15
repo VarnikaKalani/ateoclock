@@ -11,7 +11,9 @@ const CREAM = "#F1E8C7";
 const BROWN = "#6B3E1E";
 const INTER = "var(--font-inter), sans-serif";
 
-const IMAGES = [
+type TeamImage = { src: string; label: string; zoom?: number; zoomOrigin?: string };
+
+const IMAGES: TeamImage[] = [
   { src: "/varvans3.png", label: "Varnika & Vanshika" },
   { src: "/varvans2.jpg", label: "Varnika & Vanshika" },
   { src: "/varvans1.jpg", label: "Varnika & Vanshika" },
@@ -21,7 +23,7 @@ const IMAGES = [
   { src: "/vans2.JPG",    label: "Vanshika" },
   { src: "/var3.JPG",     label: "Varnika" },
   { src: "/var4.jpg",     label: "Varnika" },
-  { src: "/var5.jpg",     label: "Varnika" },
+  { src: "/var5.jpg",     label: "Varnika", zoom: 1.25, zoomOrigin: "center 40%" },
 ];
 
 const variants = {
@@ -79,7 +81,11 @@ function PolaroidStack() {
               <img
                 src={img.src}
                 alt={img.label}
-                style={{ width: "100%", height: 300, objectFit: "cover", display: "block", borderRadius: 2 }}
+                style={{
+                  width: "100%", height: 300, objectFit: "cover", display: "block", borderRadius: 2,
+                  transform: img.zoom ? `scale(${img.zoom})` : undefined,
+                  transformOrigin: img.zoomOrigin ?? "center center",
+                }}
                 onError={(e) => {
                   e.currentTarget.style.background = "rgba(116,130,63,.08)";
                   e.currentTarget.style.height = "300px";

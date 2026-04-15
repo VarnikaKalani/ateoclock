@@ -1,10 +1,11 @@
 'use client'
 import Image from 'next/image'
-import { motion, useAnimationFrame, useMotionTemplate, useMotionValue, useMotionValueEvent, useReducedMotion, useScroll, useTransform, type MotionValue } from 'framer-motion'
+import { motion, AnimatePresence, useAnimationFrame, useMotionTemplate, useMotionValue, useMotionValueEvent, useReducedMotion, useScroll, useTransform, type MotionValue } from 'framer-motion'
 import { useState, useEffect, useRef, Fragment } from 'react'
 import { getSupabaseBrowserClient } from '@/lib/supabase'
 import PillMorphTabs from '@/components/ui/pill-morph-tabs'
 import Bucket from '@/components/ui/bucket'
+import WalkingMascot from '@/components/ui/walking-mascot'
 
 const RED   = '#74823F'
 const CREAM = '#F1E8C7'
@@ -18,8 +19,8 @@ const INTER_REGULAR = 'var(--font-inter), sans-serif'
 function Logo({ size = 20, heroWord }: { size?: number; heroWord?: string }) {
   return (
     <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 1, lineHeight: 1 }}>
-      <span style={{ fontSize: size, fontWeight: 800, letterSpacing: '-1px' }}>
-        <span style={{ color: RED }}>ate</span><span style={{ color: BROWN }}>oclock</span>
+      <span style={{ fontSize: size, fontWeight: 800, letterSpacing: '-0.5px' }}>
+        <span style={{ color: RED }}>ate</span><span style={{ color: BROWN }}> o&apos;clock</span>
       </span>
       {heroWord && (
         <span style={{ fontSize: Math.round(size * 0.52), fontWeight: 700, letterSpacing: '-0.02em', color: BROWN, opacity: .55, marginLeft: 4, transition: 'opacity 0.3s' }}>
@@ -154,12 +155,12 @@ const FEATURE_STEPS = [
     kicker: 'Capture',
     title: 'Screenshot or paste a link',
     highlight: 'from anywhere.',
-    body: 'Drop in a recipe screenshot, paste a link, or open a saved post. ateoclock starts from the places you already save food ideas.',
+    body: "Drop in a recipe screenshot, paste a link, or open a saved post. ate o'clock starts from the places you already save food ideas.",
     tags: ['Screenshots', 'Links', 'Saved posts'],
   },
   {
     kicker: 'Read',
-    title: 'ateoclock reads the recipe',
+    title: "ate o'clock reads the recipe",
     highlight: 'for you.',
     body: 'The recipe gets parsed into ingredients, quantities, timing, and prep notes so the cart is structured before you touch it.',
     tags: ['Ingredients', 'Quantities', 'Prep notes'],
@@ -181,8 +182,8 @@ const FEATURE_STEPS = [
   {
     kicker: 'Cook',
     title: 'Get dinner moving',
-    highlight: 'tonight.',
-    body: 'After checkout, ateoclock keeps the recipe flow clean: prep notes, timers, and what to do next.',
+    highlight: "by 8 o'clock.",
+    body: "After checkout, ate o'clock keeps the recipe flow clean: prep notes, timers, and what to do next.",
     tags: ['Prep mode', 'Timers', 'Cook tonight'],
   },
 ]
@@ -643,7 +644,7 @@ function UpcomingFeaturesSection() {
         <div className="sticky-feature-heading">
           <p>Features</p>
           <h2>
-            Everything ateoclock can do
+            Everything ate o&apos;clock can do
           </h2>
         </div>
 
@@ -740,7 +741,7 @@ function CreatorsSection() {
         <div className="creators-copy">
           <p>For creators</p>
           <h2 id="creators-title">Earn when your audience shops your recipes.</h2>
-          <div>Share one ateoclock link. When followers buy groceries through your recipe, you earn from every eligible order.</div>
+          <div>Share one ate o&apos;clock link. When followers buy groceries through your recipe, you earn from every eligible order.</div>
 
           {/* Steps */}
           <div className="creator-steps">
@@ -807,27 +808,27 @@ function CreatorsSection() {
 
 const FAQS = [
   {
-    q: "What is ateoclock?",
-    a: "ateoclock is a platform that turns any recipe into a grocery order. Pick a recipe, select your ingredients, choose a delivery store like Blinkit or Zepto, and check out - all in one tap.",
+    q: "What is ate o'clock?",
+    a: "ate o'clock is a platform that turns any recipe into a grocery order. Pick a recipe, select your ingredients, choose a delivery store like Blinkit or Zepto, and check out - all in one tap.",
   },
   {
-    q: "Which grocery stores does ateoclock support?",
+    q: "Which grocery stores does ate o'clock support?",
     a: "We currently support Blinkit, Zepto, Amazon Fresh, BigBasket, and Instamart. More stores are being added before launch.",
   },
   {
-    q: "Is ateoclock free to use?",
-    a: "Yes - ateoclock is free for home cooks. You only pay for the groceries you order through the store of your choice.",
+    q: "Is ate o'clock free to use?",
+    a: "Yes - ate o'clock is free for home cooks. You only pay for the groceries you order through the store of your choice.",
   },
   {
-    q: "When will ateoclock launch?",
+    q: "When will ate o'clock launch?",
     a: "We're in early access right now. Join the waitlist and we'll notify you the moment we go live - early members get priority access.",
   },
   {
-    q: "Does ateoclock adjust for servings?",
+    q: "Does ate o'clock adjust for servings?",
     a: "Yes. Scale up or down the number of servings and the ingredient quantities - and the grocery list - update automatically.",
   },
   {
-    q: "What countries is ateoclock available in?",
+    q: "What countries is ate o'clock available in?",
     a: "Our launch focus is India, with global expansion planned shortly after. Prices are displayed in your local currency based on your location.",
   },
   {
@@ -921,7 +922,7 @@ export default function Home() {
   const navItems: Array<{ label: string; sectionId: string; href?: string }> = [
     { label: 'About', sectionId: 'about', href: '/team' },
     { label: 'Features', sectionId: 'features' },
-    { label: 'For Creators', sectionId: 'creators' },
+    { label: 'For Creators', sectionId: 'creators', href: '/creators' },
     { label: 'FAQs', sectionId: 'faq' },
   ]
 
@@ -1116,10 +1117,12 @@ export default function Home() {
         }
         .hero-title-word {
           display: inline-flex;
-          min-width: 7.9ch;
+          min-width: 8.4ch;
           align-items: baseline;
-          vertical-align: baseline;
+          vertical-align: bottom;
           color: ${RED2};
+          overflow: hidden;
+          line-height: 1.1;
         }
         .hero-title-word span {
           display: inline-block;
@@ -2022,7 +2025,7 @@ export default function Home() {
           position: relative;
           background: ${BG};
           border-top: 1px solid rgba(116,130,63,.08);
-          padding: 78px 28px 70px;
+          padding: 78px 28px 20px;
           overflow: visible;
         }
         .sticky-feature-shell {
@@ -2223,16 +2226,16 @@ export default function Home() {
           line-height: 1.6;
         }
         .feature-bucket-wrap {
-          width: min(100%, 560px);
+          width: 100%;
           margin-top: 0;
         }
         .visual-bucket {
           display: flex;
           flex-direction: column;
           justify-content: center;
-          width: min(100%, 560px);
+          width: 100%;
           min-height: 382px;
-          padding: 24px;
+          padding: 16px 8px;
         }
         .visual-bucket .feature-card-header {
           margin-bottom: 10px;
@@ -2683,15 +2686,15 @@ export default function Home() {
         /* Steps */
         .creator-steps {
           display: flex;
-          align-items: flex-start;
-          gap: 10px;
+          align-items: center;
+          gap: 8px;
           margin-top: 36px;
-          flex-wrap: wrap;
+          flex-wrap: nowrap;
         }
         .creator-step {
           display: flex;
-          align-items: flex-start;
-          gap: 12px;
+          align-items: center;
+          gap: 10px;
         }
         .creator-step-num {
           width: 28px;
@@ -2759,7 +2762,7 @@ export default function Home() {
         .creator-earn-amount {
           color: ${CREAM};
           font-family: ${INTER_REGULAR};
-          font-size: clamp(2rem, 4vw, 3rem);
+          font-size: clamp(1.6rem, 3vw, 2.4rem);
           font-weight: 400;
           letter-spacing: -.02em;
           line-height: 1;
@@ -3970,19 +3973,23 @@ export default function Home() {
               <span className="hero-title-nowrap">
                 groceries
                 <span className="hero-title-word">
-                  <motion.span
-                    key={HERO_TITLES[heroTitleNumber]}
-                    initial={false}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.28, ease: 'easeOut' }}
-                  >
-                    {HERO_TITLES[heroTitleNumber]}
-                  </motion.span>
+                  <AnimatePresence mode="wait" initial={false}>
+                    <motion.span
+                      key={HERO_TITLES[heroTitleNumber]}
+                      initial={{ y: '100%', opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      exit={{ y: '-100%', opacity: 0 }}
+                      transition={{ duration: 0.38, ease: [0.32, 0.72, 0, 1] }}
+                      style={{ display: 'inline-block' }}
+                    >
+                      {HERO_TITLES[heroTitleNumber]}
+                    </motion.span>
+                  </AnimatePresence>
                 </span>
               </span>
             </h1>
             <p className="hero-body fade-up">
-              ateoclock turns any recipe into an editable cart across any grocery store.
+              ate o&apos;clock turns any recipe into an editable cart across any grocery store.
             </p>
             <div id="waitlist-form" className="hero-actions fade-up">
               <a href="/waitlist" className="hero-primary-link">
@@ -4078,8 +4085,8 @@ export default function Home() {
         <div className="site-footer-shell">
           <div className="site-footer-main">
             <div className="site-footer-brand">
-              <div className="site-footer-logo" aria-label="ateoclock">
-                <span>ate</span><span>oclock</span>
+              <div className="site-footer-logo" aria-label="ate o'clock">
+                <span>ate</span><span> o&apos;clock</span>
               </div>
               <p>Saved recipes, grocery carts, and creator earnings in one place.</p>
               <div className="site-footer-socials" aria-label="Social links">
@@ -4127,6 +4134,7 @@ export default function Home() {
           </div>
         </div>
       </footer>
+      <WalkingMascot />
     </main>
   )
 }

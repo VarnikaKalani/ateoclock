@@ -12,8 +12,9 @@ const BROWN = "#6B3E1E";
 const INTER = "var(--font-inter), sans-serif";
 
 const IMAGES = [
-  { src: "/varvans1.jpg", label: "Varnika & Vanshika" },
+  { src: "/varvans3.jpeg", label: "Varnika & Vanshika" },
   { src: "/varvans2.jpg", label: "Varnika & Vanshika" },
+  { src: "/varvans1.jpg", label: "Varnika & Vanshika" },
   { src: "/var1.jpg",     label: "Varnika" },
   { src: "/vans1.jpg",    label: "Vanshika" },
   { src: "/var2.jpg",     label: "Varnika" },
@@ -231,10 +232,10 @@ export default function TeamPage() {
               Hi, we&rsquo;re <span style={HIGHLIGHT}>Varnika and Vanshika</span>, twins from India who love food and are always excited to try something new. But can we cook?
             </p>
             <p style={P}>
-              Honestly, only with instructions - whether that&rsquo;s a step-by-step video or a quick FaceTime with mom.
+              Honestly, only with instructions, whether that&rsquo;s a step-by-step video or a quick FaceTime with mom.
             </p>
             <p style={P}>
-              We were always saving recipes, sending them to each other, and feeling fully convinced we&rsquo;d make them - but somewhere between the inspiration and the ingredients, it all started to feel like too much effort.
+              We were always saving recipes, sending them to each other, and feeling fully convinced we&rsquo;d make them, but somewhere between the inspiration and the ingredients, it all started to feel like too much effort.
             </p>
             <p style={P}>
               That got us thinking. So many people want to make food, but the journey from <span style={HIGHLIGHT}>&ldquo;this looks good&rdquo;</span> to <span style={HIGHLIGHT}>&ldquo;what do I need to buy?&rdquo;</span> is still way too messy.

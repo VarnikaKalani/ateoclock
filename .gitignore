@@ -36,6 +36,10 @@ yarn-error.log*
 # vercel
 .vercel
 
+# chrome debug profiles
+.chrome-debug-profile*/
+.chrome-*.png
+
 # supabase
 supabase/.temp/
 

@@ -62,7 +62,7 @@ export default function WalkingMascot() {
 
   const xRef    = useRef(160);
   const dirRef  = useRef(1); // 1=right, -1=left
-  const rafRef  = useRef<number>();
+  const rafRef  = useRef<number | null>(null);
   const lastRef = useRef(0);
   const dragOff = useRef(0);
 
@@ -89,7 +89,7 @@ export default function WalkingMascot() {
   }, []);
 
   const stopLoop = useCallback(() => {
-    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    if (rafRef.current !== null) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
   }, []);
 
   useEffect(() => {

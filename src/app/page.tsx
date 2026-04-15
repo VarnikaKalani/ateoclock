@@ -469,7 +469,7 @@ function RecipeCheckoutDemoSection() {
                   <div>
                     <span>{selectedStore ? `Total via ${selectedStore.name}` : 'Cart total'}</span>
                     <strong className={!selectedStore ? 'recipe-demo-empty-total' : undefined}>
-                      {storeTotal ? formatRupees(storeTotal) : 'Select a store first'}
+                      {storeTotal ? formatRupees(storeTotal) : '—'}
                     </strong>
                   </div>
                   <div className="recipe-demo-checkout-actions">
@@ -1064,10 +1064,10 @@ export default function Home() {
           pointer-events: none;
         }
         .hero-grid-layer-base {
-          opacity: .08;
+          opacity: .15;
         }
         .hero-grid-layer-reveal {
-          opacity: .46;
+          opacity: .68;
         }
         .hero-grid-svg {
           width: 100%;
@@ -1184,7 +1184,7 @@ export default function Home() {
           color: ${RED};
         }
         .hero-recipe-card {
-          top: 36px;
+          top: 56px;
           left: 4px;
           width: min(48%, 300px);
           border-radius: 18px;
@@ -1737,7 +1737,8 @@ export default function Home() {
           padding: 14px;
         }
         .recipe-demo-summary-list {
-          max-height: none;
+          max-height: 240px;
+          overflow-y: auto;
         }
         .recipe-demo-summary-list .recipe-demo-item {
           min-height: 50px;
@@ -1792,11 +1793,11 @@ export default function Home() {
           line-height: 1;
         }
         .recipe-demo-checkout .recipe-demo-empty-total {
-          color: rgba(107,62,30,.58);
+          color: rgba(107,62,30,.32);
           font-family: inherit;
-          font-size: 13px;
-          font-weight: 800;
-          line-height: 1.35;
+          font-size: 20px;
+          font-weight: 400;
+          line-height: 1;
         }
         .recipe-demo-checkout-actions {
           display: flex;

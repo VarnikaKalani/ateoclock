@@ -2389,24 +2389,24 @@ export default function Home() {
           color: ${RED};
         }
         .feature-cart-card.visual-bucket {
-          min-height: 430px;
-          padding: 24px 28px 30px;
+          min-height: 500px;
+          padding: 24px 20px 20px;
           justify-content: flex-start;
           align-items: center;
         }
         .feature-cart-card.visual-bucket .feature-card-header {
           width: 100%;
-          margin-bottom: 18px;
+          margin-bottom: 12px;
         }
         .feature-cart-card.visual-bucket .feature-bucket-wrap {
-          width: min(100%, 390px);
+          width: 100%;
           flex: 1;
           display: flex;
           align-items: center;
           justify-content: center;
           margin: 0 auto;
-          transform: scale(.92);
-          transform-origin: top center;
+          transform: scale(1.08);
+          transform-origin: center center;
         }
         .visual-read {
           position: relative;
@@ -2687,49 +2687,50 @@ export default function Home() {
         .creator-steps {
           display: flex;
           align-items: center;
-          gap: 8px;
+          gap: 6px;
           margin-top: 36px;
           flex-wrap: nowrap;
         }
         .creator-step {
           display: flex;
           align-items: center;
-          gap: 10px;
+          gap: 7px;
+          flex-shrink: 0;
         }
         .creator-step-num {
-          width: 28px;
-          height: 28px;
+          width: 22px;
+          height: 22px;
           border-radius: 50%;
           border: 1.5px solid rgba(241,232,199,.22);
           display: flex;
           align-items: center;
           justify-content: center;
           color: rgba(241,232,199,.5);
-          font-size: 10px;
+          font-size: 9px;
           font-weight: 800;
           letter-spacing: .06em;
           flex-shrink: 0;
-          margin-top: 2px;
         }
         .creator-step strong {
           display: block;
           color: ${CREAM};
-          font-size: 13px;
+          font-size: 11px;
           font-weight: 700;
           line-height: 1.3;
+          white-space: nowrap;
         }
         .creator-step span {
           display: block;
           color: rgba(241,232,199,.46);
-          font-size: 11px;
+          font-size: 10px;
           font-weight: 500;
           line-height: 1.4;
-          margin-top: 2px;
+          margin-top: 1px;
+          white-space: nowrap;
         }
         .creator-step-arrow {
           color: rgba(241,232,199,.22);
-          font-size: 18px;
-          padding-top: 4px;
+          font-size: 14px;
           flex-shrink: 0;
         }
 
@@ -2762,7 +2763,7 @@ export default function Home() {
         .creator-earn-amount {
           color: ${CREAM};
           font-family: ${INTER_REGULAR};
-          font-size: clamp(1.6rem, 3vw, 2.4rem);
+          font-size: clamp(1.3rem, 2.2vw, 1.8rem);
           font-weight: 400;
           letter-spacing: -.02em;
           line-height: 1;
@@ -3694,10 +3695,10 @@ export default function Home() {
             margin-bottom: 24px;
           }
           .creator-earn-amount {
-            font-size: 2rem;
+            font-size: 1.6rem;
           }
           .creator-steps {
-            gap: 8px;
+            gap: 6px;
           }
           .feature-mobile-scene .sticky-feature-asset {
             min-height: 430px;
@@ -3821,7 +3822,7 @@ export default function Home() {
             margin-bottom: 22px;
           }
           .creator-earn-amount {
-            font-size: 2.2rem;
+            font-size: 1.7rem;
           }
 
           /* FAQ */

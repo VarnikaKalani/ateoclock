@@ -41,20 +41,20 @@ const STYLES = `
     color: ${CREAM}; margin-bottom: 20px; font-family: ${INTER};
   }
   .cr-steps {
-    display: flex; align-items: center; gap: 8px;
+    display: flex; align-items: center; gap: 6px;
     margin: 32px 0 36px; flex-wrap: nowrap;
   }
-  .cr-step { display: flex; align-items: center; gap: 10px; }
+  .cr-step { display: flex; align-items: center; gap: 7px; flex-shrink: 0; }
   .cr-step-num {
-    width: 28px; height: 28px; border-radius: 50%;
+    width: 22px; height: 22px; border-radius: 50%;
     border: 1.5px solid rgba(241,232,199,.22);
     display: flex; align-items: center; justify-content: center;
-    color: rgba(241,232,199,.5); font-size: 10px; font-weight: 800;
+    color: rgba(241,232,199,.5); font-size: 9px; font-weight: 800;
     letter-spacing: .06em; flex-shrink: 0;
   }
-  .cr-step strong { display: block; color: ${CREAM}; font-size: 13px; font-weight: 700; line-height: 1.3; }
-  .cr-step span   { display: block; color: rgba(241,232,199,.46); font-size: 11px; font-weight: 500; margin-top: 2px; }
-  .cr-step-arrow  { color: rgba(241,232,199,.22); font-size: 18px; flex-shrink: 0; }
+  .cr-step strong { display: block; color: ${CREAM}; font-size: 11px; font-weight: 700; line-height: 1.3; white-space: nowrap; }
+  .cr-step span   { display: block; color: rgba(241,232,199,.46); font-size: 10px; font-weight: 500; margin-top: 1px; white-space: nowrap; }
+  .cr-step-arrow  { color: rgba(241,232,199,.22); font-size: 14px; flex-shrink: 0; }
   .cr-cta {
     display: inline-flex; align-items: center; gap: 8px;
     height: 50px; padding: 0 28px; border-radius: 999px;
@@ -83,7 +83,7 @@ const STYLES = `
   }
   .cr-card-amount {
     color: ${CREAM}; font-family: ${INTER};
-    font-size: clamp(1.6rem, 3vw, 2.4rem);
+    font-size: clamp(1.3rem, 2.2vw, 1.8rem);
     font-weight: 400; letter-spacing: -.02em; line-height: 1;
   }
   .cr-card-badge {

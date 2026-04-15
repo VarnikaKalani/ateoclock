@@ -12,7 +12,7 @@ const BROWN = "#6B3E1E";
 const INTER = "var(--font-inter), sans-serif";
 
 const IMAGES = [
-  { src: "/varvans3.jpeg", label: "Varnika & Vanshika" },
+  { src: "/varvans3.png", label: "Varnika & Vanshika" },
   { src: "/varvans2.jpg", label: "Varnika & Vanshika" },
   { src: "/varvans1.jpg", label: "Varnika & Vanshika" },
   { src: "/var1.jpg",     label: "Varnika" },

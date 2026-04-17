@@ -1,8 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Heart, ChevronDown, SendHorizonal } from "lucide-react";
+import { Heart, ChevronDown, SendHorizonal } from "lucide-react";
 import { GridBackground } from "@/components/ui/grid-background";
 
 const RED    = "#74823F";
@@ -41,19 +40,44 @@ const STYLES = `
     animation-delay:var(--love-delay);
   }
 
-  .wl-back {
-    position:fixed; top:24px; left:28px; z-index:50;
-    display:inline-flex; align-items:center; justify-content:center;
-    width:44px; height:44px;
-    border:1px solid rgba(107,62,30,.18); border-radius:8px;
-    background:rgba(255,255,255,.72); color:${BROWN};
-    box-shadow:0 14px 34px rgba(107,62,30,.08); text-decoration:none;
+  /* ── Sticky nav ── */
+  .wl-nav-wrap {
+    position:sticky; top:0; z-index:100; padding:8px 20px;
+  }
+  .wl-nav {
+    max-width:1180px; margin:0 auto;
+    background:rgba(255,255,255,0.68);
+    backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+    border:1px solid rgba(116,130,63,.08); border-radius:12px;
+    box-shadow:rgba(0,0,0,0.14) 0px 0.6px 0.6px -1.25px,rgba(0,0,0,0.1) 0px 2.3px 2.3px -2.5px,rgba(0,0,0,0.04) 0px 10px 10px -3.75px;
+  }
+  .wl-nav-inner {
+    height:48px; display:flex; align-items:center; justify-content:space-between; padding:0 18px;
+  }
+  .wl-nav-logo {
+    font-size:21px; font-weight:800; letter-spacing:-0.5px; text-decoration:none; display:inline-flex; align-items:baseline; gap:1px;
+  }
+  .wl-nav-links {
+    display:flex; gap:2px; align-items:center;
+  }
+  .wl-nav-link {
+    padding:7px 17px; border-radius:999px; color:#74823F; font-size:14px; font-weight:600;
+    text-decoration:none; font-family:var(--font-inter),sans-serif; opacity:0.75; transition:opacity .15s;
+  }
+  .wl-nav-link:hover { opacity:1; }
+  .wl-nav-cta {
+    padding:8px 18px; border-radius:999px; background:#2C4B1A; color:#F1E8C7;
+    font-size:12px; font-weight:700; text-decoration:none; flex-shrink:0; transition:opacity .15s;
+  }
+  .wl-nav-cta:hover { opacity:0.85; }
+  @media (max-width:640px) {
+    .wl-nav-links { display:none; }
   }
 
   .wl-shell {
     width:min(500px, calc(100% - 40px));
     margin:0 auto;
-    padding:88px 0 72px;
+    padding:48px 0 72px;
   }
 
   .wl-heading { text-align:center; margin-bottom:16px; }
@@ -147,8 +171,8 @@ const STYLES = `
   }
   .wl-handle-wrap .wl-field { padding-left:34px; }
 
-  /* Creator slot - always in DOM, visibility toggled to preserve height */
-  .creator-slot { transition:opacity .18s; }
+  /* Creator slot - always in DOM, height locked so form doesn't shift */
+  .creator-slot { height:52px; transition:opacity .18s; }
   .creator-slot.hidden { visibility:hidden; pointer-events:none; opacity:0; }
 
   /* Submit */
@@ -171,9 +195,8 @@ const STYLES = `
   .wl-note { margin-top:12px; color:rgba(107,62,30,.44); font-size:12px; text-align:center; }
 
   @media (max-width:640px) {
-    .wl-back { top:18px; left:18px; }
     .wl-shell {
-      padding-top: 80px;
+      padding-top: 36px;
       padding-bottom: 48px;
     }
     .wl-heading h1 {
@@ -315,9 +338,27 @@ export default function WaitlistPage() {
         </div>
       )}
 
-      <Link href="/" replace prefetch={false} className="wl-back" aria-label="Back">
-        <ArrowLeft size={20} strokeWidth={2.4} />
-      </Link>
+      {/* Sticky nav */}
+      <div className="wl-nav-wrap">
+        <nav className="wl-nav">
+          <div className="wl-nav-inner">
+            <a href="/" className="wl-nav-logo">
+              <span style={{ color: RED }}>ate</span><span style={{ color: BROWN }}> o&apos;clock</span>
+            </a>
+            <div className="wl-nav-links">
+              {[
+                { label: "About",        href: "/team" },
+                { label: "Features",     href: "/#features" },
+                { label: "For Creators", href: "/#creators" },
+                { label: "FAQs",         href: "/#faq" },
+              ].map(link => (
+                <a key={link.label} href={link.href} className="wl-nav-link">{link.label}</a>
+              ))}
+            </div>
+            <a href="/waitlist" className="wl-nav-cta">Get Started</a>
+          </div>
+        </nav>
+      </div>
 
       <main className="wl-shell">
         {/* Heading */}

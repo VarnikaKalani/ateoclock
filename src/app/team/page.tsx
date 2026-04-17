@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { GridBackground } from "@/components/ui/grid-background";
@@ -11,7 +11,7 @@ const CREAM = "#F1E8C7";
 const BROWN = "#6B3E1E";
 const INTER = "var(--font-inter), sans-serif";
 
-type TeamImage = { src: string; label: string; zoom?: number; zoomOrigin?: string };
+type TeamImage = { src: string; label: string };
 
 const IMAGES: TeamImage[] = [
   { src: "/varvans3.png", label: "Varnika & Vanshika" },
@@ -23,7 +23,7 @@ const IMAGES: TeamImage[] = [
   { src: "/vans2.JPG",    label: "Vanshika" },
   { src: "/var3.JPG",     label: "Varnika" },
   { src: "/var4.jpg",     label: "Varnika" },
-  { src: "/var5.jpg",     label: "Varnika", zoom: 1.25, zoomOrigin: "center 40%" },
+  { src: "/var5.jpg",     label: "Varnika" },
 ];
 
 const variants = {
@@ -77,20 +77,31 @@ function PolaroidStack() {
                 transformStyle: "preserve-3d",
               }}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={img.src}
-                alt={img.label}
+              {/* Fixed-height image container — prevents any image from overflowing */}
+              <div
                 style={{
-                  width: "100%", height: 300, objectFit: "cover", display: "block", borderRadius: 2,
-                  transform: img.zoom ? `scale(${img.zoom})` : undefined,
-                  transformOrigin: img.zoomOrigin ?? "center center",
+                  width: "100%",
+                  height: 300,
+                  overflow: "hidden",
+                  borderRadius: 2,
+                  background: "rgba(116,130,63,.08)",
+                  position: "relative",
                 }}
-                onError={(e) => {
-                  e.currentTarget.style.background = "rgba(116,130,63,.08)";
-                  e.currentTarget.style.height = "300px";
-                }}
-              />
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={img.src}
+                  alt={img.label}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                    objectPosition: "center",
+                    display: "block",
+                    borderRadius: 2,
+                  }}
+                />
+              </div>
               <div style={{
                 position: "absolute", bottom: 12, left: 0, right: 0,
                 textAlign: "center",
@@ -119,7 +130,7 @@ function PolaroidStack() {
           }}
           aria-label="Previous photo"
         >
-          <ArrowLeft size={14} strokeWidth={2.4} />
+          ←
         </button>
         <span style={{ fontSize: 11, color: "rgba(116,130,63,.52)", fontWeight: 600, letterSpacing: ".06em" }}>
           {idx + 1} / {IMAGES.length}
@@ -135,7 +146,7 @@ function PolaroidStack() {
           }}
           aria-label="Next photo"
         >
-          <ArrowRight size={14} strokeWidth={2.4} />
+          →
         </button>
       </div>
       <p style={{ fontSize: 11, color: "rgba(116,130,63,.42)", margin: 0 }}>click photo or arrows to flip</p>
@@ -157,10 +168,43 @@ const HIGHLIGHT: React.CSSProperties = {
 };
 
 const TEAM_STYLES = `
+  .team-nav-wrap {
+    position: sticky; top: 0; z-index: 100; padding: 8px 20px;
+  }
+  .team-nav {
+    max-width: 1180px; margin: 0 auto;
+    background: rgba(255,255,255,0.68);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(116,130,63,.08); border-radius: 12px;
+    box-shadow: rgba(0,0,0,0.14) 0px 0.6px 0.6px -1.25px, rgba(0,0,0,0.1) 0px 2.3px 2.3px -2.5px, rgba(0,0,0,0.04) 0px 10px 10px -3.75px;
+  }
+  .team-nav-inner {
+    height: 48px; display: flex; align-items: center; justify-content: space-between; padding: 0 18px;
+  }
+  .team-nav-logo {
+    font-size: 21px; font-weight: 800; letter-spacing: -0.5px; text-decoration: none; display: inline-flex; align-items: baseline; gap: 1px;
+  }
+  .team-nav-links {
+    display: flex; gap: 2px; align-items: center;
+  }
+  .team-nav-link {
+    padding: 7px 17px; border-radius: 999px; color: #74823F; font-size: 14px; font-weight: 600;
+    text-decoration: none; font-family: var(--font-inter), sans-serif; opacity: 0.75; transition: opacity .15s;
+  }
+  .team-nav-link:hover { opacity: 1; }
+  .team-nav-cta {
+    padding: 8px 18px; border-radius: 999px; background: #2C4B1A; color: #F1E8C7;
+    font-size: 12px; font-weight: 700; text-decoration: none; flex-shrink: 0; transition: opacity .15s;
+  }
+  .team-nav-cta:hover { opacity: 0.85; }
+  @media (max-width: 700px) {
+    .team-nav-links { display: none; }
+  }
+
   .team-shell {
     width: min(900px, calc(100% - 40px));
     margin: 0 auto;
-    padding: 80px 0 100px;
+    padding: 48px 0 100px;
   }
   .team-heading { margin-bottom: 36px; }
   .team-content {
@@ -172,7 +216,7 @@ const TEAM_STYLES = `
   @media (max-width: 700px) {
     .team-shell {
       width: calc(100% - 32px);
-      padding: 72px 0 64px;
+      padding: 36px 0 64px;
     }
     .team-heading {
       margin-bottom: 28px;
@@ -191,23 +235,28 @@ export default function TeamPage() {
       style={{ minHeight: "100vh", background: CREAM, color: RED, fontFamily: "var(--font-inter), sans-serif" }}
     >
       <style>{TEAM_STYLES}</style>
-      {/* Back button */}
-      <Link
-        href="/"
-        replace
-        prefetch={false}
-        aria-label="Go back"
-        style={{
-          position: "fixed", top: 24, left: 28, zIndex: 5,
-          display: "inline-flex", alignItems: "center", justifyContent: "center",
-          width: 44, height: 44,
-          border: "1px solid rgba(107,62,30,.18)", borderRadius: 8,
-          background: "rgba(255,255,255,.72)", color: BROWN,
-          boxShadow: "0 14px 34px rgba(107,62,30,.08)", textDecoration: "none",
-        }}
-      >
-        <ArrowLeft size={20} strokeWidth={2.4} />
-      </Link>
+
+      {/* Sticky nav — same design as main page */}
+      <div className="team-nav-wrap">
+        <nav className="team-nav">
+          <div className="team-nav-inner">
+            <a href="/" className="team-nav-logo">
+              <span style={{ color: RED }}>ate</span><span style={{ color: BROWN }}> o&apos;clock</span>
+            </a>
+            <div className="team-nav-links">
+              {[
+                { label: "About",        href: "/team" },
+                { label: "Features",     href: "/#features" },
+                { label: "For Creators", href: "/#creators" },
+                { label: "FAQs",         href: "/#faq" },
+              ].map(link => (
+                <a key={link.label} href={link.href} className="team-nav-link">{link.label}</a>
+              ))}
+            </div>
+            <a href="/waitlist" className="team-nav-cta">Get Started</a>
+          </div>
+        </nav>
+      </div>
 
       <div className="team-shell">
         {/* Heading */}
@@ -218,14 +267,14 @@ export default function TeamPage() {
           <h1 style={{ marginBottom: 10, color: RED, fontFamily: INTER, fontSize: "clamp(1.5rem,2.8vw,1.9rem)", fontWeight: 400, lineHeight: 1.1, letterSpacing: "-0.025em" }}>
             The people building ateoclock.
           </h1>
-          <a
+          <Link
             href="/#about"
             style={{ display: "inline-flex", alignItems: "center", gap: 6, color: BROWN, fontSize: 13, fontWeight: 700, textDecoration: "none", opacity: 0.72 }}
             onMouseEnter={e => (e.currentTarget.style.opacity = "1")}
             onMouseLeave={e => (e.currentTarget.style.opacity = ".72")}
           >
             See how it works <ArrowRight size={13} strokeWidth={2.5} />
-          </a>
+          </Link>
         </div>
 
         {/* Two-column: photo left, text right */}

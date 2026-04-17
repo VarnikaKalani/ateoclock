@@ -7,12 +7,13 @@ import PillMorphTabs from '@/components/ui/pill-morph-tabs'
 import Bucket from '@/components/ui/bucket'
 import WalkingMascot from '@/components/ui/walking-mascot'
 
-const RED   = '#74823F'
-const CREAM = '#F1E8C7'
-const RED2  = '#A65F2D'
-const BROWN = '#6B3E1E'
-const BG    = '#F1E8C7'
-const WHITE = '#ffffff'
+const RED        = '#74823F'
+const CREAM      = '#F1E8C7'
+const RED2       = '#A65F2D'
+const BROWN      = '#6B3E1E'
+const GREEN_DARK = '#2C4B1A'
+const BG         = '#E2E9D0'
+const WHITE      = '#ffffff'
 const INTER_REGULAR = 'var(--font-inter), sans-serif'
 
 
@@ -470,7 +471,7 @@ function RecipeCheckoutDemoSection() {
                   <div>
                     <span>{selectedStore ? `Total via ${selectedStore.name}` : 'Cart total'}</span>
                     <strong className={!selectedStore ? 'recipe-demo-empty-total' : undefined}>
-                      {storeTotal ? formatRupees(storeTotal) : '—'}
+                      {storeTotal ? formatRupees(storeTotal) : '-'}
                     </strong>
                   </div>
                   <div className="recipe-demo-checkout-actions">
@@ -922,7 +923,7 @@ export default function Home() {
   const navItems: Array<{ label: string; sectionId: string; href?: string }> = [
     { label: 'About', sectionId: 'about', href: '/team' },
     { label: 'Features', sectionId: 'features' },
-    { label: 'For Creators', sectionId: 'creators', href: '/creators' },
+    { label: 'For Creators', sectionId: 'creators' },
     { label: 'FAQs', sectionId: 'faq' },
   ]
 
@@ -1049,11 +1050,11 @@ export default function Home() {
 
         .hero-section {
           position: relative;
-          min-height: calc(100svh - 138px);
+          min-height: auto;
           display: flex;
           align-items: center;
           overflow: hidden;
-          padding: 92px 28px 88px;
+          padding: 92px 28px 72px;
           background: ${BG};
           border-bottom: 1px solid rgba(116,130,63,.08);
         }
@@ -1196,6 +1197,7 @@ export default function Home() {
         .hero-cart-card {
           right: 0;
           bottom: 28px;
+          z-index: 2;
           width: min(50%, 310px);
           border-radius: 18px;
           padding: 22px;
@@ -1273,6 +1275,7 @@ export default function Home() {
           top: 50%;
           left: 50%;
           transform: translate(-50%,-50%);
+          z-index: 1;
           border-radius: 999px;
           background: ${BROWN};
           padding: 11px 20px;
@@ -2211,8 +2214,8 @@ export default function Home() {
           margin-bottom: 14px;
           color: ${RED};
           font-family: ${INTER_REGULAR};
-          font-size: clamp(2rem, 3.3vw, 3.25rem);
-          font-weight: 700;
+          font-size: clamp(1.875rem, 3.1vw, 3rem);
+          font-weight: 400;
           line-height: 1.08;
           letter-spacing: 0;
         }
@@ -2222,7 +2225,9 @@ export default function Home() {
         .sticky-feature-card-inner > div:not(.sticky-feature-index):not(.sticky-feature-tags) {
           max-width: 500px;
           color: rgba(116,130,63,.68);
-          font-size: 16px;
+          font-family: ${INTER_REGULAR};
+          font-size: 14px;
+          font-weight: 400;
           line-height: 1.6;
         }
         .feature-bucket-wrap {
@@ -2405,7 +2410,7 @@ export default function Home() {
           align-items: center;
           justify-content: center;
           margin: 0 auto;
-          transform: scale(1.08);
+          transform: scale(1.22);
           transform-origin: center center;
         }
         .visual-read {
@@ -2629,7 +2634,7 @@ export default function Home() {
           animation: nextStepSlide 2.8s ease-in-out infinite;
         }
         .creators-section {
-          background: ${BROWN};
+          background: ${GREEN_DARK};
           border-top: 1px solid rgba(116,130,63,.08);
           padding: 96px 28px;
         }
@@ -2689,7 +2694,7 @@ export default function Home() {
           align-items: center;
           gap: 6px;
           margin-top: 36px;
-          flex-wrap: nowrap;
+          flex-wrap: wrap;
         }
         .creator-step {
           display: flex;
@@ -2840,7 +2845,7 @@ export default function Home() {
           font-weight: 700;
         }
         .site-footer {
-          background: ${BROWN};
+          background: ${GREEN_DARK};
           color: ${CREAM};
           padding: 104px 28px 54px;
         }
@@ -3915,7 +3920,7 @@ export default function Home() {
               />
             </div>
             <a href="/waitlist"
-              style={{ padding: '8px 18px', borderRadius: 999, background: BROWN, color: CREAM, fontSize: 12, fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'opacity .15s', textDecoration: 'none', flexShrink: 0 }}
+              style={{ padding: '8px 18px', borderRadius: 999, background: GREEN_DARK, color: CREAM, fontSize: 12, fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'opacity .15s', textDecoration: 'none', flexShrink: 0 }}
               onMouseEnter={e => (e.currentTarget.style.opacity = '.85')}
               onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
             >Get Started</a>
@@ -3952,7 +3957,7 @@ export default function Home() {
                 </button>
               ))}
               <a href="/waitlist"
-                style={{ marginTop: 2, display: 'block', width: '100%', padding: '10px 14px', borderRadius: 8, background: BROWN, color: CREAM, fontSize: 13, fontWeight: 700, textDecoration: 'none', textAlign: 'center', boxSizing: 'border-box' }}
+                style={{ marginTop: 2, display: 'block', width: '100%', padding: '10px 14px', borderRadius: 8, background: GREEN_DARK, color: CREAM, fontSize: 13, fontWeight: 700, textDecoration: 'none', textAlign: 'center', boxSizing: 'border-box' }}
               >
                 Get Started
               </a>

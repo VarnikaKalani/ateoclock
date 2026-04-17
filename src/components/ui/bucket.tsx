@@ -265,7 +265,7 @@ const Bucket = () => {
                     animate={{ y: 0, opacity: 1, scale: isMobile ? 0.82 : 0.9 }}
                     exit={{ y: isMobile ? 62 : 78, scale: 0.76, transition: { duration: 0.8 } }}
                     transition={{ duration: 0.5, ease: [0.455, 0.03, 0.515, 0.955] }}
-                    className="z-10 rounded-full p-1.5 w-[180px] max-w-[58%] shadow-sm absolute pointer-events-auto flex items-center gap-1.5 origin-bottom"
+                    className="z-10 rounded-full p-1.5 w-[220px] max-w-[70%] shadow-sm absolute pointer-events-auto flex items-center gap-1.5 origin-bottom"
                     style={{ background: '#fff', border: '1px solid rgba(116,130,63,0.18)', boxShadow: '0 12px 28px rgba(116,130,63,0.12)' }}
                   >
                     <div className="flex size-8 shrink-0 items-center justify-center rounded-full" style={{ background: 'rgba(116,130,63,0.08)' }}>

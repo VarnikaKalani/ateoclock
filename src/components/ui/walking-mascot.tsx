@@ -2,155 +2,164 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 
-const W = 72;          // render px
-const SPEED = 0.18;    // slow walk px/ms
-const FPS = 5;         // slow animation frames
-const CLIMB_H = 140;   // px above ground to climb
-const WALK_MS  = 4200;
-const EAT_MS   = 3000;
-const CLIMB_MS = 2400;
-const FALL_MS  = 800;
+const W        = 96;     // render px
+const SPEED    = 0.019;  // slow amble — reduced ~50% from original
+const FPS      = 3;      // chunky pixel-art frames
+const WALK_MS  = 10000;
+const EAT_MS   = 3200;
 
-type Phase = "walk" | "eat" | "climb" | "fall";
+type Phase = "walk" | "eat";
 
-// ─── Panda SVG ───────────────────────────────────────────────────
+// White-and-brown panda, side view, faces RIGHT by default.
+// flipped = scaleX(-1) so it always faces its walking direction.
 function PandaSVG({
   frame, phase, flipped,
-}: {
-  frame: number; phase: Phase; flipped: boolean;
-}) {
-  const walking  = phase === "walk";
-  const eating   = phase === "eat";
-  const climbing = phase === "climb";
-  const falling  = phase === "fall";
+}: { frame: number; phase: Phase; flipped: boolean }) {
+  const walking = phase === "walk";
+  const eating  = phase === "eat";
 
-  // leg bob
-  const legAlt = (walking || climbing) && frame === 1;
-  const legLy  = legAlt ? 12 : 13;
-  const legRy  = legAlt ? 14 : 13;
+  // Diagonal gait: frame toggles which diagonal pair steps
+  const stepA = walking && frame === 1;
 
-  // arms: raised when climbing, normal otherwise
-  const armLy = climbing ? 4 : 9;
-  const armRy = climbing ? 4 : 9;
+  // Near-side legs (fully visible)
+  const nFrontY = stepA ? 20 : 22;
+  const nRearY  = stepA ? 22 : 20;
+  // Far-side legs (behind body, faded)
+  const fFrontY = stepA ? 22 : 20;
+  const fRearY  = stepA ? 20 : 22;
 
-  // mouth opens on frame 1 while eating
+  // Body bobs on each step
+  const bodyDY = walking ? (stepA ? 0.8 : 0) : 0;
+  // Head dips when eating, small nod when walking
+  const headDY = eating ? (frame ? 2 : 0) : walking ? (stepA ? 0.4 : 0) : 0;
+
+  // Mouth opens when eating frame 1
   const mouthOpen = eating && frame === 1;
 
-  // tilt when falling
-  const tilt = falling ? (frame ? 22 : -22) : 0;
+  const outline = { stroke: "#1a0800", strokeLinejoin: "round" as const };
 
   return (
     <svg
       width={W}
       height={W}
-      viewBox="0 0 16 16"
+      viewBox="0 0 48 30"
+      shapeRendering="crispEdges"
       style={{
         imageRendering: "pixelated",
         display: "block",
-        transform: [
-          flipped ? "scaleX(-1)" : "",
-          tilt     ? `rotate(${tilt}deg)` : "",
-        ].filter(Boolean).join(" ") || undefined,
+        filter: "drop-shadow(0 2px 0 rgba(0,0,0,0.18))",
+        transform: flipped ? "scaleX(-1)" : undefined,
       }}
     >
-      {/* ── Ears ── */}
-      <rect x="2"  y="0" width="3" height="3" rx="1.5" fill="#111" />
-      <rect x="11" y="0" width="3" height="3" rx="1.5" fill="#111" />
+      {/* Ground shadow */}
+      <ellipse cx="22" cy="29.8" rx="13" ry="1.1" fill="rgba(0,0,0,0.12)" />
 
-      {/* ── Head ── */}
-      <rect x="3" y="1" width="10" height="8" rx="3" fill="#f7f7f7" />
+      {/* Far-side legs behind body (faded for depth) */}
+      <rect x="13" y={fRearY}  width="3.8" height="8.5" rx="1.9"
+        fill="#6B3E1E" opacity="0.55" {...outline} strokeWidth="0.7" />
+      <rect x="30" y={fFrontY} width="3.8" height="8.5" rx="1.9"
+        fill="#6B3E1E" opacity="0.55" {...outline} strokeWidth="0.7" />
 
-      {/* ── Eye patches ── */}
-      <rect x="3" y="2" width="4" height="4" rx="2" fill="#1a1a1a" />
-      <rect x="9" y="2" width="4" height="4" rx="2" fill="#1a1a1a" />
+      {/* Body */}
+      <g transform={`translate(0 ${bodyDY})`}>
+        {/* Main white body oval */}
+        <ellipse cx="22" cy="20" rx="14.5" ry="9.5"
+          fill="#FFFFFF" {...outline} strokeWidth="1.4" />
 
-      {/* ── Eyes ── */}
-      <rect x="4"  y="3" width="2" height="2" rx="1" fill="white" />
-      <rect x="10" y="3" width="2" height="2" rx="1" fill="white" />
+        {/* 3D highlight — top of body */}
+        <ellipse cx="20" cy="15.8" rx="7" ry="3.2"
+          fill="rgba(255,255,255,0.55)" />
 
-      {/* ── Pupils ── */}
-      <rect x="5"  y="4" width="1" height="1" fill="#111" />
-      <rect x="11" y="4" width="1" height="1" fill="#111" />
+        {/* Hip patch (rear) — brown */}
+        <ellipse cx="12" cy="19" rx="6"  ry="5.5"
+          fill="#8B4C1E" {...outline} strokeWidth="0.9" />
+        {/* Hip 3D highlight */}
+        <ellipse cx="11" cy="17" rx="2.8" ry="2"
+          fill="rgba(255,255,255,0.22)" />
 
-      {/* ── Nose ── */}
-      <rect x="7" y="6" width="2" height="1" rx="0.5" fill="#444" />
+        {/* Shoulder patch (front) — brown */}
+        <ellipse cx="32" cy="18" rx="6.5" ry="6"
+          fill="#8B4C1E" {...outline} strokeWidth="0.9" />
+        {/* Shoulder 3D highlight */}
+        <ellipse cx="31" cy="16" rx="3" ry="2"
+          fill="rgba(255,255,255,0.22)" />
 
-      {/* ── Mouth ── */}
-      {mouthOpen
-        ? <rect x="6" y="7" width="4" height="1.5" rx="0.5" fill="#444" />
-        : <rect x="7" y="7" width="2" height="1"   rx="0.5" fill="#555" />
-      }
+        {/* Near-side legs in front of body */}
+        <rect x="10" y={nRearY}  width="4.5" height="9.5" rx="2.2"
+          fill="#7B4A1E" {...outline} strokeWidth="1.1" />
+        <rect x="32" y={nFrontY} width="4.5" height="9.5" rx="2.2"
+          fill="#7B4A1E" {...outline} strokeWidth="1.1" />
+      </g>
 
-      {/* ── Body ── */}
-      <rect x="4" y="8" width="8" height="6" rx="2" fill="#efefef" />
+      {/* Head and neck — separate so it can nod independently */}
+      <g transform={`translate(0 ${headDY})`}>
+        {/* Neck blob blends head into body */}
+        <ellipse cx="33" cy="17.5" rx="5" ry="4"
+          fill="#FFFFFF" {...outline} strokeWidth="0.9" />
 
-      {/* ── Arms ── */}
-      <rect x="1"  y={armLy} width="3" height="4" rx="1.5" fill="#1a1a1a" />
-      <rect x="12" y={armRy} width="3" height="4" rx="1.5" fill="#1a1a1a" />
+        {/* Round white head — bigger circle for cuter proportions */}
+        <circle cx="36" cy="11" r="10.5"
+          fill="#FFFFFF" {...outline} strokeWidth="1.5" />
 
-      {/* ── Legs ── */}
-      <rect x="4" y={legLy} width="3" height="3" rx="1" fill="#1a1a1a" />
-      <rect x="9" y={legRy} width="3" height="3" rx="1" fill="#1a1a1a" />
+        {/* 3D highlight — top of head */}
+        <ellipse cx="33.5" cy="6.5" rx="5" ry="2.8"
+          fill="rgba(255,255,255,0.5)" />
+
+        {/* Far ear — brown with warm inner */}
+        <circle cx="43" cy="3.5" r="3.8" fill="#8B4C1E" {...outline} strokeWidth="0.8" />
+        <circle cx="43" cy="3.5" r="1.6" fill="#C87850" />
+
+        {/* Near ear — brown with warm inner */}
+        <circle cx="29.5" cy="3.5" r="4.2" fill="#8B4C1E" {...outline} strokeWidth="1.1" />
+        <circle cx="29.5" cy="3.5" r="1.9" fill="#C87850" />
+
+        {/* Eye patch — large brown oval, rounded for cuteness */}
+        <ellipse cx="40" cy="10" rx="5" ry="4.5"
+          fill="#8B4C1E" {...outline} strokeWidth="0.9" />
+
+        {/* Eye white — bigger for cuter look */}
+        <circle cx="40.5" cy="10" r="3" fill="white" />
+        {/* Pupil */}
+        <circle cx="41.2" cy="10.4" r="1.8" fill="#1a0800" />
+        {/* Main shine */}
+        <circle cx="42.2" cy="9.2"  r="0.7" fill="white" />
+        {/* Small secondary shine */}
+        <circle cx="40.2" cy="11.3" r="0.35" fill="white" />
+
+        {/* Muzzle — near-white rounded snout */}
+        <ellipse cx="44.5" cy="14.5" rx="4"   ry="3.2"
+          fill="#F8F4EE" {...outline} strokeWidth="0.8" />
+        {/* Nose — cute oval */}
+        <ellipse cx="45.5" cy="12.8" rx="2"   ry="1.3"
+          fill="#8B4C1E" {...outline} strokeWidth="0.6" />
+
+        {/* Mouth */}
+        {mouthOpen ? (
+          <rect x="43.5" y="15.5" width="4" height="1.8" rx="0.8" fill="#8B4C1E" />
+        ) : (
+          <path
+            d="M43.5 15.5 Q45.5 17 47 15.5"
+            stroke="#8B4C1E" strokeWidth="0.8"
+            fill="none" strokeLinecap="round"
+          />
+        )}
+
+        {/* Cheek blush — soft and round */}
+        <circle cx="37.5" cy="13.5" r="2.8" fill="rgba(228,130,110,0.30)" />
+      </g>
     </svg>
   );
 }
 
-// ─── Bamboo stick (carried) ───────────────────────────────────────
-function BambooStick({ angle }: { angle: number }) {
-  return (
-    <svg
-      width={10} height={44}
-      viewBox="0 0 5 22"
-      style={{
-        imageRendering: "pixelated",
-        display: "block",
-        transform: `rotate(${angle}deg)`,
-        transformOrigin: "bottom center",
-      }}
-    >
-      <rect x="2" y="0" width="1.5" height="21" fill="#5c9e30" />
-      <rect x="1" y="7"  width="3" height="1.5" rx="0.5" fill="#4a8525" />
-      <rect x="1" y="15" width="3" height="1.5" rx="0.5" fill="#4a8525" />
-      <ellipse cx="4.5" cy="4"  rx="2.2" ry="0.9" fill="#72bb42" transform="rotate(-32 4.5 4)"  />
-      <ellipse cx="0.5" cy="14" rx="2.2" ry="0.9" fill="#72bb42" transform="rotate(32 0.5 14)" />
-    </svg>
-  );
-}
-
-// ─── Bamboo pole (planted, for climbing) ─────────────────────────
-function BambooPole({ height }: { height: number }) {
-  const segs = Math.ceil(height / 22);
-  return (
-    <svg
-      width={14} height={height}
-      viewBox={`0 0 7 ${segs * 22}`}
-      style={{ imageRendering: "pixelated", display: "block" }}
-    >
-      {Array.from({ length: segs }).map((_, i) => (
-        <g key={i}>
-          <rect x="2.5" y={i * 22}      width="2" height="21" fill="#5c9e30" />
-          <rect x="1.5" y={i * 22 + 19} width="4" height="3"  rx="1" fill="#4a8525" />
-          {i % 2 === 0
-            ? <ellipse cx="6"  cy={i * 22 + 9}  rx="3.2" ry="1.3" fill="#72bb42" transform={`rotate(-28 6 ${i * 22 + 9})`}  />
-            : <ellipse cx="1"  cy={i * 22 + 13} rx="3.2" ry="1.3" fill="#72bb42" transform={`rotate(28 1 ${i * 22 + 13})`} />
-          }
-        </g>
-      ))}
-    </svg>
-  );
-}
-
-// ─── Main component ───────────────────────────────────────────────
+// ─── Main component ──────────────────────────────────────────────────────────
 export default function WalkingMascot() {
-  const [phase,   setPhase]   = useState<Phase>("walk");
-  const [x,       setX]       = useState(120);
-  const [y,       setY]       = useState(0);
-  const [frame,   setFrame]   = useState(0);
-  const [flipped, setFlipped] = useState(false);
-  const [dragging,setDragging]= useState(false);
+  const [phase,    setPhase]    = useState<Phase>("walk");
+  const [x,        setX]        = useState(120);
+  const [frame,    setFrame]    = useState(0);
+  const [flipped,  setFlipped]  = useState(false);
+  const [dragging, setDragging] = useState(false);
 
   const xRef     = useRef(120);
-  const yRef     = useRef(0);
   const dirRef   = useRef(1);
   const phaseRef = useRef<Phase>("walk");
   const rafRef   = useRef<number | null>(null);
@@ -158,7 +167,7 @@ export default function WalkingMascot() {
   const phaseT   = useRef(0);
   const dragOff  = useRef(0);
 
-  // Animation frame ticker
+  // Slow frame ticker
   useEffect(() => {
     const id = setInterval(() => setFrame(f => 1 - f), 1000 / FPS);
     return () => clearInterval(id);
@@ -185,53 +194,21 @@ export default function WalkingMascot() {
       if (ph === "walk") {
         xRef.current += dirRef.current * SPEED * dt;
         const max = window.innerWidth - W;
+        // Turn to face walking direction when hitting walls
         if (xRef.current <= 0)   { xRef.current = 0;   dirRef.current =  1; setFlipped(false); }
         if (xRef.current >= max) { xRef.current = max; dirRef.current = -1; setFlipped(true);  }
         setX(xRef.current);
-
         if (elapsed >= WALK_MS) {
-          phaseRef.current = "eat";
-          setPhase("eat");
-          phaseT.current = now;
+          phaseRef.current = "eat"; setPhase("eat"); phaseT.current = now;
         }
-
       } else if (ph === "eat") {
         if (elapsed >= EAT_MS) {
-          phaseRef.current = "climb";
-          setPhase("climb");
-          phaseT.current = now;
-        }
-
-      } else if (ph === "climb") {
-        const t    = Math.min(elapsed / CLIMB_MS, 1);
-        const ease = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
-        yRef.current = ease * CLIMB_H;
-        setY(yRef.current);
-
-        if (elapsed >= CLIMB_MS) {
-          phaseRef.current = "fall";
-          setPhase("fall");
-          phaseT.current = now;
-        }
-
-      } else { // fall
-        const t = Math.min(elapsed / FALL_MS, 1);
-        // gravity curve
-        yRef.current = CLIMB_H * (1 - t) * (1 - t);
-        setY(yRef.current);
-
-        if (elapsed >= FALL_MS) {
-          yRef.current = 0;
-          setY(0);
-          phaseRef.current = "walk";
-          setPhase("walk");
-          phaseT.current = now;
+          phaseRef.current = "walk"; setPhase("walk"); phaseT.current = now;
         }
       }
 
       rafRef.current = requestAnimationFrame(tick);
     };
-
     rafRef.current = requestAnimationFrame(tick);
   }, []);
 
@@ -247,21 +224,16 @@ export default function WalkingMascot() {
     setDragging(true);
     dragOff.current = e.clientX - xRef.current;
   }, []);
-
   useEffect(() => {
     if (!dragging) return;
     const onMove = (e: MouseEvent) => {
       const nx = Math.max(0, Math.min(window.innerWidth - W, e.clientX - dragOff.current));
-      xRef.current = nx;
-      setX(nx);
+      xRef.current = nx; setX(nx);
     };
     const onUp = () => setDragging(false);
     window.addEventListener("mousemove", onMove);
     window.addEventListener("mouseup",   onUp);
-    return () => {
-      window.removeEventListener("mousemove", onMove);
-      window.removeEventListener("mouseup",   onUp);
-    };
+    return () => { window.removeEventListener("mousemove", onMove); window.removeEventListener("mouseup", onUp); };
   }, [dragging]);
 
   // Touch drag
@@ -269,79 +241,31 @@ export default function WalkingMascot() {
     dragOff.current = e.touches[0].clientX - xRef.current;
     setDragging(true);
   }, []);
-
   useEffect(() => {
     if (!dragging) return;
     const onMove = (e: TouchEvent) => {
       const nx = Math.max(0, Math.min(window.innerWidth - W, e.touches[0].clientX - dragOff.current));
-      xRef.current = nx;
-      setX(nx);
+      xRef.current = nx; setX(nx);
     };
     const onEnd = () => setDragging(false);
     window.addEventListener("touchmove", onMove, { passive: true });
     window.addEventListener("touchend",  onEnd);
-    return () => {
-      window.removeEventListener("touchmove", onMove);
-      window.removeEventListener("touchend",  onEnd);
-    };
+    return () => { window.removeEventListener("touchmove", onMove); window.removeEventListener("touchend", onEnd); };
   }, [dragging]);
 
-  const showPole = phase === "eat" || phase === "climb" || phase === "fall";
-  const poleH    = CLIMB_H + W + 8;
-  // bamboo stick angle: held casually while walking, brought to mouth while eating
-  const stickAngle = phase === "eat" ? (flipped ? 35 : -35) : (flipped ? -12 : 12);
-
   return (
-    <>
-      {/* Bamboo pole — grounded at panda's position */}
-      {showPole && (
-        <div
-          aria-hidden="true"
-          style={{
-            position:      "fixed",
-            bottom:        0,
-            left:          x + W * 0.58,
-            zIndex:        49,
-            pointerEvents: "none",
-          }}
-        >
-          <BambooPole height={poleH} />
-        </div>
-      )}
-
-      {/* Panda */}
-      <div
-        aria-hidden="true"
-        onMouseDown={onDown}
-        onTouchStart={onTouch}
-        style={{
-          position:    "fixed",
-          bottom:      y,
-          left:        x,
-          width:       W,
-          height:      W,
-          zIndex:      50,
-          cursor:      dragging ? "grabbing" : "grab",
-          userSelect:  "none",
-          touchAction: "none",
-        }}
-      >
-        {/* Bamboo stick — carried while walking or eating */}
-        {(phase === "walk" || phase === "eat") && (
-          <div
-            style={{
-              position:        "absolute",
-              ...(flipped ? { left: -8 } : { right: -8 }),
-              bottom:          10,
-              transformOrigin: "bottom center",
-            }}
-          >
-            <BambooStick angle={stickAngle} />
-          </div>
-        )}
-
-        <PandaSVG frame={frame} phase={phase} flipped={flipped} />
-      </div>
-    </>
+    <div
+      aria-hidden="true"
+      onMouseDown={onDown}
+      onTouchStart={onTouch}
+      style={{
+        position: "fixed", bottom: 0, left: x,
+        width: W, height: W, zIndex: 50,
+        cursor: dragging ? "grabbing" : "grab",
+        userSelect: "none", touchAction: "none",
+      }}
+    >
+      <PandaSVG frame={frame} phase={phase} flipped={flipped} />
+    </div>
   );
 }

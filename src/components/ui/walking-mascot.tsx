@@ -2,46 +2,46 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 
-const SIZE   = 96;    // display px (64px sprite scaled up 1.5×)
-const SPEED  = 0.019; // px/ms
-const FPS    = 10;    // matches panda_brown.json
+const SIZE     = 96;    // display px
+const SPEED    = 0.019; // px/ms
+const FPS      = 10;
+const WALK_MS  = 10000;
+const IDLE_MS  = 3200;
+const WALK_LEN = 4;
+const IDLE_LEN = 3;
 
 type Phase = "walk" | "idle";
+type Dir   = "right" | "left";
 
-const WALK_FRAMES  = [0, 1, 2, 3];
-const IDLE_FRAMES  = [0, 1, 2];       // front animation
-const WALK_MS      = 10000;
-const IDLE_MS      = 3200;
-
-function spriteUrl(anim: "walk" | "front" | "drag", frame: number) {
-  return `/mascot/panda_brown_${anim}-${frame}.png`;
+function src(phase: Phase, dir: Dir, frame: number, dragging: boolean) {
+  if (dragging)         return `/mascot/panda_${dir}_drag-0.png`;
+  if (phase === "idle") return `/mascot/panda_front-${frame}.png`;
+  return `/mascot/panda_${dir}_walk-${frame}.png`;
 }
 
 export default function WalkingMascot() {
-  const [phase,    setPhase]   = useState<Phase>("walk");
-  const [frame,    setFrame]   = useState(0);
-  const [x,        setX]       = useState(120);
-  const [flipped,  setFlipped] = useState(false);
-  const [dragging, setDragging]= useState(false);
+  const [phase,    setPhase]    = useState<Phase>("walk");
+  const [frame,    setFrame]    = useState(0);
+  const [x,        setX]        = useState(120);
+  const [dir,      setDir]      = useState<Dir>("right");
+  const [dragging, setDragging] = useState(false);
 
   const xRef     = useRef(120);
-  const dirRef   = useRef(1);
+  const dirRef   = useRef<Dir>("right");
   const phaseRef = useRef<Phase>("walk");
   const rafRef   = useRef<number | null>(null);
   const lastRef  = useRef(0);
   const phaseT   = useRef(0);
   const dragOff  = useRef(0);
-  const frameIdx = useRef(0);
+  const fIdx     = useRef(0);
   const lastFrT  = useRef(0);
 
-  // Frame ticker driven by rAF (respects FPS)
   const tickFrame = useCallback((now: number) => {
     if (now - lastFrT.current >= 1000 / FPS) {
       lastFrT.current = now;
-      const ph  = phaseRef.current;
-      const len = ph === "walk" ? WALK_FRAMES.length : IDLE_FRAMES.length;
-      frameIdx.current = (frameIdx.current + 1) % len;
-      setFrame(frameIdx.current);
+      const len = phaseRef.current === "walk" ? WALK_LEN : IDLE_LEN;
+      fIdx.current = (fIdx.current + 1) % len;
+      setFrame(fIdx.current);
     }
   }, []);
 
@@ -53,38 +53,32 @@ export default function WalkingMascot() {
   }, []);
 
   const startLoop = useCallback(() => {
-    const now0 = performance.now();
-    lastRef.current = now0;
-    phaseT.current  = now0;
-    lastFrT.current = now0;
+    const t0 = performance.now();
+    lastRef.current = t0; phaseT.current = t0; lastFrT.current = t0;
 
     const tick = (now: number) => {
       const dt      = Math.min(now - lastRef.current, 50);
       lastRef.current = now;
       const elapsed   = now - phaseT.current;
-      const ph        = phaseRef.current;
 
       tickFrame(now);
 
-      if (ph === "walk") {
-        xRef.current += dirRef.current * SPEED * dt;
+      if (phaseRef.current === "walk") {
+        xRef.current += (dirRef.current === "right" ? 1 : -1) * SPEED * dt;
         const max = window.innerWidth - SIZE;
-        if (xRef.current <= 0)   { xRef.current = 0;   dirRef.current =  1; setFlipped(false); }
-        if (xRef.current >= max) { xRef.current = max; dirRef.current = -1; setFlipped(true);  }
+        if (xRef.current <= 0)   { xRef.current = 0;   dirRef.current = "right"; setDir("right"); }
+        if (xRef.current >= max) { xRef.current = max; dirRef.current = "left";  setDir("left");  }
         setX(xRef.current);
         if (elapsed >= WALK_MS) {
           phaseRef.current = "idle"; setPhase("idle");
-          frameIdx.current = 0; setFrame(0);
-          phaseT.current = now;
+          fIdx.current = 0; setFrame(0); phaseT.current = now;
         }
       } else {
         if (elapsed >= IDLE_MS) {
           phaseRef.current = "walk"; setPhase("walk");
-          frameIdx.current = 0; setFrame(0);
-          phaseT.current = now;
+          fIdx.current = 0; setFrame(0); phaseT.current = now;
         }
       }
-
       rafRef.current = requestAnimationFrame(tick);
     };
     rafRef.current = requestAnimationFrame(tick);
@@ -98,14 +92,15 @@ export default function WalkingMascot() {
 
   // Mouse drag
   const onDown = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    setDragging(true);
+    e.preventDefault(); setDragging(true);
     dragOff.current = e.clientX - xRef.current;
   }, []);
   useEffect(() => {
     if (!dragging) return;
     const onMove = (e: MouseEvent) => {
       const nx = Math.max(0, Math.min(window.innerWidth - SIZE, e.clientX - dragOff.current));
+      if (nx > xRef.current) { dirRef.current = "right"; setDir("right"); }
+      else if (nx < xRef.current) { dirRef.current = "left"; setDir("left"); }
       xRef.current = nx; setX(nx);
     };
     const onUp = () => setDragging(false);
@@ -116,13 +111,14 @@ export default function WalkingMascot() {
 
   // Touch drag
   const onTouch = useCallback((e: React.TouchEvent) => {
-    dragOff.current = e.touches[0].clientX - xRef.current;
-    setDragging(true);
+    dragOff.current = e.touches[0].clientX - xRef.current; setDragging(true);
   }, []);
   useEffect(() => {
     if (!dragging) return;
     const onMove = (e: TouchEvent) => {
       const nx = Math.max(0, Math.min(window.innerWidth - SIZE, e.touches[0].clientX - dragOff.current));
+      if (nx > xRef.current) { dirRef.current = "right"; setDir("right"); }
+      else if (nx < xRef.current) { dirRef.current = "left"; setDir("left"); }
       xRef.current = nx; setX(nx);
     };
     const onEnd = () => setDragging(false);
@@ -130,10 +126,6 @@ export default function WalkingMascot() {
     window.addEventListener("touchend",  onEnd);
     return () => { window.removeEventListener("touchmove", onMove); window.removeEventListener("touchend", onEnd); };
   }, [dragging]);
-
-  const anim  = dragging ? "drag" : phase === "walk" ? "walk" : "front";
-  const fIdx  = dragging ? 0 : frame;
-  const src   = spriteUrl(anim as "walk" | "front" | "drag", fIdx);
 
   return (
     <div
@@ -149,16 +141,12 @@ export default function WalkingMascot() {
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={src}
+        src={src(phase, dir, frame, dragging)}
         alt=""
         width={SIZE}
         height={SIZE}
-        style={{
-          imageRendering: "pixelated",
-          display: "block",
-          transform: flipped ? "scaleX(-1)" : undefined,
-          filter: "drop-shadow(0 2px 0 rgba(0,0,0,0.18))",
-        }}
+        style={{ imageRendering: "pixelated", display: "block",
+                 filter: "drop-shadow(0 2px 0 rgba(0,0,0,0.18))" }}
       />
     </div>
   );

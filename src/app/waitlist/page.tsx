@@ -136,7 +136,7 @@ const STYLES = `
   }
 
   /* Fields */
-  .wl-fields { display:flex; flex-direction:column; gap:10px; margin-bottom:12px; min-height:176px; }
+  .wl-fields { display:flex; flex-direction:column; gap:10px; margin-bottom:12px; }
 
   .wl-field {
     width:100%; height:52px;
@@ -159,7 +159,7 @@ const STYLES = `
     color:rgba(107,62,30,.5);
   }
   select.wl-field {
-    appearance:none; color:rgba(116,130,63,.5); font-weight:500; cursor:pointer; padding-right:44px;
+    appearance:none; color:rgba(116,130,63,.5); font-weight:400; cursor:pointer; padding-right:44px;
   }
   select.wl-field.has-value { color:${RED}; }
   select.wl-field option { background:${FIELD_BG}; color:${RED}; font-weight:400; }
@@ -222,9 +222,6 @@ const STYLES = `
     .wl-field {
       height: 50px;
       font-size: 16px; /* prevents iOS zoom */
-    }
-    .wl-fields {
-      min-height: 170px; /* 3×50px fields + 2×10px gaps */
     }
     .wl-submit {
       height: 50px;

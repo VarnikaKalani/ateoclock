@@ -4122,8 +4122,8 @@ export default function Home() {
               <div>
                 <div className="site-footer-link-group">
                   <h3>Legal</h3>
-                  <a href="#">Terms of Use</a>
-                  <a href="#">Privacy Policy</a>
+                  <a href="/terms">Terms of Use</a>
+                  <a href="/privacy">Privacy Policy</a>
                 </div>
                 <div className="site-footer-link-group">
                   <h3>About</h3>

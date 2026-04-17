@@ -136,7 +136,7 @@ const STYLES = `
   }
 
   /* Fields */
-  .wl-fields { display:flex; flex-direction:column; gap:10px; margin-bottom:12px; }
+  .wl-fields { display:flex; flex-direction:column; gap:10px; margin-bottom:12px; min-height:176px; }
 
   .wl-field {
     width:100%; height:52px;
@@ -222,6 +222,9 @@ const STYLES = `
     .wl-field {
       height: 50px;
       font-size: 16px; /* prevents iOS zoom */
+    }
+    .wl-fields {
+      min-height: 170px; /* 3×50px fields + 2×10px gaps */
     }
     .wl-submit {
       height: 50px;

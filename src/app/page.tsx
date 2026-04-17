@@ -11,8 +11,7 @@ const RED        = '#74823F'
 const CREAM      = '#F1E8C7'
 const RED2       = '#A65F2D'
 const BROWN      = '#6B3E1E'
-const GREEN_DARK = '#2C4B1A'
-const BG         = '#E2E9D0'
+const BG         = '#F1E8C7'
 const WHITE      = '#ffffff'
 const INTER_REGULAR = 'var(--font-inter), sans-serif'
 
@@ -2634,7 +2633,7 @@ export default function Home() {
           animation: nextStepSlide 2.8s ease-in-out infinite;
         }
         .creators-section {
-          background: ${GREEN_DARK};
+          background: ${BROWN};
           border-top: 1px solid rgba(116,130,63,.08);
           padding: 96px 28px;
         }
@@ -2642,7 +2641,7 @@ export default function Home() {
           max-width: 1100px;
           margin: 0 auto;
           display: grid;
-          grid-template-columns: minmax(300px, 420px) 1fr;
+          grid-template-columns: minmax(300px, 560px) 1fr;
           gap: 72px;
           align-items: center;
         }
@@ -2694,7 +2693,7 @@ export default function Home() {
           align-items: center;
           gap: 6px;
           margin-top: 36px;
-          flex-wrap: wrap;
+          flex-wrap: nowrap;
         }
         .creator-step {
           display: flex;
@@ -2845,7 +2844,7 @@ export default function Home() {
           font-weight: 700;
         }
         .site-footer {
-          background: ${GREEN_DARK};
+          background: ${BROWN};
           color: ${CREAM};
           padding: 104px 28px 54px;
         }
@@ -3920,7 +3919,7 @@ export default function Home() {
               />
             </div>
             <a href="/waitlist"
-              style={{ padding: '8px 18px', borderRadius: 999, background: GREEN_DARK, color: CREAM, fontSize: 12, fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'opacity .15s', textDecoration: 'none', flexShrink: 0 }}
+              style={{ padding: '8px 18px', borderRadius: 999, background: BROWN, color: CREAM, fontSize: 12, fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'opacity .15s', textDecoration: 'none', flexShrink: 0 }}
               onMouseEnter={e => (e.currentTarget.style.opacity = '.85')}
               onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
             >Get Started</a>
@@ -3957,7 +3956,7 @@ export default function Home() {
                 </button>
               ))}
               <a href="/waitlist"
-                style={{ marginTop: 2, display: 'block', width: '100%', padding: '10px 14px', borderRadius: 8, background: GREEN_DARK, color: CREAM, fontSize: 13, fontWeight: 700, textDecoration: 'none', textAlign: 'center', boxSizing: 'border-box' }}
+                style={{ marginTop: 2, display: 'block', width: '100%', padding: '10px 14px', borderRadius: 8, background: BROWN, color: CREAM, fontSize: 13, fontWeight: 700, textDecoration: 'none', textAlign: 'center', boxSizing: 'border-box' }}
               >
                 Get Started
               </a>

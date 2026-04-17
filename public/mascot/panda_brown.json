@@ -1,0 +1,42 @@
+{
+  "id": "panda_brown",
+  "dragPath": "drag",
+  "fallPath": "drag",
+  "fps": 10,
+  "zIndex": 0,
+  "scale": 1,
+  "tags": ["custom", "panda", "brown", "cute"],
+  "movementPath": "walk",
+  "speed": 0.7,
+  "capabilities": [
+    "AnimatedSprite",
+    "AnimationsProvider",
+    "AnimationsScheduler",
+    "AutoRespawn",
+    "BounceOnLateralCollisions",
+    "Draggable",
+    "FlipHorizontallyWhenGoingLeft",
+    "Gravity",
+    "LinearMovement",
+    "PetsSpritesProvider",
+    "Rotating",
+    "ShowsMenuOnRightClick"
+  ],
+  "animations": [
+    {
+      "id": "front",
+      "position": "fromEntityBottomLeft",
+      "requiredLoops": 5
+    },
+    {
+      "id": "walk",
+      "position": "fromEntityBottomLeft",
+      "requiredLoops": 4
+    },
+    {
+      "id": "drag",
+      "position": "fromEntityBottomLeft",
+      "requiredLoops": 1
+    }
+  ]
+}

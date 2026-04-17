@@ -66,7 +66,7 @@ const STYLES = `
   }
   .wl-nav-link:hover { opacity:1; }
   .wl-nav-cta {
-    padding:8px 18px; border-radius:999px; background:#2C4B1A; color:#F1E8C7;
+    padding:8px 18px; border-radius:999px; background:#74823F; color:#F1E8C7;
     font-size:12px; font-weight:700; text-decoration:none; flex-shrink:0; transition:opacity .15s;
   }
   .wl-nav-cta:hover { opacity:0.85; }
@@ -171,9 +171,9 @@ const STYLES = `
   }
   .wl-handle-wrap .wl-field { padding-left:34px; }
 
-  /* Creator slot - always in DOM, height locked so form doesn't shift */
-  .creator-slot { height:52px; transition:opacity .18s; }
-  .creator-slot.hidden { visibility:hidden; pointer-events:none; opacity:0; }
+  /* Row 2: country + optional instagram side by side */
+  .wl-row2 { display:flex; gap:10px; }
+  .wl-row2 > * { flex:1; min-width:0; }
 
   /* Submit */
   .wl-submit {
@@ -230,6 +230,7 @@ const STYLES = `
     .wl-note {
       font-size: 11px;
     }
+    .wl-row2 { flex-direction: column; }
   }
 `;
 
@@ -423,33 +424,35 @@ export default function WaitlistPage() {
               autoComplete="email"
             />
 
-            {/* Country */}
-            <div className="wl-select-wrap">
-              <select
-                className={`wl-field${country ? " has-value" : ""}`}
-                value={country}
-                onChange={(e) => setCountry(e.target.value)}
-                required
-                disabled={status === "loading" || status === "success"}
-              >
-                <option value="" disabled>Where are you based?</option>
-                {COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
-              </select>
-              <ChevronDown className="wl-chevron" size={16} strokeWidth={2.2} />
-            </div>
+            {/* Country + optional instagram side-by-side in creator mode */}
+            <div className="wl-row2">
+              <div className="wl-select-wrap">
+                <select
+                  className={`wl-field${country ? " has-value" : ""}`}
+                  value={country}
+                  onChange={(e) => setCountry(e.target.value)}
+                  required
+                  disabled={status === "loading" || status === "success"}
+                >
+                  <option value="" disabled>Where are you based?</option>
+                  {COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                </select>
+                <ChevronDown className="wl-chevron" size={16} strokeWidth={2.2} />
+              </div>
 
-            {/* Creator handle - always rendered, hidden via visibility to keep height */}
-            <div className={`creator-slot wl-handle-wrap${isCreator ? "" : " hidden"}`}>
-              <span className="wl-handle-at">@</span>
-              <input
-                className="wl-field"
-                type="text"
-                placeholder="instagram or portfolio link"
-                value={instagram}
-                onChange={(e) => setInstagram(e.target.value)}
-                disabled={!isCreator || status === "loading" || status === "success"}
-                tabIndex={isCreator ? 0 : -1}
-              />
+              {isCreator && (
+                <div className="wl-handle-wrap">
+                  <span className="wl-handle-at">@</span>
+                  <input
+                    className="wl-field"
+                    type="text"
+                    placeholder="instagram or link"
+                    value={instagram}
+                    onChange={(e) => setInstagram(e.target.value)}
+                    disabled={status === "loading" || status === "success"}
+                  />
+                </div>
+              )}
             </div>
           </div>
 

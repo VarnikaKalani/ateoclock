@@ -193,7 +193,7 @@ const TEAM_STYLES = `
   }
   .team-nav-link:hover { opacity: 1; }
   .team-nav-cta {
-    padding: 8px 18px; border-radius: 999px; background: #2C4B1A; color: #F1E8C7;
+    padding: 8px 18px; border-radius: 999px; background: #74823F; color: #F1E8C7;
     font-size: 12px; font-weight: 700; text-decoration: none; flex-shrink: 0; transition: opacity .15s;
   }
   .team-nav-cta:hover { opacity: 0.85; }

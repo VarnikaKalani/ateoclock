@@ -3919,7 +3919,7 @@ export default function Home() {
               />
             </div>
             <a href="/waitlist"
-              style={{ padding: '8px 18px', borderRadius: 999, background: BROWN, color: CREAM, fontSize: 12, fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'opacity .15s', textDecoration: 'none', flexShrink: 0 }}
+              style={{ padding: '8px 18px', borderRadius: 999, background: RED, color: CREAM, fontSize: 12, fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'opacity .15s', textDecoration: 'none', flexShrink: 0 }}
               onMouseEnter={e => (e.currentTarget.style.opacity = '.85')}
               onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
             >Get Started</a>
@@ -3956,7 +3956,7 @@ export default function Home() {
                 </button>
               ))}
               <a href="/waitlist"
-                style={{ marginTop: 2, display: 'block', width: '100%', padding: '10px 14px', borderRadius: 8, background: BROWN, color: CREAM, fontSize: 13, fontWeight: 700, textDecoration: 'none', textAlign: 'center', boxSizing: 'border-box' }}
+                style={{ marginTop: 2, display: 'block', width: '100%', padding: '10px 14px', borderRadius: 8, background: RED, color: CREAM, fontSize: 13, fontWeight: 700, textDecoration: 'none', textAlign: 'center', boxSizing: 'border-box' }}
               >
                 Get Started
               </a>

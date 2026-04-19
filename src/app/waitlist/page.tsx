@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { Heart, ChevronDown, SendHorizonal } from "lucide-react";
 import { GridBackground } from "@/components/ui/grid-background";
+import { SiteFooter } from "@/components/site-footer";
+import { SiteNav } from "@/components/site-nav";
 
 const RED    = "#74823F";
 const CREAM  = "#F1E8C7";
@@ -339,27 +341,7 @@ export default function WaitlistPage() {
         </div>
       )}
 
-      {/* Sticky nav */}
-      <div className="wl-nav-wrap">
-        <nav className="wl-nav">
-          <div className="wl-nav-inner">
-            <a href="/" className="wl-nav-logo">
-              <span style={{ color: RED }}>ate</span><span style={{ color: BROWN }}> o&apos;clock</span>
-            </a>
-            <div className="wl-nav-links">
-              {[
-                { label: "About",        href: "/team" },
-                { label: "Features",     href: "/#features" },
-                { label: "For Creators", href: "/#creators" },
-                { label: "FAQs",         href: "/#faq" },
-              ].map(link => (
-                <a key={link.label} href={link.href} className="wl-nav-link">{link.label}</a>
-              ))}
-            </div>
-            <a href="/waitlist" className="wl-nav-cta">Get Started</a>
-          </div>
-        </nav>
-      </div>
+      <SiteNav />
 
       <main className="wl-shell">
         {/* Heading */}
@@ -481,6 +463,7 @@ export default function WaitlistPage() {
           <p className="wl-note">No spam. Unsubscribe any time.</p>
         </form>
       </main>
+      <SiteFooter />
     </GridBackground>
   );
 }

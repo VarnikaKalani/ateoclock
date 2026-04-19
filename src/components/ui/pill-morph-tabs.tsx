@@ -13,6 +13,7 @@ export interface PillTab {
 
 interface PillMorphTabsProps {
   items?: PillTab[];
+  value?: string;
   defaultValue?: string;
   onValueChange?: (value: string) => void;
   className?: string;
@@ -20,16 +21,17 @@ interface PillMorphTabsProps {
 
 export default function PillMorphTabs({
   items = [],
+  value: controlledValue,
   defaultValue,
   onValueChange,
   className,
 }: PillMorphTabsProps) {
   const first = items[0]?.value ?? "tab-0";
-  const [value, setValue] = React.useState<string>(defaultValue ?? first);
+  const [internalValue, setInternalValue] = React.useState<string>(defaultValue ?? first);
+  const value = controlledValue ?? internalValue;
   const listRef = React.useRef<HTMLDivElement | null>(null);
   const triggerRefs = React.useRef<Record<string, HTMLButtonElement | null>>({});
   const onValueChangeRef = React.useRef(onValueChange);
-  const hasMountedRef = React.useRef(false);
   const [indicator, setIndicator] = React.useState<{ left: number; width: number } | null>(null);
   const [isExpanding, setIsExpanding] = React.useState(false);
 
@@ -61,17 +63,16 @@ export default function PillMorphTabs({
     onValueChangeRef.current = onValueChange;
   }, [onValueChange]);
 
-  React.useEffect(() => {
-    if (!hasMountedRef.current) {
-      hasMountedRef.current = true;
-      return;
+  function handleValueChange(nextValue: string) {
+    if (controlledValue === undefined) {
+      setInternalValue(nextValue);
     }
-    onValueChangeRef.current?.(value);
-  }, [value]);
+    onValueChangeRef.current?.(nextValue);
+  }
 
   return (
     <div className={cn("w-full", className)}>
-      <Tabs value={value} onValueChange={(v) => setValue(v)}>
+      <Tabs value={value} onValueChange={handleValueChange}>
         <div ref={listRef} className="relative inline-flex items-center">
           {indicator && (
             <motion.div

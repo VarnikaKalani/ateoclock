@@ -3,9 +3,9 @@ import Image from 'next/image'
 import { motion, AnimatePresence, useAnimationFrame, useMotionTemplate, useMotionValue, useMotionValueEvent, useReducedMotion, useScroll, useTransform, type MotionValue } from 'framer-motion'
 import { useState, useEffect, useRef, Fragment } from 'react'
 import { getSupabaseBrowserClient } from '@/lib/supabase'
-import PillMorphTabs from '@/components/ui/pill-morph-tabs'
 import Bucket from '@/components/ui/bucket'
 import WalkingMascot from '@/components/ui/walking-mascot'
+import { SiteNav } from '@/components/site-nav'
 
 const RED        = '#74823F'
 const CREAM      = '#F1E8C7'
@@ -14,22 +14,6 @@ const BROWN      = '#6B3E1E'
 const BG         = '#F1E8C7'
 const WHITE      = '#ffffff'
 const INTER_REGULAR = 'var(--font-inter), sans-serif'
-
-
-function Logo({ size = 20, heroWord }: { size?: number; heroWord?: string }) {
-  return (
-    <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 1, lineHeight: 1 }}>
-      <span style={{ fontSize: size, fontWeight: 800, letterSpacing: '-0.5px' }}>
-        <span style={{ color: RED }}>ate</span><span style={{ color: BROWN }}> o&apos;clock</span>
-      </span>
-      {heroWord && (
-        <span style={{ fontSize: Math.round(size * 0.52), fontWeight: 700, letterSpacing: '-0.02em', color: BROWN, opacity: .55, marginLeft: 4, transition: 'opacity 0.3s' }}>
-          {heroWord}
-        </span>
-      )}
-    </span>
-  )
-}
 
 function InstagramGlyph({ size = 17 }: { size?: number }) {
   return (
@@ -879,7 +863,6 @@ export default function Home() {
   const [cartFill, setCartFill] = useState(0)
   const [heroTitleNumber, setHeroTitleNumber] = useState(0)
   const [waitlistCount, setWaitlistCount] = useState<number | null>(null)
-  const [navOpen, setNavOpen] = useState(false)
 
   useEffect(() => {
     const t = setInterval(() => setCartFill(n => (n >= 4 ? 0 : n + 1)), 800)
@@ -913,19 +896,6 @@ export default function Home() {
 
     return () => { supabase.removeChannel(channel) }
   }, [])
-
-  function scrollToSection(sectionId: string) {
-    document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    setNavOpen(false)
-  }
-
-  const navItems: Array<{ label: string; sectionId: string; href?: string }> = [
-    { label: 'About', sectionId: 'about', href: '/team' },
-    { label: 'Features', sectionId: 'features' },
-    { label: 'For Creators', sectionId: 'creators' },
-    { label: 'FAQs', sectionId: 'faq' },
-  ]
-
 
   const ingredients = ['Frozen acai', 'Banana', 'Granola', 'Mixed berries']
 
@@ -2196,14 +2166,14 @@ export default function Home() {
           font-size: 13px;
           font-weight: 800;
           line-height: 1;
-          letter-spacing: .16em;
+          letter-spacing: .11em;
         }
         .sticky-feature-card p {
           margin-bottom: 10px;
           color: ${BROWN};
           font-size: 11px;
           font-weight: 800;
-          letter-spacing: .14em;
+          letter-spacing: .1em;
           text-transform: uppercase;
           opacity: .62;
         }
@@ -2216,7 +2186,7 @@ export default function Home() {
           font-size: clamp(1.875rem, 3.1vw, 3rem);
           font-weight: 400;
           line-height: 1.08;
-          letter-spacing: 0;
+          letter-spacing: -0.045em;
         }
         .sticky-feature-card h3 span {
           color: ${RED2};
@@ -2469,7 +2439,7 @@ export default function Home() {
         }
         .feature-read-tile strong {
           color: ${RED};
-          font-size: 16px;
+          font-size: 10px;
         }
         .feature-read-line {
           margin-top: 14px;
@@ -3584,8 +3554,24 @@ export default function Home() {
           .hero-section {
             padding: 58px 18px 56px;
           }
+          .hero-copy,
+          .hero-title,
+          .hero-title-nowrap {
+            max-width: 100%;
+          }
           .hero-title {
             font-size: clamp(2.15rem, 12vw, 3rem);
+            letter-spacing: 0;
+            overflow-wrap: anywhere;
+          }
+          .hero-title-nowrap {
+            display: inline;
+            white-space: normal;
+          }
+          .hero-title-word {
+            display: inline-flex;
+            min-width: 7.5ch;
+            margin-left: .28ch;
           }
           .hero-body {
             font-size: 15px;
@@ -3861,6 +3847,21 @@ export default function Home() {
           }
         }
 
+        @media (max-width: 480px) {
+          .site-footer-links {
+            grid-template-columns: 1fr;
+            gap: 30px;
+          }
+          .site-footer-link-group + .site-footer-link-group {
+            margin-top: 30px;
+          }
+          .site-footer-socials {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 16px;
+          }
+        }
+
         @media (prefers-reduced-motion: reduce) {
           html {
             scroll-behavior: auto !important;
@@ -3883,88 +3884,7 @@ export default function Home() {
         }
       `}</style>
 
-      {/* NAV */}
-      <div style={{ position: 'sticky', top: 0, zIndex: 100, padding: '8px 20px' }}>
-        <nav style={{ maxWidth: 1180, margin: '0 auto', background: 'rgba(255,255,255,0.68)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', border: '1px solid rgba(116,130,63,.08)', borderRadius: 12, boxShadow: 'rgba(0,0,0,0.14) 0px 0.6px 0.6px -1.25px, rgba(0,0,0,0.1) 0px 2.3px 2.3px -2.5px, rgba(0,0,0,0.04) 0px 10px 10px -3.75px' }}>
-        <div style={{ maxWidth: 1180, margin: '0 auto' }}>
-          <div style={{ height: 48, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 18px' }}>
-            <a
-              href="#hero"
-              className="nav-logo-link"
-              aria-label="Go to the first section"
-              onClick={(event) => {
-                event.preventDefault()
-                scrollToSection('hero')
-              }}
-            >
-              <Logo size={21} />
-            </a>
-            <div className="nav-desktop" style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)' }}>
-              <PillMorphTabs
-                items={navItems.map(({ label, sectionId }) => ({
-                  value: sectionId,
-                  label,
-                  panel: null,
-                }))}
-                defaultValue=""
-                onValueChange={(sectionId) => {
-                  const item = navItems.find(n => n.sectionId === sectionId)
-                  if (!item) return
-                  if (item.href) {
-                    window.location.assign(item.href)
-                    return
-                  }
-                  scrollToSection(item.sectionId)
-                }}
-              />
-            </div>
-            <a href="/waitlist"
-              style={{ padding: '8px 18px', borderRadius: 999, background: RED, color: CREAM, fontSize: 12, fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'opacity .15s', textDecoration: 'none', flexShrink: 0 }}
-              onMouseEnter={e => (e.currentTarget.style.opacity = '.85')}
-              onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
-            >Get Started</a>
-            <div className="nav-desktop" style={{ display: 'none' }} />
-
-            <button
-              type="button"
-              className="nav-toggle"
-              aria-expanded={navOpen}
-              aria-controls="mobile-menu"
-              onClick={() => setNavOpen((open) => !open)}
-            >
-              {navOpen ? 'Close' : 'Menu'}
-            </button>
-          </div>
-
-          {navOpen && (
-            <div id="mobile-menu" className="nav-mobile">
-              {navItems.map(({ label, sectionId }) => (
-                <button
-                  key={`mobile-${label}`}
-                  type="button"
-                  className="nav-mobile-link"
-                  onClick={() => {
-                    const item = navItems.find(n => n.sectionId === sectionId)
-                    if (item?.href) {
-                      window.location.assign(item.href)
-                      return
-                    }
-                    scrollToSection(sectionId)
-                  }}
-                >
-                  {label}
-                </button>
-              ))}
-              <a href="/waitlist"
-                style={{ marginTop: 2, display: 'block', width: '100%', padding: '10px 14px', borderRadius: 8, background: RED, color: CREAM, fontSize: 13, fontWeight: 700, textDecoration: 'none', textAlign: 'center', boxSizing: 'border-box' }}
-              >
-                Get Started
-              </a>
-            </div>
-          )}
-        </div>
-      </nav>
-      </div>
+      <SiteNav />
 
       {/* HERO */}
       <HeroGridSection>
@@ -4095,11 +4015,21 @@ export default function Home() {
               </div>
               <p>Saved recipes, grocery carts, and creator earnings in one place.</p>
               <div className="site-footer-socials" aria-label="Social links">
-                <a href="#" aria-label="Instagram">
+                <a
+                  href="https://www.instagram.com/ateoclock.app/"
+                  aria-label="Instagram"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   <InstagramGlyph size={17} />
                   <span>Instagram</span>
                 </a>
-                <a href="#" aria-label="Substack">
+                <a
+                  href="https://substack.com/@ateoclock"
+                  aria-label="Substack"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   <SubstackGlyph size={18} />
                   <span>Substack</span>
                 </a>
@@ -4124,6 +4054,8 @@ export default function Home() {
                   <h3>Legal</h3>
                   <a href="/terms">Terms of Use</a>
                   <a href="/privacy">Privacy Policy</a>
+                  <a href="/affiliate-disclosure">Affiliate Disclosure</a>
+                  <a href="/disclaimer">Disclaimer</a>
                 </div>
                 <div className="site-footer-link-group">
                   <h3>About</h3>
@@ -4135,7 +4067,7 @@ export default function Home() {
 
           <div className="site-footer-bottom">
             <p>&#169; 2026 ateoclock. All rights reserved.</p>
-            <p>hello@ateoclock.app</p>
+            <a href="mailto:ateoclock.app@gmail.com">ateoclock.app@gmail.com</a>
           </div>
         </div>
       </footer>

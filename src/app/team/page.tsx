@@ -5,6 +5,8 @@ import { ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { GridBackground } from "@/components/ui/grid-background";
+import { SiteFooter } from "@/components/site-footer";
+import { SiteNav } from "@/components/site-nav";
 
 const RED   = "#74823F";
 const CREAM = "#F1E8C7";
@@ -236,27 +238,7 @@ export default function TeamPage() {
     >
       <style>{TEAM_STYLES}</style>
 
-      {/* Sticky nav — same design as main page */}
-      <div className="team-nav-wrap">
-        <nav className="team-nav">
-          <div className="team-nav-inner">
-            <a href="/" className="team-nav-logo">
-              <span style={{ color: RED }}>ate</span><span style={{ color: BROWN }}> o&apos;clock</span>
-            </a>
-            <div className="team-nav-links">
-              {[
-                { label: "About",        href: "/team" },
-                { label: "Features",     href: "/#features" },
-                { label: "For Creators", href: "/#creators" },
-                { label: "FAQs",         href: "/#faq" },
-              ].map(link => (
-                <a key={link.label} href={link.href} className="team-nav-link">{link.label}</a>
-              ))}
-            </div>
-            <a href="/waitlist" className="team-nav-cta">Get Started</a>
-          </div>
-        </nav>
-      </div>
+      <SiteNav />
 
       <div className="team-shell">
         {/* Heading */}
@@ -315,6 +297,7 @@ export default function TeamPage() {
           </div>
         </div>
       </div>
+      <SiteFooter />
     </GridBackground>
   );
 }

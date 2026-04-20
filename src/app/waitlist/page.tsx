@@ -1,10 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { Heart, ChevronDown, SendHorizonal } from "lucide-react";
 import { GridBackground } from "@/components/ui/grid-background";
 import { SiteFooter } from "@/components/site-footer";
-import { SiteNav } from "@/components/site-nav";
 
 const RED    = "#74823F";
 const CREAM  = "#F1E8C7";
@@ -64,9 +65,15 @@ const STYLES = `
   }
   .wl-nav-link {
     padding:7px 17px; border-radius:999px; color:#74823F; font-size:14px; font-weight:600;
-    text-decoration:none; font-family:var(--font-inter),sans-serif; opacity:0.75; transition:opacity .15s;
+    text-decoration:none; font-family:var(--font-inter),sans-serif; opacity:0.75;
+    transition:opacity .15s, color .15s;
   }
-  .wl-nav-link:hover { opacity:1; }
+  .wl-nav-link:hover { opacity:1; color:#6B3E1E; }
+  .wl-nav-link.is-active {
+    opacity:1;
+    border:1.5px solid rgba(116,130,63,.38);
+    padding:5.5px 15.5px;
+  }
   .wl-nav-cta {
     padding:8px 18px; border-radius:999px; background:#74823F; color:#F1E8C7;
     font-size:12px; font-weight:700; text-decoration:none; flex-shrink:0; transition:opacity .15s;
@@ -239,6 +246,14 @@ const STYLES = `
 type Role = "user" | "creator";
 
 export default function WaitlistPage() {
+  const pathname = usePathname();
+  const NAV_LINKS = [
+    { label: "About",        href: "/team" },
+    { label: "Features",     href: "/#features" },
+    { label: "For Creators", href: "/#creators" },
+    { label: "FAQs",         href: "/#faq" },
+  ];
+
   const [role, setRole] = useState<Role>("user");
   const [email, setEmail] = useState("");
   const [country, setCountry] = useState("");
@@ -341,7 +356,28 @@ export default function WaitlistPage() {
         </div>
       )}
 
-      <SiteNav />
+      {/* Sticky nav */}
+      <div className="wl-nav-wrap">
+        <nav className="wl-nav">
+          <div className="wl-nav-inner">
+            <Link href="/" className="wl-nav-logo">
+              <span style={{ color: RED }}>ate</span><span style={{ color: BROWN }}> o&apos;clock</span>
+            </Link>
+            <div className="wl-nav-links">
+              {NAV_LINKS.map(link => (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  className={`wl-nav-link${pathname === link.href ? " is-active" : ""}`}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+            <a href="/waitlist" className="wl-nav-cta">Get Started</a>
+          </div>
+        </nav>
+      </div>
 
       <main className="wl-shell">
         {/* Heading */}

@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
+import Link from "next/link";
 import { GridBackground } from "@/components/ui/grid-background";
 import { SiteFooter } from "@/components/site-footer";
-import { SiteNav } from "@/components/site-nav";
 
 const GREEN = "#74823F";
 const CREAM = "#F1E8C7";
@@ -55,7 +55,7 @@ const LEGAL_STYLES = `
   .legal-nav-logo {
     font-size: 21px;
     font-weight: 800;
-    letter-spacing: 0;
+    letter-spacing: -0.5px;
     text-decoration: none;
     display: inline-flex;
     align-items: baseline;
@@ -70,20 +70,20 @@ const LEGAL_STYLES = `
   }
 
   .legal-nav-link {
-    padding: 7px 14px;
-    border-radius: 8px;
+    padding: 7px 17px;
+    border-radius: 999px;
     color: ${GREEN};
     font-size: 14px;
     font-weight: 600;
     text-decoration: none;
     font-family: ${INTER};
-    opacity: .76;
-    transition: opacity .15s, background-color .15s;
+    opacity: .75;
+    transition: opacity .15s, color .15s;
   }
 
   .legal-nav-link:hover {
     opacity: 1;
-    background: rgba(116,130,63,.08);
+    color: ${BROWN};
   }
 
   .legal-nav-cta {
@@ -286,6 +286,13 @@ const LEGAL_STYLES = `
   }
 `;
 
+const navLinks = [
+  { label: "About", href: "/team" },
+  { label: "Features", href: "/#features" },
+  { label: "For Creators", href: "/#creators" },
+  { label: "FAQs", href: "/#faq" },
+];
+
 function slugify(value: string) {
   return value
     .toLowerCase()
@@ -318,7 +325,26 @@ export function LegalPage({
     >
       <style>{LEGAL_STYLES}</style>
 
-      <SiteNav />
+      <div className="legal-nav-wrap">
+        <nav className="legal-nav" aria-label="Legal page navigation">
+          <div className="legal-nav-inner">
+            <Link href="/" className="legal-nav-logo" aria-label="ate o'clock home">
+              <span style={{ color: GREEN }}>ate</span>
+              <span style={{ color: BROWN }}> o&apos;clock</span>
+            </Link>
+            <div className="legal-nav-links">
+              {navLinks.map((link) => (
+                <Link key={link.label} href={link.href} className="legal-nav-link">
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+            <Link href="/waitlist" className="legal-nav-cta">
+              Get Started
+            </Link>
+          </div>
+        </nav>
+      </div>
 
       <main className="legal-shell">
         <header className="legal-hero">

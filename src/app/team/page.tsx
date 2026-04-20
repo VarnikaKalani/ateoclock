@@ -4,9 +4,9 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
-import { GridBackground } from "@/components/ui/grid-background";
+import { usePathname } from "next/navigation";
 import { SiteFooter } from "@/components/site-footer";
-import { SiteNav } from "@/components/site-nav";
+import { GridBackground } from "@/components/ui/grid-background";
 
 const RED   = "#74823F";
 const CREAM = "#F1E8C7";
@@ -191,9 +191,15 @@ const TEAM_STYLES = `
   }
   .team-nav-link {
     padding: 7px 17px; border-radius: 999px; color: #74823F; font-size: 14px; font-weight: 600;
-    text-decoration: none; font-family: var(--font-inter), sans-serif; opacity: 0.75; transition: opacity .15s;
+    text-decoration: none; font-family: var(--font-inter), sans-serif; opacity: 0.75;
+    transition: opacity .15s, color .15s;
   }
-  .team-nav-link:hover { opacity: 1; }
+  .team-nav-link:hover { opacity: 1; color: #6B3E1E; }
+  .team-nav-link.is-active {
+    opacity: 1;
+    border: 1.5px solid rgba(116,130,63,.38);
+    padding: 5.5px 15.5px;
+  }
   .team-nav-cta {
     padding: 8px 18px; border-radius: 999px; background: #74823F; color: #F1E8C7;
     font-size: 12px; font-weight: 700; text-decoration: none; flex-shrink: 0; transition: opacity .15s;
@@ -231,6 +237,14 @@ const TEAM_STYLES = `
 `;
 
 export default function TeamPage() {
+  const pathname = usePathname();
+  const navLinks = [
+    { label: "About",        href: "/team" },
+    { label: "Features",     href: "/#features" },
+    { label: "For Creators", href: "/#creators" },
+    { label: "FAQs",         href: "/#faq" },
+  ];
+
   return (
     <GridBackground
       patternId="team-grid"
@@ -238,7 +252,28 @@ export default function TeamPage() {
     >
       <style>{TEAM_STYLES}</style>
 
-      <SiteNav />
+      {/* Sticky nav — same design as main page */}
+      <div className="team-nav-wrap">
+        <nav className="team-nav">
+          <div className="team-nav-inner">
+            <Link href="/" className="team-nav-logo">
+              <span style={{ color: RED }}>ate</span><span style={{ color: BROWN }}> o&apos;clock</span>
+            </Link>
+            <div className="team-nav-links">
+              {navLinks.map(link => (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  className={`team-nav-link${pathname === link.href ? " is-active" : ""}`}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+            <a href="/waitlist" className="team-nav-cta">Get Started</a>
+          </div>
+        </nav>
+      </div>
 
       <div className="team-shell">
         {/* Heading */}

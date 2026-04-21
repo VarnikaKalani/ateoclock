@@ -3,9 +3,8 @@ import Image from 'next/image'
 import { motion, AnimatePresence, useAnimationFrame, useMotionTemplate, useMotionValue, useMotionValueEvent, useReducedMotion, useScroll, useTransform, type MotionValue } from 'framer-motion'
 import { useState, useEffect, useRef, Fragment } from 'react'
 import { getSupabaseBrowserClient } from '@/lib/supabase'
+import PillMorphTabs from '@/components/ui/pill-morph-tabs'
 import Bucket from '@/components/ui/bucket'
-import WalkingMascot from '@/components/ui/walking-mascot'
-import { SiteNav } from '@/components/site-nav'
 
 const RED        = '#74823F'
 const CREAM      = '#F1E8C7'
@@ -14,6 +13,22 @@ const BROWN      = '#6B3E1E'
 const BG         = '#F1E8C7'
 const WHITE      = '#ffffff'
 const INTER_REGULAR = 'var(--font-inter), sans-serif'
+
+
+function Logo({ size = 20, heroWord }: { size?: number; heroWord?: string }) {
+  return (
+    <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 1, lineHeight: 1 }}>
+      <span style={{ fontSize: size, fontWeight: 800, letterSpacing: '-0.5px' }}>
+        <span style={{ color: RED }}>ate</span><span style={{ color: BROWN }}> o&apos;clock</span>
+      </span>
+      {heroWord && (
+        <span style={{ fontSize: Math.round(size * 0.52), fontWeight: 700, letterSpacing: '-0.02em', color: BROWN, opacity: .55, marginLeft: 4, transition: 'opacity 0.3s' }}>
+          {heroWord}
+        </span>
+      )}
+    </span>
+  )
+}
 
 function InstagramGlyph({ size = 17 }: { size?: number }) {
   return (
@@ -863,6 +878,7 @@ export default function Home() {
   const [cartFill, setCartFill] = useState(0)
   const [heroTitleNumber, setHeroTitleNumber] = useState(0)
   const [waitlistCount, setWaitlistCount] = useState<number | null>(null)
+  const [navOpen, setNavOpen] = useState(false)
 
   useEffect(() => {
     const t = setInterval(() => setCartFill(n => (n >= 4 ? 0 : n + 1)), 800)
@@ -896,6 +912,19 @@ export default function Home() {
 
     return () => { supabase.removeChannel(channel) }
   }, [])
+
+  function scrollToSection(sectionId: string) {
+    document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    setNavOpen(false)
+  }
+
+  const navItems: Array<{ label: string; sectionId: string; href?: string }> = [
+    { label: 'About', sectionId: 'about', href: '/team' },
+    { label: 'Features', sectionId: 'features' },
+    { label: 'For Creators', sectionId: 'creators' },
+    { label: 'FAQs', sectionId: 'faq' },
+  ]
+
 
   const ingredients = ['Frozen acai', 'Banana', 'Granola', 'Mixed berries']
 
@@ -3884,7 +3913,88 @@ export default function Home() {
         }
       `}</style>
 
-      <SiteNav />
+      {/* NAV */}
+      <div style={{ position: 'sticky', top: 0, zIndex: 100, padding: '8px 20px' }}>
+        <nav style={{ maxWidth: 1180, margin: '0 auto', background: 'rgba(255,255,255,0.68)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', border: '1px solid rgba(116,130,63,.08)', borderRadius: 12, boxShadow: 'rgba(0,0,0,0.14) 0px 0.6px 0.6px -1.25px, rgba(0,0,0,0.1) 0px 2.3px 2.3px -2.5px, rgba(0,0,0,0.04) 0px 10px 10px -3.75px' }}>
+        <div style={{ maxWidth: 1180, margin: '0 auto' }}>
+          <div style={{ height: 48, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 18px' }}>
+            <a
+              href="#hero"
+              className="nav-logo-link"
+              aria-label="Go to the first section"
+              onClick={(event) => {
+                event.preventDefault()
+                scrollToSection('hero')
+              }}
+            >
+              <Logo size={21} />
+            </a>
+            <div className="nav-desktop" style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)' }}>
+              <PillMorphTabs
+                items={navItems.map(({ label, sectionId }) => ({
+                  value: sectionId,
+                  label,
+                  panel: null,
+                }))}
+                defaultValue=""
+                onValueChange={(sectionId) => {
+                  const item = navItems.find(n => n.sectionId === sectionId)
+                  if (!item) return
+                  if (item.href) {
+                    window.location.assign(item.href)
+                    return
+                  }
+                  scrollToSection(item.sectionId)
+                }}
+              />
+            </div>
+            <a href="/waitlist"
+              style={{ padding: '8px 18px', borderRadius: 999, background: RED, color: CREAM, fontSize: 12, fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'opacity .15s', textDecoration: 'none', flexShrink: 0 }}
+              onMouseEnter={e => (e.currentTarget.style.opacity = '.85')}
+              onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
+            >Get Started</a>
+            <div className="nav-desktop" style={{ display: 'none' }} />
+
+            <button
+              type="button"
+              className="nav-toggle"
+              aria-expanded={navOpen}
+              aria-controls="mobile-menu"
+              onClick={() => setNavOpen((open) => !open)}
+            >
+              {navOpen ? 'Close' : 'Menu'}
+            </button>
+          </div>
+
+          {navOpen && (
+            <div id="mobile-menu" className="nav-mobile">
+              {navItems.map(({ label, sectionId }) => (
+                <button
+                  key={`mobile-${label}`}
+                  type="button"
+                  className="nav-mobile-link"
+                  onClick={() => {
+                    const item = navItems.find(n => n.sectionId === sectionId)
+                    if (item?.href) {
+                      window.location.assign(item.href)
+                      return
+                    }
+                    scrollToSection(sectionId)
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
+              <a href="/waitlist"
+                style={{ marginTop: 2, display: 'block', width: '100%', padding: '10px 14px', borderRadius: 8, background: RED, color: CREAM, fontSize: 13, fontWeight: 700, textDecoration: 'none', textAlign: 'center', boxSizing: 'border-box' }}
+              >
+                Get Started
+              </a>
+            </div>
+          )}
+        </div>
+      </nav>
+      </div>
 
       {/* HERO */}
       <HeroGridSection>
@@ -4071,7 +4181,6 @@ export default function Home() {
           </div>
         </div>
       </footer>
-      <WalkingMascot />
     </main>
   )
 }

@@ -2,10 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
 import { Heart, ChevronDown, SendHorizonal } from "lucide-react";
 import { GridBackground } from "@/components/ui/grid-background";
-import { SiteFooter } from "@/components/site-footer";
 
 const RED    = "#74823F";
 const CREAM  = "#F1E8C7";
@@ -65,15 +63,9 @@ const STYLES = `
   }
   .wl-nav-link {
     padding:7px 17px; border-radius:999px; color:#74823F; font-size:14px; font-weight:600;
-    text-decoration:none; font-family:var(--font-inter),sans-serif; opacity:0.75;
-    transition:opacity .15s, color .15s;
+    text-decoration:none; font-family:var(--font-inter),sans-serif; opacity:0.75; transition:opacity .15s;
   }
-  .wl-nav-link:hover { opacity:1; color:#6B3E1E; }
-  .wl-nav-link.is-active {
-    opacity:1;
-    border:1.5px solid rgba(116,130,63,.38);
-    padding:5.5px 15.5px;
-  }
+  .wl-nav-link:hover { opacity:1; }
   .wl-nav-cta {
     padding:8px 18px; border-radius:999px; background:#74823F; color:#F1E8C7;
     font-size:12px; font-weight:700; text-decoration:none; flex-shrink:0; transition:opacity .15s;
@@ -246,14 +238,6 @@ const STYLES = `
 type Role = "user" | "creator";
 
 export default function WaitlistPage() {
-  const pathname = usePathname();
-  const NAV_LINKS = [
-    { label: "About",        href: "/team" },
-    { label: "Features",     href: "/#features" },
-    { label: "For Creators", href: "/#creators" },
-    { label: "FAQs",         href: "/#faq" },
-  ];
-
   const [role, setRole] = useState<Role>("user");
   const [email, setEmail] = useState("");
   const [country, setCountry] = useState("");
@@ -364,14 +348,13 @@ export default function WaitlistPage() {
               <span style={{ color: RED }}>ate</span><span style={{ color: BROWN }}> o&apos;clock</span>
             </Link>
             <div className="wl-nav-links">
-              {NAV_LINKS.map(link => (
-                <Link
-                  key={link.label}
-                  href={link.href}
-                  className={`wl-nav-link${pathname === link.href ? " is-active" : ""}`}
-                >
-                  {link.label}
-                </Link>
+              {[
+                { label: "About",        href: "/team" },
+                { label: "Features",     href: "/#features" },
+                { label: "For Creators", href: "/#creators" },
+                { label: "FAQs",         href: "/#faq" },
+              ].map(link => (
+                <Link key={link.label} href={link.href} className="wl-nav-link">{link.label}</Link>
               ))}
             </div>
             <a href="/waitlist" className="wl-nav-cta">Get Started</a>
@@ -410,96 +393,96 @@ export default function WaitlistPage() {
           <span className="love-count">{loveCount.toLocaleString()} people love this</span>
         </div>
 
-        {/* Role toggle */}
-        <div style={{ display: "flex", justifyContent: "center" }}>
-          <div className="role-toggle" role="group" aria-label="I am a">
-            {(["user", "creator"] as Role[]).map((r) => (
-              <button
-                key={r}
-                type="button"
-                aria-pressed={role === r}
-                className={role === r ? "is-active" : undefined}
-                onClick={() => setRole(r)}
-              >
-                {r === "user" ? "User" : "Creator"}
-              </button>
-            ))}
+        {status === "success" ? (
+          <div style={{ textAlign: "center", padding: "32px 0 16px" }}>
+            <p className="wl-success" style={{ fontSize: 16, fontWeight: 700, marginBottom: 10 }}>
+              You&rsquo;re in!
+            </p>
+            <p className="wl-note" style={{ marginTop: 0 }}>
+              We&rsquo;ll be in touch when ateoclock opens early access.
+            </p>
           </div>
-        </div>
+        ) : (
+          <>
+            {/* Role toggle */}
+            <div style={{ display: "flex", justifyContent: "center" }}>
+              <div className="role-toggle" role="group" aria-label="I am a">
+                {(["user", "creator"] as Role[]).map((r) => (
+                  <button
+                    key={r}
+                    type="button"
+                    aria-pressed={role === r}
+                    className={role === r ? "is-active" : undefined}
+                    onClick={() => setRole(r)}
+                  >
+                    {r === "user" ? "User" : "Creator"}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit}>
-          <div className="wl-fields">
-            {/* Email */}
-            <input
-              className="wl-field"
-              type="email"
-              placeholder="your@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              disabled={status === "loading" || status === "success"}
-              autoComplete="email"
-            />
-
-            {/* Country + optional instagram side-by-side in creator mode */}
-            <div className="wl-row2">
-              <div className="wl-select-wrap">
-                <select
-                  className={`wl-field${country ? " has-value" : ""}`}
-                  value={country}
-                  onChange={(e) => setCountry(e.target.value)}
+            {/* Form */}
+            <form onSubmit={handleSubmit}>
+              <div className="wl-fields">
+                <input
+                  className="wl-field"
+                  type="email"
+                  placeholder="your@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
-                  disabled={status === "loading" || status === "success"}
-                >
-                  <option value="" disabled>Where are you based?</option>
-                  {COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
-                </select>
-                <ChevronDown className="wl-chevron" size={16} strokeWidth={2.2} />
+                  disabled={status === "loading"}
+                  autoComplete="email"
+                />
+
+                <div className="wl-row2">
+                  <div className="wl-select-wrap">
+                    <select
+                      className={`wl-field${country ? " has-value" : ""}`}
+                      value={country}
+                      onChange={(e) => setCountry(e.target.value)}
+                      required
+                      disabled={status === "loading"}
+                    >
+                      <option value="" disabled>Where are you based?</option>
+                      {COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                    <ChevronDown className="wl-chevron" size={16} strokeWidth={2.2} />
+                  </div>
+
+                  {isCreator && (
+                    <div className="wl-handle-wrap">
+                      <span className="wl-handle-at">@</span>
+                      <input
+                        className="wl-field"
+                        type="text"
+                        placeholder="instagram or link"
+                        value={instagram}
+                        onChange={(e) => setInstagram(e.target.value)}
+                        disabled={status === "loading"}
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
 
-              {isCreator && (
-                <div className="wl-handle-wrap">
-                  <span className="wl-handle-at">@</span>
-                  <input
-                    className="wl-field"
-                    type="text"
-                    placeholder="instagram or link"
-                    value={instagram}
-                    onChange={(e) => setInstagram(e.target.value)}
-                    disabled={status === "loading" || status === "success"}
-                  />
-                </div>
+              <button
+                className="wl-submit"
+                type="submit"
+                disabled={status === "loading"}
+              >
+                {status === "loading" ? "Joining…" : "Join waitlist"}
+                {status !== "loading" && <SendHorizonal size={16} strokeWidth={2} />}
+              </button>
+
+              {status === "error" && (
+                <p className="wl-error">Something went wrong. Please try again.</p>
               )}
-            </div>
-          </div>
-
-          {/* Submit - always at bottom */}
-          <button
-            className="wl-submit"
-            type="submit"
-            disabled={status === "loading" || status === "success"}
-          >
-            {status === "success"
-              ? "You're in!"
-              : status === "loading"
-              ? "Joining…"
-              : "Join waitlist"}
-            {status !== "success" && status !== "loading" && <SendHorizonal size={16} strokeWidth={2} />}
-          </button>
-
-          {status === "error" && (
-            <p className="wl-error">Something went wrong. Please try again.</p>
-          )}
-          {status === "success" && (
-            <p className="wl-success">
-              You&rsquo;re on the list. We&rsquo;ll be in touch when ateoclock opens early access.
-            </p>
-          )}
-          <p className="wl-note">No spam. Unsubscribe any time.</p>
-        </form>
+              <p className="wl-note">No spam. Unsubscribe any time.</p>
+            </form>
+          </>
+        )}
       </main>
-      <SiteFooter />
     </GridBackground>
   );
 }

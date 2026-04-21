@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { GridBackground } from "@/components/ui/grid-background";
-import { SiteFooter } from "@/components/site-footer";
 
 const GREEN = "#74823F";
 const CREAM = "#F1E8C7";
@@ -70,20 +69,20 @@ const LEGAL_STYLES = `
   }
 
   .legal-nav-link {
-    padding: 7px 17px;
-    border-radius: 999px;
+    padding: 7px 14px;
+    border-radius: 8px;
     color: ${GREEN};
     font-size: 14px;
     font-weight: 600;
     text-decoration: none;
     font-family: ${INTER};
-    opacity: .75;
-    transition: opacity .15s, color .15s;
+    opacity: .76;
+    transition: opacity .15s, background-color .15s;
   }
 
   .legal-nav-link:hover {
     opacity: 1;
-    color: ${BROWN};
+    background: rgba(116,130,63,.08);
   }
 
   .legal-nav-cta {
@@ -368,7 +367,6 @@ export function LegalPage({
           </div>
         </div>
       </main>
-      <SiteFooter />
     </GridBackground>
   );
 }

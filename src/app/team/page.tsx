@@ -1,11 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Mail } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
-import { usePathname } from "next/navigation";
-import { SiteFooter } from "@/components/site-footer";
 import { GridBackground } from "@/components/ui/grid-background";
 
 const RED   = "#74823F";
@@ -33,6 +31,16 @@ const variants = {
   center: { rotateY: 0, opacity: 1, scale: 1 },
   exit:  (d: number) => ({ rotateY: d < 0 ? 90 : -90, opacity: 0, scale: 0.96 }),
 };
+
+function InstagramGlyph({ size = 18 }: { size?: number }) {
+  return (
+    <svg aria-hidden="true" fill="none" height={size} viewBox="0 0 24 24" width={size}>
+      <rect height="16" rx="5" stroke="currentColor" strokeWidth="2" width="16" x="4" y="4" />
+      <circle cx="12" cy="12" r="3.4" stroke="currentColor" strokeWidth="2" />
+      <circle cx="17" cy="7" fill="currentColor" r="1.1" />
+    </svg>
+  );
+}
 
 function PolaroidStack() {
   const [[idx, dir], setPage] = useState([0, 1]);
@@ -191,15 +199,9 @@ const TEAM_STYLES = `
   }
   .team-nav-link {
     padding: 7px 17px; border-radius: 999px; color: #74823F; font-size: 14px; font-weight: 600;
-    text-decoration: none; font-family: var(--font-inter), sans-serif; opacity: 0.75;
-    transition: opacity .15s, color .15s;
+    text-decoration: none; font-family: var(--font-inter), sans-serif; opacity: 0.75; transition: opacity .15s;
   }
-  .team-nav-link:hover { opacity: 1; color: #6B3E1E; }
-  .team-nav-link.is-active {
-    opacity: 1;
-    border: 1.5px solid rgba(116,130,63,.38);
-    padding: 5.5px 15.5px;
-  }
+  .team-nav-link:hover { opacity: 1; }
   .team-nav-cta {
     padding: 8px 18px; border-radius: 999px; background: #74823F; color: #F1E8C7;
     font-size: 12px; font-weight: 700; text-decoration: none; flex-shrink: 0; transition: opacity .15s;
@@ -221,6 +223,55 @@ const TEAM_STYLES = `
     gap: 52px;
     align-items: start;
   }
+  .team-contact {
+    margin-top: 64px;
+    padding-top: 34px;
+    border-top: 1px solid rgba(107,62,30,.14);
+    text-align: center;
+  }
+  .team-contact h2 {
+    color: ${BROWN};
+    font-family: ${INTER};
+    font-size: clamp(1.3rem, 2.6vw, 1.8rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 10px;
+  }
+  .team-contact p {
+    color: rgba(90,62,28,.72);
+    font-size: 15px;
+    line-height: 1.6;
+    margin: 0 auto 22px;
+  }
+  .team-contact-actions {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .team-contact-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-width: 148px;
+    min-height: 46px;
+    padding: 0 18px;
+    border-radius: 8px;
+    border: 1px solid rgba(107,62,30,.16);
+    background: rgba(255,255,255,.56);
+    color: ${BROWN};
+    font-size: 14px;
+    font-weight: 800;
+    text-decoration: none;
+    box-shadow: 0 8px 24px rgba(107,62,30,.06);
+    transition: transform .16s ease, background .16s ease, border-color .16s ease;
+  }
+  .team-contact-link:hover {
+    transform: translateY(-2px);
+    background: rgba(255,255,255,.82);
+    border-color: rgba(107,62,30,.28);
+  }
   @media (max-width: 700px) {
     .team-shell {
       width: calc(100% - 32px);
@@ -233,18 +284,21 @@ const TEAM_STYLES = `
       grid-template-columns: 1fr;
       gap: 36px;
     }
+    .team-contact {
+      margin-top: 48px;
+      padding-top: 28px;
+    }
+    .team-contact-actions {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .team-contact-link {
+      width: 100%;
+    }
   }
 `;
 
 export default function TeamPage() {
-  const pathname = usePathname();
-  const navLinks = [
-    { label: "About",        href: "/team" },
-    { label: "Features",     href: "/#features" },
-    { label: "For Creators", href: "/#creators" },
-    { label: "FAQs",         href: "/#faq" },
-  ];
-
   return (
     <GridBackground
       patternId="team-grid"
@@ -260,14 +314,13 @@ export default function TeamPage() {
               <span style={{ color: RED }}>ate</span><span style={{ color: BROWN }}> o&apos;clock</span>
             </Link>
             <div className="team-nav-links">
-              {navLinks.map(link => (
-                <Link
-                  key={link.label}
-                  href={link.href}
-                  className={`team-nav-link${pathname === link.href ? " is-active" : ""}`}
-                >
-                  {link.label}
-                </Link>
+              {[
+                { label: "About",        href: "/team" },
+                { label: "Features",     href: "/#features" },
+                { label: "For Creators", href: "/#creators" },
+                { label: "FAQs",         href: "/#faq" },
+              ].map(link => (
+                <Link key={link.label} href={link.href} className="team-nav-link">{link.label}</Link>
               ))}
             </div>
             <a href="/waitlist" className="team-nav-cta">Get Started</a>
@@ -331,8 +384,28 @@ export default function TeamPage() {
             </p>
           </div>
         </div>
+
+        <section className="team-contact" aria-labelledby="team-contact-title">
+          <h2 id="team-contact-title">Contact Us</h2>
+          <p>Reach us by email or Instagram.</p>
+          <div className="team-contact-actions">
+            <a className="team-contact-link" href="mailto:ateoclock.app@gmail.com" aria-label="Email ateoclock">
+              <Mail size={18} strokeWidth={2.4} />
+              Email
+            </a>
+            <a
+              className="team-contact-link"
+              href="https://www.instagram.com/ateoclock.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Open ateoclock on Instagram"
+            >
+              <InstagramGlyph />
+              Instagram
+            </a>
+          </div>
+        </section>
       </div>
-      <SiteFooter />
     </GridBackground>
   );
 }

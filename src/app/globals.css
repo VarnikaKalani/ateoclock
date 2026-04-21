@@ -125,7 +125,7 @@
 html {
   scroll-behavior: smooth;
   max-width: 100%;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 body {
@@ -133,7 +133,7 @@ body {
   font-family: var(--font-inter), sans-serif;
   min-width: 0;
   max-width: 100%;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 img,
@@ -158,3 +158,4 @@ input:focus {
   outline: none;
   box-shadow: 0 0 0 3px rgba(116, 130, 63, 0.15);
 }
+
